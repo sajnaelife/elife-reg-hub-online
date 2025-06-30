@@ -8,6 +8,13 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Loader2 } from 'lucide-react';
 
+// Admin credentials - in a real app, these would be stored securely in a database
+const ADMIN_CREDENTIALS = [
+  { username: 'anas', password: 'eva919123', role: 'super_admin' },
+  { username: 'adminlocal', password: 'admin9094', role: 'local_admin' },
+  { username: 'adminuser', password: 'user123', role: 'user_admin' }
+];
+
 const AdminLoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,32 +29,33 @@ const AdminLoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
+      // Simulate a brief loading delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const data = await response.json();
+      // Check credentials against the predefined admin users
+      const adminUser = ADMIN_CREDENTIALS.find(
+        admin => admin.username === credentials.username && admin.password === credentials.password
+      );
 
-      if (response.ok) {
-        localStorage.setItem('adminSession', JSON.stringify({
-          username: data.username,
-          role: data.role,
-          sessionId: data.sessionId,
+      if (adminUser) {
+        // Create session data
+        const sessionData = {
+          username: adminUser.username,
+          role: adminUser.role,
+          sessionId: Date.now().toString(),
           loginTime: new Date().toISOString()
-        }));
+        };
+
+        localStorage.setItem('adminSession', JSON.stringify(sessionData));
 
         toast({
           title: "Login Successful",
-          description: `Welcome back, ${data.username}!`,
+          description: `Welcome back, ${adminUser.username}!`,
         });
 
         navigate('/admin/dashboard');
       } else {
-        throw new Error(data.error || 'Login failed');
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
