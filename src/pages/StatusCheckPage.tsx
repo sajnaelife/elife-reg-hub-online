@@ -24,25 +24,49 @@ const StatusCheckPage = () => {
         return null;
       }
 
-      const { data, error } = await supabase
+      // First get the registration
+      const { data: registrationData, error: registrationError } = await supabase
         .from('registrations')
-        .select(`
-          *,
-          categories (name, actual_fee, offer_fee),
-          panchayaths (name, district)
-        `)
+        .select('*')
         .eq('mobile_number', searchData.mobile_number)
         .eq('customer_id', searchData.customer_id)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
+      if (registrationError) {
+        if (registrationError.code === 'PGRST116') {
           return null; // No matching record found
         }
-        throw error;
+        throw registrationError;
       }
-      
-      return data;
+
+      if (!registrationData) {
+        return null;
+      }
+
+      // Get category information
+      const { data: categoryData } = await supabase
+        .from('categories')
+        .select('name, actual_fee, offer_fee')
+        .eq('id', registrationData.category_id)
+        .single();
+
+      // Get panchayath information if panchayath_id exists
+      let panchayathData = null;
+      if (registrationData.panchayath_id) {
+        const { data } = await supabase
+          .from('panchayaths')
+          .select('name, district')
+          .eq('id', registrationData.panchayath_id)
+          .single();
+        panchayathData = data;
+      }
+
+      // Combine the data
+      return {
+        ...registrationData,
+        categories: categoryData,
+        panchayaths: panchayathData
+      };
     },
     enabled: shouldSearch && !!searchData.mobile_number && !!searchData.customer_id
   });
@@ -173,7 +197,7 @@ const StatusCheckPage = () => {
                       <div className="space-y-2">
                         <div>
                           <span className="text-sm text-gray-500">Category:</span>
-                          <p className="font-medium">{registration.categories?.name}</p>
+                          <p className="font-medium">{registration.categories?.name || 'N/A'}</p>
                         </div>
                         <div>
                           <span className="text-sm text-gray-500">Fee Paid:</span>
