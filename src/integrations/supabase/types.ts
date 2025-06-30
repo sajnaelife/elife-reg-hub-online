@@ -69,33 +69,27 @@ export type Database = {
       categories: {
         Row: {
           actual_fee: number
-          created_at: string
           id: string
-          is_active: boolean
+          is_active: boolean | null
           name: string
           offer_fee: number
           popup_image_url: string | null
-          updated_at: string
         }
         Insert: {
-          actual_fee?: number
-          created_at?: string
+          actual_fee: number
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           name: string
-          offer_fee?: number
+          offer_fee: number
           popup_image_url?: string | null
-          updated_at?: string
         }
         Update: {
           actual_fee?: number
-          created_at?: string
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           name?: string
           offer_fee?: number
           popup_image_url?: string | null
-          updated_at?: string
         }
         Relationships: []
       }
@@ -170,13 +164,6 @@ export type Database = {
           ward?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "registrations_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "registrations_panchayath_id_fkey"
             columns: ["panchayath_id"]

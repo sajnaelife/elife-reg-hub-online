@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Image } from 'lucide-react';
 
@@ -289,31 +290,31 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-200">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Actual Fee</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Offer Fee</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Discount</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Image</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Actual Fee</TableHead>
+                <TableHead>Offer Fee</TableHead>
+                <TableHead>Discount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Image</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {categories?.map((category) => (
-                <tr key={category.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-200 px-4 py-2 font-medium">
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">
                     {category.name}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">₹{category.actual_fee}</td>
-                  <td className="border border-gray-200 px-4 py-2">₹{category.offer_fee}</td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  </TableCell>
+                  <TableCell>₹{category.actual_fee}</TableCell>
+                  <TableCell>₹{category.offer_fee}</TableCell>
+                  <TableCell>
                     {Math.round(((category.actual_fee - category.offer_fee) / category.actual_fee) * 100)}%
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  </TableCell>
+                  <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       category.is_active 
                         ? 'bg-green-100 text-green-800' 
@@ -321,15 +322,15 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
                     }`}>
                       {category.is_active ? 'Active' : 'Inactive'}
                     </span>
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  </TableCell>
+                  <TableCell>
                     {category.popup_image_url ? (
                       <Image className="h-4 w-4 text-blue-600" />
                     ) : (
                       <span className="text-gray-400">No image</span>
                     )}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
                       {permissions.canWrite && (
                         <Button
@@ -350,24 +351,24 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
                         </Button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
+
+          {isLoading && (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+
+          {!isLoading && (!categories || categories.length === 0) && (
+            <div className="text-center py-8 text-gray-500">
+              No categories found. Create your first category to get started.
+            </div>
+          )}
         </div>
-
-        {isLoading && (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
-
-        {!isLoading && (!categories || categories.length === 0) && (
-          <div className="text-center py-8 text-gray-500">
-            No categories found. Create your first category to get started.
-          </div>
-        )}
       </CardContent>
     </Card>
   );
