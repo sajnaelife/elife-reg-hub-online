@@ -52,7 +52,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const { data: registrations, isLoading } = useQuery({
     queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter],
     queryFn: async () => {
-      let query = supabase
+      let query = (supabase as any)
         .from('registrations')
         .select(`
           *,
@@ -83,7 +83,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categories').select('*');
+      const { data, error } = await (supabase as any).from('categories').select('*');
       if (error) throw error;
       return data as Category[];
     }
@@ -114,7 +114,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: UpdateStatusParams) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('registrations')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -140,7 +140,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   // Delete registration mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('registrations')
         .delete()
         .eq('id', id);

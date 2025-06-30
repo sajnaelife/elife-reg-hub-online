@@ -37,7 +37,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   const { data: panchayaths, isLoading } = useQuery({
     queryKey: ['admin-panchayaths'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('panchayaths')
         .select('*')
         .order('district', { ascending: true })
@@ -74,7 +74,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   const savePanchayathMutation = useMutation({
     mutationFn: async (panchayathData: PanchayathData) => {
       if (editingPanchayath) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('panchayaths')
           .update({
             ...panchayathData,
@@ -84,7 +84,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
         
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('panchayaths')
           .insert([panchayathData]);
         
@@ -113,7 +113,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   // Delete panchayath mutation
   const deletePanchayathMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('panchayaths')
         .delete()
         .eq('id', id);

@@ -45,7 +45,7 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
   const { data: announcements, isLoading } = useQuery({
     queryKey: ['admin-announcements'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false });
@@ -86,7 +86,7 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
       };
 
       if (editingAnnouncement) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('announcements')
           .update({
             ...dataToSave,
@@ -96,7 +96,7 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
         
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('announcements')
           .insert([dataToSave]);
         
@@ -130,7 +130,7 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
   // Delete announcement mutation
   const deleteAnnouncementMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('announcements')
         .delete()
         .eq('id', id);

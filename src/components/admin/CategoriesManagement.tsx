@@ -47,7 +47,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   const { data: categories, isLoading } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('categories')
         .select('*')
         .order('name');
@@ -83,7 +83,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   const saveCategoryMutation = useMutation({
     mutationFn: async (categoryData: CategoryData) => {
       if (editingCategory) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('categories')
           .update({
             ...categoryData,
@@ -95,7 +95,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
         
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('categories')
           .insert([{
             ...categoryData,
@@ -134,7 +134,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   // Delete category mutation
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('categories')
         .delete()
         .eq('id', id);
