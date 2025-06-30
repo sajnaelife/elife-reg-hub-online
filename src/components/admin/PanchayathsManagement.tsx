@@ -10,12 +10,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
-const PanchayathsManagement = ({ permissions }) => {
+interface PanchayathData {
+  name: string;
+  district: string;
+}
+
+interface Panchayath {
+  id: string;
+  name: string;
+  district: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingPanchayath, setEditingPanchayath] = useState(null);
-  const [formData, setFormData] = useState({
+  const [editingPanchayath, setEditingPanchayath] = useState<Panchayath | null>(null);
+  const [formData, setFormData] = useState<PanchayathData>({
     name: '',
     district: ''
   });
@@ -31,7 +44,7 @@ const PanchayathsManagement = ({ permissions }) => {
         .order('name', { ascending: true });
       
       if (error) throw error;
-      return data;
+      return data as Panchayath[];
     }
   });
 
@@ -59,7 +72,7 @@ const PanchayathsManagement = ({ permissions }) => {
 
   // Create/Update panchayath mutation
   const savePanchayathMutation = useMutation({
-    mutationFn: async (panchayathData) => {
+    mutationFn: async (panchayathData: PanchayathData) => {
       if (editingPanchayath) {
         const { error } = await supabase
           .from('panchayaths')
@@ -99,7 +112,7 @@ const PanchayathsManagement = ({ permissions }) => {
 
   // Delete panchayath mutation
   const deletePanchayathMutation = useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('panchayaths')
         .delete()
@@ -123,7 +136,7 @@ const PanchayathsManagement = ({ permissions }) => {
     }
   });
 
-  const handleEdit = (panchayath) => {
+  const handleEdit = (panchayath: Panchayath) => {
     setEditingPanchayath(panchayath);
     setFormData({
       name: panchayath.name,
@@ -132,7 +145,7 @@ const PanchayathsManagement = ({ permissions }) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this panchayath?')) {
         deletePanchayathMutation.mutate(id);
@@ -140,7 +153,7 @@ const PanchayathsManagement = ({ permissions }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (permissions.canWrite) {
       savePanchayathMutation.mutate(formData);
@@ -159,7 +172,7 @@ const PanchayathsManagement = ({ permissions }) => {
     }
     acc[panchayath.district].push(panchayath);
     return acc;
-  }, {}) || {};
+  }, {} as Record<string, Panchayath[]>) || {};
 
   return (
     <Card>

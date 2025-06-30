@@ -11,12 +11,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Image } from 'lucide-react';
 
-const CategoriesManagement = ({ permissions }) => {
+interface CategoryData {
+  name: string;
+  actual_fee: string;
+  offer_fee: string;
+  popup_image_url: string;
+  is_active: boolean;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  actual_fee: number;
+  offer_fee: number;
+  popup_image_url: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [formData, setFormData] = useState<CategoryData>({
     name: '',
     actual_fee: '',
     offer_fee: '',
@@ -34,7 +53,7 @@ const CategoriesManagement = ({ permissions }) => {
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data as Category[];
     }
   });
 
@@ -62,7 +81,7 @@ const CategoriesManagement = ({ permissions }) => {
 
   // Create/Update category mutation
   const saveCategoryMutation = useMutation({
-    mutationFn: async (categoryData) => {
+    mutationFn: async (categoryData: CategoryData) => {
       if (editingCategory) {
         const { error } = await supabase
           .from('categories')
@@ -114,7 +133,7 @@ const CategoriesManagement = ({ permissions }) => {
 
   // Delete category mutation
   const deleteCategoryMutation = useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('categories')
         .delete()
@@ -138,7 +157,7 @@ const CategoriesManagement = ({ permissions }) => {
     }
   });
 
-  const handleEdit = (category) => {
+  const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
@@ -150,7 +169,7 @@ const CategoriesManagement = ({ permissions }) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this category?')) {
         deleteCategoryMutation.mutate(id);
@@ -158,7 +177,7 @@ const CategoriesManagement = ({ permissions }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (permissions.canWrite) {
       saveCategoryMutation.mutate(formData);

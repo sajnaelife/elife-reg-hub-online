@@ -12,15 +12,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Calendar } from 'lucide-react';
 
-const AnnouncementsManagement = ({ permissions }) => {
+interface AnnouncementData {
+  title: string;
+  content: string;
+  expiry_date: string | null;
+  is_active: boolean;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  expiry_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
-  const [formData, setFormData] = useState({
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [formData, setFormData] = useState<AnnouncementData>({
     title: '',
     content: '',
-    expiry_date: '',
+    expiry_date: null,
     is_active: true
   });
 
@@ -34,7 +51,7 @@ const AnnouncementsManagement = ({ permissions }) => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Announcement[];
     }
   });
 
@@ -62,7 +79,7 @@ const AnnouncementsManagement = ({ permissions }) => {
 
   // Create/Update announcement mutation
   const saveAnnouncementMutation = useMutation({
-    mutationFn: async (announcementData) => {
+    mutationFn: async (announcementData: AnnouncementData) => {
       const dataToSave = {
         ...announcementData,
         expiry_date: announcementData.expiry_date || null
@@ -93,7 +110,7 @@ const AnnouncementsManagement = ({ permissions }) => {
       setFormData({
         title: '',
         content: '',
-        expiry_date: '',
+        expiry_date: null,
         is_active: true
       });
       toast({
@@ -112,7 +129,7 @@ const AnnouncementsManagement = ({ permissions }) => {
 
   // Delete announcement mutation
   const deleteAnnouncementMutation = useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('announcements')
         .delete()
@@ -136,19 +153,19 @@ const AnnouncementsManagement = ({ permissions }) => {
     }
   });
 
-  const handleEdit = (announcement) => {
+  const handleEdit = (announcement: Announcement) => {
     setEditingAnnouncement(announcement);
     setFormData({
       title: announcement.title,
       content: announcement.content,
       expiry_date: announcement.expiry_date ? 
-        new Date(announcement.expiry_date).toISOString().split('T')[0] : '',
+        new Date(announcement.expiry_date).toISOString().split('T')[0] : null,
       is_active: announcement.is_active
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this announcement?')) {
         deleteAnnouncementMutation.mutate(id);
@@ -156,7 +173,7 @@ const AnnouncementsManagement = ({ permissions }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (permissions.canWrite) {
       saveAnnouncementMutation.mutate(formData);
@@ -168,12 +185,12 @@ const AnnouncementsManagement = ({ permissions }) => {
     setFormData({
       title: '',
       content: '',
-      expiry_date: '',
+      expiry_date: null,
       is_active: true
     });
   };
 
-  const isExpired = (expiryDate) => {
+  const isExpired = (expiryDate: string | null) => {
     if (!expiryDate) return false;
     return new Date(expiryDate) < new Date();
   };
@@ -224,8 +241,8 @@ const AnnouncementsManagement = ({ permissions }) => {
                     <Input
                       id="expiry_date"
                       type="date"
-                      value={formData.expiry_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, expiry_date: e.target.value }))}
+                      value={formData.expiry_date || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, expiry_date: e.target.value || null }))}
                     />
                   </div>
                   

@@ -11,12 +11,42 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Download, CheckCircle, XCircle, Edit } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const RegistrationsManagement = ({ permissions }) => {
+type ApplicationStatus = 'pending' | 'approved' | 'rejected';
+
+interface Registration {
+  id: string;
+  customer_id: string;
+  name: string;
+  mobile_number: string;
+  address: string;
+  ward: string;
+  agent_pro: string | null;
+  status: ApplicationStatus;
+  fee_paid: number;
+  created_at: string;
+  updated_at: string;
+  category_id: string;
+  panchayath_id: string | null;
+  categories: { name: string } | null;
+  panchayaths: { name: string; district: string } | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface UpdateStatusParams {
+  id: string;
+  status: ApplicationStatus;
+}
+
+const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   // Fetch registrations with real-time updates
   const { data: registrations, isLoading } = useQuery({
@@ -36,7 +66,7 @@ const RegistrationsManagement = ({ permissions }) => {
       }
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as ApplicationStatus);
       }
 
       if (categoryFilter !== 'all') {
@@ -45,7 +75,7 @@ const RegistrationsManagement = ({ permissions }) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as Registration[];
     }
   });
 
@@ -55,7 +85,7 @@ const RegistrationsManagement = ({ permissions }) => {
     queryFn: async () => {
       const { data, error } = await supabase.from('categories').select('*');
       if (error) throw error;
-      return data;
+      return data as Category[];
     }
   });
 
@@ -83,7 +113,7 @@ const RegistrationsManagement = ({ permissions }) => {
 
   // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }) => {
+    mutationFn: async ({ id, status }: UpdateStatusParams) => {
       const { error } = await supabase
         .from('registrations')
         .update({ status, updated_at: new Date().toISOString() })
@@ -109,7 +139,7 @@ const RegistrationsManagement = ({ permissions }) => {
 
   // Delete registration mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('registrations')
         .delete()
@@ -133,7 +163,7 @@ const RegistrationsManagement = ({ permissions }) => {
     }
   });
 
-  const handleStatusUpdate = (id: string, status: string) => {
+  const handleStatusUpdate = (id: string, status: ApplicationStatus) => {
     if (permissions.canWrite) {
       updateStatusMutation.mutate({ id, status });
     }
@@ -177,7 +207,7 @@ const RegistrationsManagement = ({ permissions }) => {
     });
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case 'approved':
         return <Badge className="bg-green-100 text-green-800">Approved</Badge>;

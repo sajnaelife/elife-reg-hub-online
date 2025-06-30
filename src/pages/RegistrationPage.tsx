@@ -13,8 +13,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle } from 'lucide-react';
 
+interface Category {
+  id: string;
+  name: string;
+  actual_fee: number;
+  offer_fee: number;
+}
+
+interface Panchayath {
+  id: string;
+  name: string;
+  district: string;
+}
+
+interface RegistrationData {
+  name: string;
+  address: string;
+  mobile_number: string;
+  panchayath_id: string;
+  ward: string;
+  agent_pro: string;
+  category_id: string;
+  fee_paid: number;
+}
+
 const RegistrationPage = () => {
-  const { categoryId } = useParams();
+  const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +56,7 @@ const RegistrationPage = () => {
   const { data: category, isLoading: categoryLoading } = useQuery({
     queryKey: ['category', categoryId],
     queryFn: async () => {
+      if (!categoryId) throw new Error('Category ID is required');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -39,8 +64,9 @@ const RegistrationPage = () => {
         .single();
       
       if (error) throw error;
-      return data;
-    }
+      return data as Category;
+    },
+    enabled: !!categoryId
   });
 
   const { data: panchayaths } = useQuery({
@@ -52,7 +78,7 @@ const RegistrationPage = () => {
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data as Panchayath[];
     }
   });
 
@@ -63,7 +89,7 @@ const RegistrationPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.address || !formData.mobile_number || !formData.ward) {
+    if (!formData.name || !formData.address || !formData.mobile_number || !formData.ward || !categoryId || !category) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -75,18 +101,20 @@ const RegistrationPage = () => {
     setIsSubmitting(true);
 
     try {
+      const registrationData: RegistrationData = {
+        name: formData.name,
+        address: formData.address,
+        mobile_number: formData.mobile_number,
+        panchayath_id: formData.panchayath_id || '',
+        ward: formData.ward,
+        agent_pro: formData.agent_pro || '',
+        category_id: categoryId,
+        fee_paid: category.offer_fee
+      };
+
       const { data, error } = await supabase
         .from('registrations')
-        .insert([{
-          name: formData.name,
-          address: formData.address,
-          mobile_number: formData.mobile_number,
-          panchayath_id: formData.panchayath_id || null,
-          ward: formData.ward,
-          agent_pro: formData.agent_pro || null,
-          category_id: categoryId,
-          fee_paid: category?.offer_fee
-        }])
+        .insert([registrationData])
         .select()
         .single();
 
