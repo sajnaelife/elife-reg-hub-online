@@ -9,7 +9,186 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_login: string | null
+          password_hash: string
+          role: Database["public"]["Enums"]["admin_role"]
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          password_hash: string
+          role: Database["public"]["Enums"]["admin_role"]
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          password_hash?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+          username?: string
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          content: string
+          created_at: string | null
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          actual_fee: number
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          offer_fee: number
+          popup_image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_fee?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          offer_fee?: number
+          popup_image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_fee?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          offer_fee?: number
+          popup_image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      panchayaths: {
+        Row: {
+          created_at: string | null
+          district: string
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          district: string
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          district?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          address: string
+          agent_pro: string | null
+          category_id: string
+          created_at: string | null
+          customer_id: string
+          fee_paid: number | null
+          id: string
+          mobile_number: string
+          name: string
+          panchayath_id: string | null
+          status: Database["public"]["Enums"]["application_status"] | null
+          updated_at: string | null
+          ward: string
+        }
+        Insert: {
+          address: string
+          agent_pro?: string | null
+          category_id: string
+          created_at?: string | null
+          customer_id: string
+          fee_paid?: number | null
+          id?: string
+          mobile_number: string
+          name: string
+          panchayath_id?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string | null
+          ward: string
+        }
+        Update: {
+          address?: string
+          agent_pro?: string | null
+          category_id?: string
+          created_at?: string | null
+          customer_id?: string
+          fee_paid?: number | null
+          id?: string
+          mobile_number?: string
+          name?: string
+          panchayath_id?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string | null
+          ward?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_panchayath_id_fkey"
+            columns: ["panchayath_id"]
+            isOneToOne: false
+            referencedRelation: "panchayaths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +197,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      admin_role: "super_admin" | "local_admin" | "user_admin"
+      application_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +313,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      admin_role: ["super_admin", "local_admin", "user_admin"],
+      application_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
