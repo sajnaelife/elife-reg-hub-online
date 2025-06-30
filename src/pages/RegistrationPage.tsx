@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -35,6 +34,7 @@ interface RegistrationData {
   agent_pro: string;
   category_id: string;
   fee_paid: number;
+  customer_id: string;
 }
 
 const RegistrationPage = () => {
@@ -109,12 +109,13 @@ const RegistrationPage = () => {
         ward: formData.ward,
         agent_pro: formData.agent_pro || '',
         category_id: categoryId,
-        fee_paid: category.offer_fee
+        fee_paid: category.offer_fee,
+        customer_id: 'ESEP' + formData.mobile_number + formData.name.charAt(0).toUpperCase()
       };
 
       const { data, error } = await supabase
         .from('registrations')
-        .insert([registrationData])
+        .insert(registrationData)
         .select()
         .single();
 
