@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Users, FileText, TrendingUp, Bell } from 'lucide-react';
+import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin } from 'lucide-react';
 
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -23,21 +23,6 @@ const LandingPage = () => {
         .eq('is_active', true)
         .or('expiry_date.is.null,expiry_date.gt.now()')
         .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  // Fetch categories for display
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
       
       if (error) throw error;
       return data;
@@ -144,7 +129,7 @@ const LandingPage = () => {
           <Card className="text-center">
             <CardHeader>
               <FileText className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <CardTitle className="text-3xl font-bold text-gray-900">{categories?.length || 7}</CardTitle>
+              <CardTitle className="text-3xl font-bold text-gray-900">7</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">Available Categories</p>
@@ -163,47 +148,90 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Quick Categories Preview */}
-      {categories && categories.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
-            Available Categories
+      {/* Women Self-Employment Section */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Empowering Women Entrepreneurs
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.slice(0, 6).map((category) => (
-              <Card key={category.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">{category.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Actual Fee</p>
-                      <p className="text-lg font-bold text-gray-400 line-through">₹{category.actual_fee}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Offer Fee</p>
-                      <p className="text-xl font-bold text-green-600">₹{category.offer_fee}</p>
-                    </div>
-                  </div>
-                  <Link to={`/register/${category.id}`}>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                      Register Now
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+          <p className="text-lg text-gray-600">
+            Join our community of successful women who have built their own businesses
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="bg-gradient-to-br from-pink-50 to-rose-100 border-pink-200">
+            <CardHeader>
+              <CardTitle className="text-xl text-pink-800">Tailoring & Fashion</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-pink-700">Start your own tailoring business with government support and training programs.</p>
+              <div className="mt-4 p-3 bg-pink-100 rounded-lg">
+                <p className="text-sm text-pink-800 font-medium">Average Monthly Income: ₹15,000 - ₹25,000</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-purple-50 to-violet-100 border-purple-200">
+            <CardHeader>
+              <CardTitle className="text-xl text-purple-800">Home Food Services</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-purple-700">Transform your cooking skills into a profitable home-based food business.</p>
+              <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+                <p className="text-sm text-purple-800 font-medium">Average Monthly Income: ₹10,000 - ₹20,000</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
+            <CardHeader>
+              <CardTitle className="text-xl text-green-800">Beauty & Wellness</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-green-700">Start your beauty parlor or wellness center with professional training support.</p>
+              <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                <p className="text-sm text-green-800 font-medium">Average Monthly Income: ₹20,000 - ₹35,000</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Contact Us Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
+            <p className="text-lg text-blue-100">
+              Get in touch with us for any queries or support
+            </p>
           </div>
-          <div className="text-center mt-8">
-            <Link to="/categories">
-              <Button variant="outline" size="lg">
-                View All Categories
-              </Button>
-            </Link>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <Phone className="h-12 w-12 mx-auto mb-4 text-blue-200" />
+              <h3 className="text-xl font-semibold mb-2">Phone Support</h3>
+              <p className="text-blue-100">+91 9876543210</p>
+              <p className="text-blue-100">Mon-Fri, 9AM-6PM</p>
+            </div>
+            
+            <div className="text-center">
+              <Mail className="h-12 w-12 mx-auto mb-4 text-blue-200" />
+              <h3 className="text-xl font-semibold mb-2">Email Support</h3>
+              <p className="text-blue-100">support@esep.gov.in</p>
+              <p className="text-blue-100">We'll respond within 24 hours</p>
+            </div>
+            
+            <div className="text-center">
+              <MapPin className="h-12 w-12 mx-auto mb-4 text-blue-200" />
+              <h3 className="text-xl font-semibold mb-2">Office Address</h3>
+              <p className="text-blue-100">ESEP Office, Government Building</p>
+              <p className="text-blue-100">Kerala, India - 695001</p>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

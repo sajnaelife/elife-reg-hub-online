@@ -12,15 +12,14 @@ import { Search, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 const StatusCheckPage = () => {
   const [searchData, setSearchData] = useState({
-    mobile_number: '',
-    customer_id: ''
+    mobile_number: ''
   });
   const [shouldSearch, setShouldSearch] = useState(false);
 
   const { data: registration, isLoading, error } = useQuery({
-    queryKey: ['registration-status', searchData.mobile_number, searchData.customer_id],
+    queryKey: ['registration-status', searchData.mobile_number],
     queryFn: async () => {
-      if (!searchData.mobile_number || !searchData.customer_id) {
+      if (!searchData.mobile_number) {
         return null;
       }
 
@@ -32,7 +31,6 @@ const StatusCheckPage = () => {
           panchayaths (name, district)
         `)
         .eq('mobile_number', searchData.mobile_number)
-        .eq('customer_id', searchData.customer_id)
         .single();
 
       if (error) {
@@ -44,12 +42,12 @@ const StatusCheckPage = () => {
       
       return data;
     },
-    enabled: shouldSearch && !!searchData.mobile_number && !!searchData.customer_id
+    enabled: shouldSearch && !!searchData.mobile_number
   });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchData.mobile_number && searchData.customer_id) {
+    if (searchData.mobile_number) {
       setShouldSearch(true);
     }
   };
@@ -84,7 +82,7 @@ const StatusCheckPage = () => {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Check Application Status</h1>
           <p className="text-lg text-gray-600">
-            Enter your mobile number and customer ID to check your registration status
+            Enter your mobile number to check your registration status
           </p>
         </div>
 
@@ -97,28 +95,16 @@ const StatusCheckPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="mobile">Mobile Number</Label>
-                  <Input
-                    id="mobile"
-                    type="tel"
-                    value={searchData.mobile_number}
-                    onChange={(e) => setSearchData(prev => ({ ...prev, mobile_number: e.target.value }))}
-                    placeholder="Enter your mobile number"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="customer_id">Customer ID</Label>
-                  <Input
-                    id="customer_id"
-                    value={searchData.customer_id}
-                    onChange={(e) => setSearchData(prev => ({ ...prev, customer_id: e.target.value }))}
-                    placeholder="Enter your customer ID"
-                    required
-                  />
-                </div>
+              <div>
+                <Label htmlFor="mobile">Mobile Number</Label>
+                <Input
+                  id="mobile"
+                  type="tel"
+                  value={searchData.mobile_number}
+                  onChange={(e) => setSearchData(prev => ({ ...prev, mobile_number: e.target.value }))}
+                  placeholder="Enter your mobile number"
+                  required
+                />
               </div>
               <Button type="submit" className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
                 Check Status
@@ -218,8 +204,8 @@ const StatusCheckPage = () => {
                   <XCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Application Found</h3>
                   <p className="text-gray-600">
-                    No registration found with the provided mobile number and customer ID. 
-                    Please check your details and try again.
+                    No registration found with the provided mobile number. 
+                    Please check your mobile number and try again.
                   </p>
                 </div>
               )}

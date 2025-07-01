@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, Grid3X3, MapPin, Bell, Download } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 import RegistrationsManagement from '@/components/admin/RegistrationsManagement';
 import CategoriesManagement from '@/components/admin/CategoriesManagement';
 import PanchayathsManagement from '@/components/admin/PanchayathsManagement';
@@ -25,9 +26,11 @@ const AdminDashboard = () => {
 
     try {
       const sessionData = JSON.parse(session);
+      // Check if session is still valid (you can add expiry logic here if needed)
       setAdminSession(sessionData);
     } catch (error) {
       console.error('Invalid session data:', error);
+      localStorage.removeItem('adminSession');
       navigate('/admin/login');
     }
   }, [navigate]);
@@ -86,7 +89,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      <Navbar />
+      
+      {/* Admin Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
