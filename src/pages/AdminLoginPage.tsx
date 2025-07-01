@@ -120,15 +120,6 @@ const AdminLoginPage = () => {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-semibold text-sm mb-2">Test Credentials:</h4>
-            <div className="text-xs space-y-1 text-gray-600">
-              <p><strong>Super Admin:</strong> anas / eva919123</p>
-              <p><strong>Local Admin:</strong> adminlocal / admin9094</p>
-              <p><strong>User Admin:</strong> adminuser / user123</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

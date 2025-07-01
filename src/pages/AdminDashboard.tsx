@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Grid3X3, MapPin, Bell, Download } from 'lucide-react';
+import { LogOut, Users, Grid3X3, MapPin, Bell, Shield, BarChart3 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import RegistrationsManagement from '@/components/admin/RegistrationsManagement';
 import CategoriesManagement from '@/components/admin/CategoriesManagement';
 import PanchayathsManagement from '@/components/admin/PanchayathsManagement';
 import AnnouncementsManagement from '@/components/admin/AnnouncementsManagement';
+import AdminManagement from '@/components/admin/AdminManagement';
+import ReportsManagement from '@/components/admin/ReportsManagement';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -137,7 +139,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className={`grid w-full ${permissions.canManageAdmins ? 'grid-cols-6' : 'grid-cols-5'} mb-6`}>
             <TabsTrigger value="registrations" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Registrations
@@ -154,6 +156,16 @@ const AdminDashboard = () => {
               <Bell className="h-4 w-4" />
               Announcements
             </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </TabsTrigger>
+            {permissions.canManageAdmins && (
+              <TabsTrigger value="admins" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Admin Control
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="registrations">
@@ -171,6 +183,16 @@ const AdminDashboard = () => {
           <TabsContent value="announcements">
             <AnnouncementsManagement permissions={permissions} />
           </TabsContent>
+
+          <TabsContent value="reports">
+            <ReportsManagement permissions={permissions} />
+          </TabsContent>
+
+          {permissions.canManageAdmins && (
+            <TabsContent value="admins">
+              <AdminManagement permissions={permissions} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

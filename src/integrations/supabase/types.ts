@@ -75,6 +75,7 @@ export type Database = {
           created_at: string | null
           id: string
           is_active: boolean | null
+          is_highlighted: boolean | null
           name: string
           offer_fee: number
           popup_image_url: string | null
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          is_highlighted?: boolean | null
           name: string
           offer_fee?: number
           popup_image_url?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          is_highlighted?: boolean | null
           name?: string
           offer_fee?: number
           popup_image_url?: string | null
@@ -194,7 +197,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_manage_admins: {
+        Args: { user_role: string }
+        Returns: boolean
+      }
     }
     Enums: {
       admin_role: "super_admin" | "local_admin" | "user_admin"
