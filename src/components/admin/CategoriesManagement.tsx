@@ -43,16 +43,23 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
     is_active: true
   });
 
+  console.log('CategoriesManagement permissions:', permissions);
+
   // Fetch categories
-  const { data: categories, isLoading } = useQuery({
+  const { data: categories, isLoading, error } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: async () => {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      console.log('Fetched categories:', data);
       return data as Category[];
     }
   });
@@ -69,6 +76,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
           table: 'categories'
         },
         () => {
+          console.log('Real-time update received for categories');
           queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
         }
       )
@@ -82,28 +90,40 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   // Create/Update category mutation
   const saveCategoryMutation = useMutation({
     mutationFn: async (categoryData: CategoryData) => {
+      console.log('Saving category:', categoryData, 'editing:', editingCategory?.id);
+      
+      const dataToSave = {
+        name: categoryData.name,
+        actual_fee: parseFloat(categoryData.actual_fee),
+        offer_fee: parseFloat(categoryData.offer_fee),
+        popup_image_url: categoryData.popup_image_url || null,
+        is_active: categoryData.is_active
+      };
+
       if (editingCategory) {
         const { error } = await supabase
           .from('categories')
           .update({
-            ...categoryData,
-            actual_fee: parseFloat(categoryData.actual_fee),
-            offer_fee: parseFloat(categoryData.offer_fee),
+            ...dataToSave,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingCategory.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating category:', error);
+          throw error;
+        }
+        console.log('Category updated successfully');
       } else {
         const { error } = await supabase
           .from('categories')
-          .insert([{
-            ...categoryData,
-            actual_fee: parseFloat(categoryData.actual_fee),
-            offer_fee: parseFloat(categoryData.offer_fee)
-          }]);
+          .insert([dataToSave]);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating category:', error);
+          throw error;
+        }
+        console.log('Category created successfully');
       }
     },
     onSuccess: () => {
@@ -123,6 +143,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Save category failed:', error);
       toast({
         title: "Operation Failed",
         description: "Failed to save category. Please try again.",
@@ -134,12 +155,17 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   // Delete category mutation
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting category:', id);
       const { error } = await supabase
         .from('categories')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting category:', error);
+        throw error;
+      }
+      console.log('Category deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
@@ -149,6 +175,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Delete category failed:', error);
       toast({
         title: "Delete Failed",
         description: "Failed to delete category. It may be in use by registrations.",
@@ -158,6 +185,7 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   });
 
   const handleEdit = (category: Category) => {
+    console.log('Editing category:', category);
     setEditingCategory(category);
     setFormData({
       name: category.name,
@@ -170,17 +198,39 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
   };
 
   const handleDelete = (id: string) => {
+    console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this category?')) {
         deleteCategoryMutation.mutate(id);
       }
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to delete categories.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Handle submit called:', formData, 'canWrite:', permissions.canWrite);
     if (permissions.canWrite) {
+      if (!formData.name || !formData.actual_fee || !formData.offer_fee) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
       saveCategoryMutation.mutate(formData);
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to modify categories.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -194,6 +244,18 @@ const CategoriesManagement = ({ permissions }: { permissions: any }) => {
       is_active: true
     });
   };
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            Error loading categories: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

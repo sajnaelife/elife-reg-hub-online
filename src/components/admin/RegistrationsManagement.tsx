@@ -48,10 +48,13 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
+  console.log('RegistrationsManagement permissions:', permissions);
+
   // Fetch registrations with real-time updates
-  const { data: registrations, isLoading } = useQuery({
+  const { data: registrations, isLoading, error } = useQuery({
     queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter],
     queryFn: async () => {
+      console.log('Fetching registrations...');
       let query = supabase
         .from('registrations')
         .select(`
@@ -74,7 +77,11 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching registrations:', error);
+        throw error;
+      }
+      console.log('Fetched registrations:', data);
       return data as Registration[];
     }
   });
@@ -101,6 +108,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
           table: 'registrations'
         },
         () => {
+          console.log('Real-time update received for registrations');
           queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
         }
       )
@@ -114,12 +122,17 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: UpdateStatusParams) => {
+      console.log('Updating status for registration:', id, 'to:', status);
       const { error } = await supabase
         .from('registrations')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating status:', error);
+        throw error;
+      }
+      console.log('Status updated successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
@@ -129,6 +142,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Status update failed:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update registration status.",
@@ -140,12 +154,17 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   // Delete registration mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting registration:', id);
       const { error } = await supabase
         .from('registrations')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting registration:', error);
+        throw error;
+      }
+      console.log('Registration deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
@@ -155,6 +174,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Delete failed:', error);
       toast({
         title: "Delete Failed",
         description: "Failed to delete registration.",
@@ -164,16 +184,30 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   });
 
   const handleStatusUpdate = (id: string, status: ApplicationStatus) => {
+    console.log('Handle status update called:', id, status, 'canWrite:', permissions.canWrite);
     if (permissions.canWrite) {
       updateStatusMutation.mutate({ id, status });
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to update registrations.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleDelete = (id: string) => {
+    console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this registration?')) {
         deleteMutation.mutate(id);
       }
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to delete registrations.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -217,6 +251,18 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
     }
   };
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            Error loading registrations: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

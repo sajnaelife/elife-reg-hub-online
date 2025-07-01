@@ -33,17 +33,24 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
     district: ''
   });
 
+  console.log('PanchayathsManagement permissions:', permissions);
+
   // Fetch panchayaths
-  const { data: panchayaths, isLoading } = useQuery({
+  const { data: panchayaths, isLoading, error } = useQuery({
     queryKey: ['admin-panchayaths'],
     queryFn: async () => {
+      console.log('Fetching panchayaths...');
       const { data, error } = await supabase
         .from('panchayaths')
         .select('*')
         .order('district', { ascending: true })
         .order('name', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching panchayaths:', error);
+        throw error;
+      }
+      console.log('Fetched panchayaths:', data);
       return data as Panchayath[];
     }
   });
@@ -60,6 +67,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
           table: 'panchayaths'
         },
         () => {
+          console.log('Real-time update received for panchayaths');
           queryClient.invalidateQueries({ queryKey: ['admin-panchayaths'] });
         }
       )
@@ -73,6 +81,8 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   // Create/Update panchayath mutation
   const savePanchayathMutation = useMutation({
     mutationFn: async (panchayathData: PanchayathData) => {
+      console.log('Saving panchayath:', panchayathData, 'editing:', editingPanchayath?.id);
+      
       if (editingPanchayath) {
         const { error } = await supabase
           .from('panchayaths')
@@ -82,13 +92,21 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
           })
           .eq('id', editingPanchayath.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating panchayath:', error);
+          throw error;
+        }
+        console.log('Panchayath updated successfully');
       } else {
         const { error } = await supabase
           .from('panchayaths')
           .insert([panchayathData]);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating panchayath:', error);
+          throw error;
+        }
+        console.log('Panchayath created successfully');
       }
     },
     onSuccess: () => {
@@ -102,6 +120,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Save panchayath failed:', error);
       toast({
         title: "Operation Failed",
         description: "Failed to save panchayath. Please try again.",
@@ -113,12 +132,17 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   // Delete panchayath mutation
   const deletePanchayathMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting panchayath:', id);
       const { error } = await supabase
         .from('panchayaths')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting panchayath:', error);
+        throw error;
+      }
+      console.log('Panchayath deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-panchayaths'] });
@@ -128,6 +152,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
       });
     },
     onError: (error) => {
+      console.error('Delete panchayath failed:', error);
       toast({
         title: "Delete Failed",
         description: "Failed to delete panchayath. It may be in use by registrations.",
@@ -137,6 +162,7 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   });
 
   const handleEdit = (panchayath: Panchayath) => {
+    console.log('Editing panchayath:', panchayath);
     setEditingPanchayath(panchayath);
     setFormData({
       name: panchayath.name,
@@ -146,17 +172,39 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
   };
 
   const handleDelete = (id: string) => {
+    console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
     if (permissions.canDelete) {
       if (window.confirm('Are you sure you want to delete this panchayath?')) {
         deletePanchayathMutation.mutate(id);
       }
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to delete panchayaths.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Handle submit called:', formData, 'canWrite:', permissions.canWrite);
     if (permissions.canWrite) {
+      if (!formData.name || !formData.district) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
       savePanchayathMutation.mutate(formData);
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to modify panchayaths.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -173,6 +221,18 @@ const PanchayathsManagement = ({ permissions }: { permissions: any }) => {
     acc[panchayath.district].push(panchayath);
     return acc;
   }, {} as Record<string, Panchayath[]>) || {};
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            Error loading panchayaths: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

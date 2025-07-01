@@ -16,23 +16,35 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const [adminSession, setAdminSession] = useState(null);
   const [activeTab, setActiveTab] = useState('registrations');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const session = localStorage.getItem('adminSession');
-    if (!session) {
-      navigate('/admin/login');
-      return;
-    }
+    const checkAdminSession = () => {
+      const session = localStorage.getItem('adminSession');
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
 
-    try {
-      const sessionData = JSON.parse(session);
-      // Check if session is still valid (you can add expiry logic here if needed)
-      setAdminSession(sessionData);
-    } catch (error) {
-      console.error('Invalid session data:', error);
-      localStorage.removeItem('adminSession');
-      navigate('/admin/login');
-    }
+      try {
+        const sessionData = JSON.parse(session);
+        // Check if session exists and has required fields
+        if (sessionData && sessionData.username && sessionData.role) {
+          setAdminSession(sessionData);
+        } else {
+          localStorage.removeItem('adminSession');
+          navigate('/admin/login');
+        }
+      } catch (error) {
+        console.error('Invalid session data:', error);
+        localStorage.removeItem('adminSession');
+        navigate('/admin/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAdminSession();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -45,6 +57,7 @@ const AdminDashboard = () => {
   };
 
   const getRolePermissions = (role: string) => {
+    console.log('Getting permissions for role:', role);
     switch (role) {
       case 'super_admin':
         return {
@@ -77,7 +90,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (!adminSession) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -85,7 +98,12 @@ const AdminDashboard = () => {
     );
   }
 
+  if (!adminSession) {
+    return null;
+  }
+
   const permissions = getRolePermissions(adminSession.role);
+  console.log('Admin permissions:', permissions);
 
   return (
     <div className="min-h-screen bg-gray-50">
