@@ -47,12 +47,16 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [panchayathFilter, setPanchayathFilter] = useState<string>('all');
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
 
   console.log('RegistrationsManagement permissions:', permissions);
 
   // Fetch registrations with real-time updates
   const { data: registrations, isLoading, error } = useQuery({
-    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter],
+    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter],
     queryFn: async () => {
       console.log('Fetching registrations...');
       let query = supabase
@@ -76,6 +80,10 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
         query = query.eq('category_id', categoryFilter);
       }
 
+      if (panchayathFilter !== 'all') {
+        query = query.eq('panchayath_id', panchayathFilter);
+      }
+
       const { data, error } = await query;
       if (error) {
         console.error('Error fetching registrations:', error);
@@ -93,6 +101,16 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       const { data, error } = await supabase.from('categories').select('*');
       if (error) throw error;
       return data as Category[];
+    }
+  });
+
+  // Fetch panchayaths for filter
+  const { data: panchayaths } = useQuery({
+    queryKey: ['panchayaths'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('panchayaths').select('*').order('name');
+      if (error) throw error;
+      return data;
     }
   });
 
@@ -211,6 +229,43 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
     }
   };
 
+  const handleEdit = (registration: Registration) => {
+    setEditingRegistration(registration);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleBulkApprove = () => {
+    if (selectedRows.length === 0) {
+      toast({
+        title: "No Selection",
+        description: "Please select registrations to approve.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    selectedRows.forEach(id => {
+      updateStatusMutation.mutate({ id, status: 'approved' });
+    });
+    setSelectedRows([]);
+  };
+
+  const toggleRowSelection = (id: string) => {
+    setSelectedRows(prev => 
+      prev.includes(id) 
+        ? prev.filter(rowId => rowId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleAllSelection = () => {
+    if (selectedRows.length === registrations?.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(registrations?.map(r => r.id) || []);
+    }
+  };
+
   const exportToExcel = () => {
     if (!registrations) return;
 
@@ -269,10 +324,18 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Registrations Management</CardTitle>
-          <Button onClick={exportToExcel} className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Export Excel
-          </Button>
+          <div className="flex gap-2">
+            {selectedRows.length > 0 && (
+              <Button onClick={handleBulkApprove} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                <CheckCircle className="h-4 w-4" />
+                Bulk Approve ({selectedRows.length})
+              </Button>
+            )}
+            <Button onClick={exportToExcel} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -313,6 +376,19 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={panchayathFilter} onValueChange={setPanchayathFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by panchayath" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Panchayaths</SelectItem>
+              {panchayaths?.map((panchayath) => (
+                <SelectItem key={panchayath.id} value={panchayath.id}>
+                  {panchayath.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Registrations Table */}
@@ -320,6 +396,15 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
           <table className="w-full border-collapse border border-gray-200">
             <thead>
               <tr className="bg-gray-50">
+                <th className="border border-gray-200 px-4 py-2 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.length === registrations?.length && registrations?.length > 0}
+                    onChange={toggleAllSelection}
+                    className="mr-2"
+                  />
+                  Select
+                </th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Customer ID</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Mobile</th>
@@ -333,6 +418,13 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
             <tbody>
               {registrations?.map((registration) => (
                 <tr key={registration.id} className="hover:bg-gray-50">
+                  <td className="border border-gray-200 px-4 py-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(registration.id)}
+                      onChange={() => toggleRowSelection(registration.id)}
+                    />
+                  </td>
                   <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
                     {registration.customer_id}
                   </td>
@@ -350,6 +442,15 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     <div className="flex gap-2">
+                      {permissions.canWrite && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(registration)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      )}
                       {permissions.canWrite && registration.status === 'pending' && (
                         <>
                           <Button

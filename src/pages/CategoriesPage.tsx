@@ -20,7 +20,23 @@ const CategoriesPage = () => {
         .order('name');
       
       if (error) throw error;
-      return data;
+      
+      // Reorder categories in the specified order
+      const categoryOrder = [
+        'Pennyekart Free Registration',
+        'Pennyekart Paid Registration', 
+        'Farmelife',
+        'Organelife',
+        'Foodelife',
+        'Entrelife',
+        'Job Card'
+      ];
+      
+      return data?.sort((a, b) => {
+        const aIndex = categoryOrder.indexOf(a.name);
+        const bIndex = categoryOrder.indexOf(b.name);
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      }) || [];
     }
   });
 
@@ -114,6 +130,22 @@ const CategoriesPage = () => {
               </CardHeader>
               
               <CardContent className="space-y-6">
+                {/* Description Section */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2">Description</h4>
+                  <p className="text-sm text-gray-600">
+                    {category.name === 'Pennyekart Free Registration' && 'Free registration for basic Pennyekart services and marketplace access.'}
+                    {category.name === 'Pennyekart Paid Registration' && 'Premium registration with enhanced features and priority support.'}
+                    {category.name === 'Farmelife' && 'Comprehensive farming solutions and agricultural services registration.'}
+                    {category.name === 'Organelife' && 'Organic products certification and marketplace registration.'}
+                    {category.name === 'Foodelife' && 'Food business licensing and restaurant service registration.'}
+                    {category.name === 'Entrelife' && 'Entrepreneurship support and business development registration.'}
+                    {category.name === 'Job Card' && 'Employment registration and job placement services with priority matching.'}
+                    {!['Pennyekart Free Registration', 'Pennyekart Paid Registration', 'Farmelife', 'Organelife', 'Foodelife', 'Entrelife', 'Job Card'].includes(category.name) && 'Professional registration service for your business needs.'}
+                  </p>
+                </div>
+                
+                {/* Fee Details Section */}
                 <div className="flex justify-between items-center">
                   <div className="text-center flex-1">
                     <p className="text-sm text-gray-500 mb-1">Regular Fee</p>
