@@ -56,13 +56,30 @@ const CategoriesPage = () => {
     return gradients[index % gradients.length];
   };
 
-  const getCardIcon = (index: number, isHighlighted?: boolean) => {
-    if (isHighlighted) {
-      return <Crown className="h-6 w-6 text-white" />;
+  const getCategoryLogo = (categoryName: string, isHighlighted?: boolean) => {
+    const logoMap: { [key: string]: string } = {
+      'Pennyekart Free Registration': '/lovable-uploads/2f3ab11d-f683-42be-a94b-69644f18db08.png',
+      'Pennyekart Paid Registration': '/lovable-uploads/2f3ab11d-f683-42be-a94b-69644f18db08.png',
+      'Farmelife': '/lovable-uploads/ea1aea54-6535-4308-b2f7-fc4ce9f476e8.png',
+      'Organelife': '/lovable-uploads/17e9aae4-3476-40e1-a553-cff559b81cbe.png',
+      'Foodelife': '/lovable-uploads/67cb945b-d9cd-4023-9b98-3ad092f86195.png',
+      'Entrelife': '/lovable-uploads/91538157-882e-42fd-b645-446ed5cebe6e.png'
+    };
+
+    const logoUrl = logoMap[categoryName];
+    
+    if (logoUrl) {
+      return (
+        <img 
+          src={logoUrl} 
+          alt={`${categoryName} logo`}
+          className="h-8 w-8 object-contain bg-white/20 rounded p-1"
+        />
+      );
     }
-    const icons = [Crown, Star, Sparkles, Crown, Star, Sparkles, Crown];
-    const IconComponent = icons[index % icons.length];
-    return <IconComponent className="h-6 w-6 text-white" />;
+
+    // Fallback to crown icon for categories without specific logos
+    return <Crown className="h-6 w-6 text-white" />;
   };
 
   if (isLoading) {
@@ -109,7 +126,7 @@ const CategoriesPage = () => {
               {/* Gradient Header */}
               <div className={`h-20 bg-gradient-to-r ${getCardGradient(index, category.is_highlighted)} relative ${category.is_highlighted ? 'animate-pulse' : ''}`}>
                 <div className="absolute top-4 left-4 flex items-center space-x-2">
-                  {getCardIcon(index, category.is_highlighted)}
+                  {getCategoryLogo(category.name, category.is_highlighted)}
                   {category.is_highlighted && (
                     <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm animate-bounce">
                       Featured
