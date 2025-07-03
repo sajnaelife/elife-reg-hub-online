@@ -306,7 +306,7 @@ const RegistrationsManagement = ({
       case 'approved':
         return <Badge className="text-green-800 bg-lime-500">Approved</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800">Rejected</Badge>;
+        return <Badge className="text-red-800 bg-red-500">Rejected</Badge>;
       default:
         return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
     }
