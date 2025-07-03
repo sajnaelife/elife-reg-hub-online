@@ -51,10 +51,7 @@ const LandingPage = () => {
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-6 md:text-5xl">E-life Society 
 Self Employment Registration Portal</h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Register for various self-employment opportunities and track your application status. 
-              Join thousands of entrepreneurs building their future.
-            </p>
+            <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto font-normal md:text-base">വിവിധ സ്വയം തൊഴിൽ അവസരങ്ങൾക്കായി രജിസ്റ്റർ ചെയ്യുകയും നിങ്ങളുടെ അപേക്ഷാ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക. ഭാവി കെട്ടിപ്പടുക്കുന്ന ആയിരക്കണക്കിന് സംരംഭകരോടൊപ്പം ചേരൂ.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/categories">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
