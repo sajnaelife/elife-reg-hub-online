@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,21 +8,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin } from 'lucide-react';
-
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
 
   // Fetch active announcements
-  const { data: announcementsData } = useQuery({
+  const {
+    data: announcementsData
+  } = useQuery({
     queryKey: ['announcements'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('*')
-        .eq('is_active', true)
-        .or('expiry_date.is.null,expiry_date.gt.now()')
-        .order('created_at', { ascending: false });
-      
+      const {
+        data,
+        error
+      } = await supabase.from('announcements').select('*').eq('is_active', true).or('expiry_date.is.null,expiry_date.gt.now()').order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
       return data;
     }
@@ -31,29 +30,19 @@ const LandingPage = () => {
 
   // Real-time updates for announcements
   useEffect(() => {
-    const channel = supabase
-      .channel('announcements-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'announcements'
-        },
-        () => {
-          // Refetch announcements on any change
-          window.location.reload();
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel('announcements-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'announcements'
+    }, () => {
+      // Refetch announcements on any change
+      window.location.reload();
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />
       
       {/* Hero Section */}
@@ -84,34 +73,28 @@ const LandingPage = () => {
       </div>
 
       {/* Announcements Section */}
-      {announcementsData && announcementsData.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 py-8 bg-yellow-200">
           <div className="flex items-center gap-2 mb-6">
             <Bell className="h-6 w-6 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">Live Announcements</h2>
           </div>
           <div className="space-y-4">
-            {announcementsData.map((announcement) => (
-              <Alert key={announcement.id} className="border-blue-200 bg-blue-50">
+            {announcementsData.map(announcement => <Alert key={announcement.id} className="border-blue-200 bg-lime-100">
                 <Bell className="h-4 w-4 text-blue-600" />
                 <AlertDescription>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-blue-900 mb-1">{announcement.title}</h3>
+                      <h3 className="mb-1 text-xl font-bold text-amber-600">{announcement.title}</h3>
                       <p className="text-blue-800">{announcement.content}</p>
                     </div>
-                    {announcement.expiry_date && (
-                      <Badge variant="outline" className="text-xs">
+                    {announcement.expiry_date && <Badge variant="outline" className="text-xs">
                         Expires: {new Date(announcement.expiry_date).toLocaleDateString()}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                 </AlertDescription>
-              </Alert>
-            ))}
+              </Alert>)}
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -212,28 +195,26 @@ const LandingPage = () => {
             <div className="text-center">
               <Phone className="h-12 w-12 mx-auto mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Phone Support</h3>
-              <p className="text-blue-100">+91 9876543210</p>
+              <p className="text-blue-100">+91 9497589094</p>
               <p className="text-blue-100">Mon-Fri, 9AM-6PM</p>
             </div>
             
             <div className="text-center">
               <Mail className="h-12 w-12 mx-auto mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Email Support</h3>
-              <p className="text-blue-100">support@esep.gov.in</p>
+              <p className="text-blue-100">teamelifesociety@gmail.com </p>
               <p className="text-blue-100">We'll respond within 24 hours</p>
             </div>
             
             <div className="text-center">
               <MapPin className="h-12 w-12 mx-auto mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Office Address</h3>
-              <p className="text-blue-100">ESEP Office, Government Building</p>
-              <p className="text-blue-100">Kerala, India - 695001</p>
+              <p className="text-blue-100">Forza Mall Complex -Tirur</p>
+              <p className="text-blue-100">Kerala, India - 676101</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
