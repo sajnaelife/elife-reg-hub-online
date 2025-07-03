@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,30 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Phone, Mail, MapPin, Sparkles, Star, Crown } from 'lucide-react';
-
 const CategoriesPage = () => {
-  const { data: categories, isLoading, error } = useQuery({
+  const {
+    data: categories,
+    isLoading,
+    error
+  } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('categories').select('*').eq('is_active', true).order('name');
       if (error) throw error;
-      
+
       // Reorder categories in the specified order
-      const categoryOrder = [
-        'Pennyekart Free Registration',
-        'Pennyekart Paid Registration', 
-        'Farmelife',
-        'Organelife',
-        'Foodelife',
-        'Entrelife',
-        'Job Card'
-      ];
-      
+      const categoryOrder = ['Pennyekart Free Registration', 'Pennyekart Paid Registration', 'Farmelife', 'Organelife', 'Foodelife', 'Entrelife', 'Job Card'];
       return data?.sort((a, b) => {
         const aIndex = categoryOrder.indexOf(a.name);
         const bIndex = categoryOrder.indexOf(b.name);
@@ -39,25 +30,17 @@ const CategoriesPage = () => {
       }) || [];
     }
   });
-
   const getCardGradient = (index: number, isHighlighted?: boolean) => {
     if (isHighlighted) {
       return 'from-yellow-400 via-yellow-500 to-yellow-600';
     }
-    const gradients = [
-      'from-blue-500 to-purple-600',
-      'from-green-500 to-teal-600',
-      'from-pink-500 to-rose-600',
-      'from-orange-500 to-red-600',
-      'from-indigo-500 to-blue-600',
-      'from-purple-500 to-pink-600',
-      'from-teal-500 to-green-600',
-    ];
+    const gradients = ['from-blue-500 to-purple-600', 'from-green-500 to-teal-600', 'from-pink-500 to-rose-600', 'from-orange-500 to-red-600', 'from-indigo-500 to-blue-600', 'from-purple-500 to-pink-600', 'from-teal-500 to-green-600'];
     return gradients[index % gradients.length];
   };
-
   const getCategoryLogo = (categoryName: string, isHighlighted?: boolean) => {
-    const logoMap: { [key: string]: string } = {
+    const logoMap: {
+      [key: string]: string;
+    } = {
       'Pennyekart Free Registration': '/lovable-uploads/2f3ab11d-f683-42be-a94b-69644f18db08.png',
       'Pennyekart Paid Registration': '/lovable-uploads/2f3ab11d-f683-42be-a94b-69644f18db08.png',
       'Farmelife': '/lovable-uploads/ea1aea54-6535-4308-b2f7-fc4ce9f476e8.png',
@@ -65,78 +48,53 @@ const CategoriesPage = () => {
       'Foodelife': '/lovable-uploads/67cb945b-d9cd-4023-9b98-3ad092f86195.png',
       'Entrelife': '/lovable-uploads/91538157-882e-42fd-b645-446ed5cebe6e.png'
     };
-
     const logoUrl = logoMap[categoryName];
-    
     if (logoUrl) {
-      return (
-        <img 
-          src={logoUrl} 
-          alt={`${categoryName} logo`}
-          className="h-8 w-8 object-contain bg-white/20 rounded p-1"
-        />
-      );
+      return <img src={logoUrl} alt={`${categoryName} logo`} className="h-8 w-8 object-contain bg-white/20 rounded p-1" />;
     }
 
     // Fallback to crown icon for categories without specific logos
     return <Crown className="h-6 w-6 text-white" />;
   };
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-red-600">
             Error loading categories. Please try again later.
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            Self-Employment Categories
-          </h1>
-          <p className="text-lg text-gray-600">
-            Choose from our available self-employment registration categories
-          </p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">സ്വയം തൊഴിൽ വിഭാഗങ്ങൾ</h1>
+          <p className="text-gray-600 text-base">താങ്കൾക്ക് ആവശ്യമായ സ്വയംതൊഴിൽ മേഖല ഏതാണെന്ന് ഇവിടെനിന്ന് തിരഞ്ഞെടുക്കുക. ശ്രദ്ധിക്കുക എല്ലാ ഒരു തവണ ഒന്നിൽ മാത്രമേ രജിസ്ട്രേഷൻ സാധ്യമാകൂ അതുകൊണ്ട് എല്ലാം വായിച്ചു ഉറപ്പ് വരുത്തുക</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories?.map((category, index) => (
-            <Card key={category.id} className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-xl ${category.is_highlighted ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''}`}>
+          {categories?.map((category, index) => <Card key={category.id} className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-xl ${category.is_highlighted ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''}`}>
               {/* Gradient Header */}
               <div className={`h-20 bg-gradient-to-r ${getCardGradient(index, category.is_highlighted)} relative ${category.is_highlighted ? 'animate-pulse' : ''}`}>
                 <div className="absolute top-4 left-4 flex items-center space-x-2">
                   {getCategoryLogo(category.name, category.is_highlighted)}
-                  {category.is_highlighted && (
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm animate-bounce">
+                  {category.is_highlighted && <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm animate-bounce">
                       Featured
-                    </Badge>
-                  )}
-                  {category.offer_fee === 0 && (
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    </Badge>}
+                  {category.offer_fee === 0 && <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
                       Free
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
               </div>
               
@@ -189,7 +147,7 @@ const CategoriesPage = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Discount:</span>
                     <span className="font-bold text-red-600">
-                      {category.actual_fee > 0 ? Math.round(((category.actual_fee - category.offer_fee) / category.actual_fee) * 100) : 0}% OFF
+                      {category.actual_fee > 0 ? Math.round((category.actual_fee - category.offer_fee) / category.actual_fee * 100) : 0}% OFF
                     </span>
                   </div>
                 </div>
@@ -200,15 +158,12 @@ const CategoriesPage = () => {
                   </Button>
                 </Link>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
-        {(!categories || categories.length === 0) && (
-          <div className="text-center py-12">
+        {(!categories || categories.length === 0) && <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No categories available at the moment.</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Contact Us Section */}
@@ -245,8 +200,6 @@ const CategoriesPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CategoriesPage;
