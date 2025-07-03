@@ -49,9 +49,8 @@ const LandingPage = () => {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Self Employment Registration Portal
-            </h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-6 md:text-5xl">E-life Society 
+Self Employment Registration Portal</h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Register for various self-employment opportunities and track your application status. 
               Join thousands of entrepreneurs building their future.
