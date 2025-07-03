@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,9 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Download, CheckCircle, XCircle, Edit } from 'lucide-react';
 import * as XLSX from 'xlsx';
-
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
-
 interface Registration {
   id: string;
   customer_id: string;
@@ -27,22 +24,30 @@ interface Registration {
   updated_at: string;
   category_id: string;
   panchayath_id: string | null;
-  categories: { name: string } | null;
-  panchayaths: { name: string; district: string } | null;
+  categories: {
+    name: string;
+  } | null;
+  panchayaths: {
+    name: string;
+    district: string;
+  } | null;
 }
-
 interface Category {
   id: string;
   name: string;
 }
-
 interface UpdateStatusParams {
   id: string;
   status: ApplicationStatus;
 }
-
-const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
-  const { toast } = useToast();
+const RegistrationsManagement = ({
+  permissions
+}: {
+  permissions: any;
+}) => {
+  const {
+    toast
+  } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -51,40 +56,40 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
-
   console.log('RegistrationsManagement permissions:', permissions);
 
   // Fetch registrations with real-time updates
-  const { data: registrations, isLoading, error } = useQuery({
+  const {
+    data: registrations,
+    isLoading,
+    error
+  } = useQuery({
     queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter],
     queryFn: async () => {
       console.log('Fetching registrations...');
-      let query = supabase
-        .from('registrations')
-        .select(`
+      let query = supabase.from('registrations').select(`
           *,
           categories (name),
           panchayaths (name, district)
-        `)
-        .order('created_at', { ascending: false });
-
+        `).order('created_at', {
+        ascending: false
+      });
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,mobile_number.ilike.%${searchTerm}%,customer_id.ilike.%${searchTerm}%`);
       }
-
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter as ApplicationStatus);
       }
-
       if (categoryFilter !== 'all') {
         query = query.eq('category_id', categoryFilter);
       }
-
       if (panchayathFilter !== 'all') {
         query = query.eq('panchayath_id', panchayathFilter);
       }
-
-      const { data, error } = await query;
+      const {
+        data,
+        error
+      } = await query;
       if (error) {
         console.error('Error fetching registrations:', error);
         throw error;
@@ -95,20 +100,30 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   });
 
   // Fetch categories for filter
-  const { data: categories } = useQuery({
+  const {
+    data: categories
+  } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categories').select('*');
+      const {
+        data,
+        error
+      } = await supabase.from('categories').select('*');
       if (error) throw error;
       return data as Category[];
     }
   });
 
   // Fetch panchayaths for filter
-  const { data: panchayaths } = useQuery({
+  const {
+    data: panchayaths
+  } = useQuery({
     queryKey: ['panchayaths'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('panchayaths').select('*').order('name');
+      const {
+        data,
+        error
+      } = await supabase.from('panchayaths').select('*').order('name');
       if (error) throw error;
       return data;
     }
@@ -116,22 +131,16 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
 
   // Real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('registrations-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'registrations'
-        },
-        () => {
-          console.log('Real-time update received for registrations');
-          queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel('registrations-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'registrations'
+    }, () => {
+      console.log('Real-time update received for registrations');
+      queryClient.invalidateQueries({
+        queryKey: ['admin-registrations']
+      });
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
@@ -139,13 +148,17 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
 
   // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: UpdateStatusParams) => {
+    mutationFn: async ({
+      id,
+      status
+    }: UpdateStatusParams) => {
       console.log('Updating status for registration:', id, 'to:', status);
-      const { error } = await supabase
-        .from('registrations')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', id);
-      
+      const {
+        error
+      } = await supabase.from('registrations').update({
+        status,
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
       if (error) {
         console.error('Error updating status:', error);
         throw error;
@@ -153,13 +166,15 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       console.log('Status updated successfully');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin-registrations']
+      });
       toast({
         title: "Status Updated",
-        description: "Registration status has been updated successfully.",
+        description: "Registration status has been updated successfully."
       });
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Status update failed:', error);
       toast({
         title: "Update Failed",
@@ -173,11 +188,9 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       console.log('Deleting registration:', id);
-      const { error } = await supabase
-        .from('registrations')
-        .delete()
-        .eq('id', id);
-      
+      const {
+        error
+      } = await supabase.from('registrations').delete().eq('id', id);
       if (error) {
         console.error('Error deleting registration:', error);
         throw error;
@@ -185,13 +198,15 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       console.log('Registration deleted successfully');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin-registrations']
+      });
       toast({
         title: "Registration Deleted",
-        description: "Registration has been deleted successfully.",
+        description: "Registration has been deleted successfully."
       });
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Delete failed:', error);
       toast({
         title: "Delete Failed",
@@ -200,11 +215,13 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
     }
   });
-
   const handleStatusUpdate = (id: string, status: ApplicationStatus) => {
     console.log('Handle status update called:', id, status, 'canWrite:', permissions.canWrite);
     if (permissions.canWrite) {
-      updateStatusMutation.mutate({ id, status });
+      updateStatusMutation.mutate({
+        id,
+        status
+      });
     } else {
       toast({
         title: "Permission Denied",
@@ -213,7 +230,6 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
     }
   };
-
   const handleDelete = (id: string) => {
     console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
     if (permissions.canDelete) {
@@ -228,12 +244,10 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
     }
   };
-
   const handleEdit = (registration: Registration) => {
     setEditingRegistration(registration);
     setIsEditDialogOpen(true);
   };
-
   const handleBulkApprove = () => {
     if (selectedRows.length === 0) {
       toast({
@@ -243,21 +257,17 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       });
       return;
     }
-    
     selectedRows.forEach(id => {
-      updateStatusMutation.mutate({ id, status: 'approved' });
+      updateStatusMutation.mutate({
+        id,
+        status: 'approved'
+      });
     });
     setSelectedRows([]);
   };
-
   const toggleRowSelection = (id: string) => {
-    setSelectedRows(prev => 
-      prev.includes(id) 
-        ? prev.filter(rowId => rowId !== id)
-        : [...prev, id]
-    );
+    setSelectedRows(prev => prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]);
   };
-
   const toggleAllSelection = () => {
     if (selectedRows.length === registrations?.length) {
       setSelectedRows([]);
@@ -265,10 +275,8 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       setSelectedRows(registrations?.map(r => r.id) || []);
     }
   };
-
   const exportToExcel = () => {
     if (!registrations) return;
-
     const exportData = registrations.map(reg => ({
       'Customer ID': reg.customer_id,
       'Name': reg.name,
@@ -284,18 +292,15 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       'Applied Date': new Date(reg.created_at).toLocaleDateString('en-IN'),
       'Updated Date': new Date(reg.updated_at).toLocaleDateString('en-IN')
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
     XLSX.writeFile(workbook, `registrations_${new Date().toISOString().split('T')[0]}.xlsx`);
-
     toast({
       title: "Export Successful",
-      description: "Registrations have been exported to Excel.",
+      description: "Registrations have been exported to Excel."
     });
   };
-
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case 'approved':
@@ -303,34 +308,27 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
       case 'rejected':
         return <Badge className="bg-red-100 text-red-800">Rejected</Badge>;
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return <Badge className="text-yellow-800 bg-lime-500">Pending</Badge>;
     }
   };
-
   if (error) {
-    return (
-      <Card>
+    return <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-600">
             Error loading registrations: {error.message}
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Registrations Management</CardTitle>
           <div className="flex gap-2">
-            {selectedRows.length > 0 && (
-              <Button onClick={handleBulkApprove} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+            {selectedRows.length > 0 && <Button onClick={handleBulkApprove} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
                 <CheckCircle className="h-4 w-4" />
                 Bulk Approve ({selectedRows.length})
-              </Button>
-            )}
+              </Button>}
             <Button onClick={exportToExcel} className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export Excel
@@ -344,12 +342,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by name, mobile, or customer ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Search by name, mobile, or customer ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -369,11 +362,9 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
+              {categories?.map(category => <SelectItem key={category.id} value={category.id}>
                   {category.name}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={panchayathFilter} onValueChange={setPanchayathFilter}>
@@ -382,11 +373,9 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Panchayaths</SelectItem>
-              {panchayaths?.map((panchayath) => (
-                <SelectItem key={panchayath.id} value={panchayath.id}>
+              {panchayaths?.map(panchayath => <SelectItem key={panchayath.id} value={panchayath.id}>
                   {panchayath.name}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -397,12 +386,7 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
             <thead>
               <tr className="bg-gray-50">
                 <th className="border border-gray-200 px-4 py-2 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.length === registrations?.length && registrations?.length > 0}
-                    onChange={toggleAllSelection}
-                    className="mr-2"
-                  />
+                  <input type="checkbox" checked={selectedRows.length === registrations?.length && registrations?.length > 0} onChange={toggleAllSelection} className="mr-2" />
                   Select
                 </th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Customer ID</th>
@@ -416,21 +400,16 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
               </tr>
             </thead>
             <tbody>
-              {registrations?.map((registration) => (
-                <tr key={registration.id} className="hover:bg-gray-50">
+              {registrations?.map(registration => <tr key={registration.id} className="hover:bg-gray-50">
                   <td className="border border-gray-200 px-4 py-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(registration.id)}
-                      onChange={() => toggleRowSelection(registration.id)}
-                    />
+                    <input type="checkbox" checked={selectedRows.includes(registration.id)} onChange={() => toggleRowSelection(registration.id)} />
                   </td>
                   <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
                     {registration.customer_id}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">{registration.name}</td>
                   <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-4 py-2 bg-green-400">
                     {registration.categories?.name}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
@@ -442,64 +421,35 @@ const RegistrationsManagement = ({ permissions }: { permissions: any }) => {
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     <div className="flex gap-2">
-                      {permissions.canWrite && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(registration)}
-                        >
+                      {permissions.canWrite && <Button size="sm" variant="outline" onClick={() => handleEdit(registration)}>
                           <Edit className="h-3 w-3" />
-                        </Button>
-                      )}
-                      {permissions.canWrite && registration.status === 'pending' && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleStatusUpdate(registration.id, 'approved')}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
+                        </Button>}
+                      {permissions.canWrite && registration.status === 'pending' && <>
+                          <Button size="sm" onClick={() => handleStatusUpdate(registration.id, 'approved')} className="bg-green-600 hover:bg-green-700">
                             <CheckCircle className="h-3 w-3" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleStatusUpdate(registration.id, 'rejected')}
-                          >
+                          <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(registration.id, 'rejected')}>
                             <XCircle className="h-3 w-3" />
                           </Button>
-                        </>
-                      )}
-                      {permissions.canDelete && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(registration.id)}
-                        >
+                        </>}
+                      {permissions.canDelete && <Button size="sm" variant="outline" onClick={() => handleDelete(registration.id)}>
                           Delete
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
                   </td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
           </table>
         </div>
 
-        {isLoading && (
-          <div className="text-center py-8">
+        {isLoading && <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
+          </div>}
 
-        {!isLoading && (!registrations || registrations.length === 0) && (
-          <div className="text-center py-8 text-gray-500">
+        {!isLoading && (!registrations || registrations.length === 0) && <div className="text-center py-8 text-gray-500">
             No registrations found matching your criteria.
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default RegistrationsManagement;
