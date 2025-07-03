@@ -409,7 +409,7 @@ const RegistrationsManagement = ({
                   </td>
                   <td className="border border-gray-200 px-4 py-2">{registration.name}</td>
                   <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
-                  <td className="border border-gray-200 px-4 py-2 bg-green-400">
+                  <td className="border border-gray-200 px-4 py-2 bg-slate-50">
                     {registration.categories?.name}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
