@@ -9,14 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, X } from 'lucide-react';
 
 interface Category {
   id: string;
   name: string;
   actual_fee: number;
   offer_fee: number;
+  popup_image_url: string | null;
 }
 
 interface Panchayath {
@@ -185,6 +187,29 @@ const RegistrationPage = () => {
             <CardContent className="pt-8">
               <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Registration Successful!</h2>
+              
+              {/* Popup Image Dialog */}
+              {category.popup_image_url && (
+                <div className="mb-6">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="mb-4">
+                        View Special Offer
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
+                      <div className="relative">
+                        <img 
+                          src={category.popup_image_url} 
+                          alt={`${category.name} special offer`}
+                          className="w-full h-auto object-contain"
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+
               <div className="space-y-4 text-left bg-gray-50 p-6 rounded-lg">
                 <div>
                   <strong>Customer ID:</strong> {generatedCustomerId}
