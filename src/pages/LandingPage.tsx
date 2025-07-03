@@ -62,7 +62,7 @@ Self Employment Registration Portal</h1>
                 </Button>
               </Link>
               <Link to="/status">
-                <Button variant="outline" size="lg" className="px-8 py-3">
+                <Button variant="outline" size="lg" className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-base font-bold">
                   Check Status
                 </Button>
               </Link>
