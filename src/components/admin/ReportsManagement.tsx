@@ -3,7 +3,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, TrendingUp, Users, MapPin } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, MapPin, DollarSign } from 'lucide-react';
 
 const ReportsManagement = ({ permissions }: { permissions: any }) => {
   // Fetch registration summary by panchayath
@@ -59,19 +59,27 @@ const ReportsManagement = ({ permissions }: { permissions: any }) => {
         registrationsCount,
         categoriesCount,
         panchayathsCount,
-        activeCategories
+        activeCategories,
+        feesData
       ] = await Promise.all([
         supabase.from('registrations').select('*', { count: 'exact', head: true }),
         supabase.from('categories').select('*', { count: 'exact', head: true }),
         supabase.from('panchayaths').select('*', { count: 'exact', head: true }),
-        supabase.from('categories').select('*', { count: 'exact', head: true }).eq('is_active', true)
+        supabase.from('categories').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('registrations').select('fee_paid')
       ]);
+
+      // Calculate total fees collected
+      const totalFeesCollected = feesData.data?.reduce((sum, reg) => {
+        return sum + (reg.fee_paid || 0);
+      }, 0) || 0;
 
       return {
         totalRegistrations: registrationsCount.count || 0,
         totalCategories: categoriesCount.count || 0,
         totalPanchayaths: panchayathsCount.count || 0,
-        activeCategories: activeCategories.count || 0
+        activeCategories: activeCategories.count || 0,
+        totalFeesCollected
       };
     }
   });
@@ -91,7 +99,7 @@ const ReportsManagement = ({ permissions }: { permissions: any }) => {
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
@@ -128,6 +136,21 @@ const ReportsManagement = ({ permissions }: { permissions: any }) => {
             <div className="text-2xl font-bold">
               {loadingStats ? '...' : stats?.totalPanchayaths || 0}
             </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Fees Collected</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              ₹{loadingStats ? '...' : (stats?.totalFeesCollected || 0).toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Revenue from registrations
+            </p>
           </CardContent>
         </Card>
         
