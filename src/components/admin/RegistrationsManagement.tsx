@@ -304,7 +304,7 @@ const RegistrationsManagement = ({
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-100 text-green-800">Approved</Badge>;
+        return <Badge className="text-green-800 bg-lime-500">Approved</Badge>;
       case 'rejected':
         return <Badge className="bg-red-100 text-red-800">Rejected</Badge>;
       default:
