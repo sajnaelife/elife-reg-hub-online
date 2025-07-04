@@ -72,7 +72,7 @@ const AdminDashboard = () => {
         return {
           canRead: true,
           canWrite: true,
-          canDelete: true,
+          canDelete: false,
           canManageAdmins: false
         };
       case 'user_admin':

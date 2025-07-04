@@ -19,6 +19,7 @@ interface Category {
   actual_fee: number;
   offer_fee: number;
   popup_image_url: string | null;
+  qr_image_url: string | null;
 }
 
 interface Panchayath {
@@ -183,11 +184,58 @@ const RegistrationPage = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-8">
-          <Card className="text-center">
+          <Card className="text-center max-w-4xl mx-auto">
             <CardContent className="pt-8">
               <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Registration Successful!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Registration Successful!</h2>
               
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                {/* Registration Details */}
+                <div className="space-y-4 text-left">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Customer ID:</span>
+                    <span className="font-mono text-sm">{generatedCustomerId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Category:</span>
+                    <span>{category.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Fee Paid:</span>
+                    <span>₹{category.offer_fee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Status:</span>
+                    <span>Pending Approval</span>
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                {category.qr_image_url && (
+                  <div className="flex flex-col items-center">
+                    <div className="bg-teal-600 p-4 rounded-lg relative">
+                      <img 
+                        src={category.qr_image_url} 
+                        alt="QR Code"
+                        className="w-48 h-48 object-contain bg-white p-2 rounded"
+                      />
+                      <Button 
+                        size="sm" 
+                        className="absolute top-2 right-2 bg-black text-white hover:bg-gray-800"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = category.qr_image_url!;
+                          link.download = `qr-code-${generatedCustomerId}.png`;
+                          link.click();
+                        }}
+                      >
+                        DOWNLOAD ⬇
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Popup Image Dialog */}
               {category.popup_image_url && (
                 <div className="mb-6">
@@ -210,31 +258,13 @@ const RegistrationPage = () => {
                 </div>
               )}
 
-              <div className="space-y-4 text-left bg-gray-50 p-6 rounded-lg">
-                <div>
-                  <strong>Customer ID:</strong> {generatedCustomerId}
-                </div>
-                <div>
-                  <strong>Category:</strong> {category.name}
-                </div>
-                <div>
-                  <strong>Fee Paid:</strong> ₹{category.offer_fee}
-                </div>
-                <div>
-                  <strong>Status:</strong> Pending Approval
-                </div>
-              </div>
-              <p className="text-gray-600 mt-4 mb-6">
+              <p className="text-gray-600 mb-6">
                 Please save your Customer ID for future reference. You can check your application status using your mobile number and Customer ID.
               </p>
-              <div className="space-y-3">
-                <Button onClick={() => navigate('/status')} className="w-full">
-                  Check Status
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/')} className="w-full">
-                  Back to Home
-                </Button>
-              </div>
+              
+              <Button onClick={() => navigate('/status')} className="w-full max-w-md mx-auto bg-gray-800 hover:bg-gray-900">
+                Check Status
+              </Button>
             </CardContent>
           </Card>
         </div>

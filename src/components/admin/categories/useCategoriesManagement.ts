@@ -14,6 +14,7 @@ export const useCategoriesManagement = (permissions: any) => {
     actual_fee: '',
     offer_fee: '',
     popup_image_url: '',
+    qr_image_url: '',
     is_active: true
   });
 
@@ -69,6 +70,7 @@ export const useCategoriesManagement = (permissions: any) => {
         actual_fee: parseFloat(categoryData.actual_fee),
         offer_fee: parseFloat(categoryData.offer_fee),
         popup_image_url: categoryData.popup_image_url || null,
+        qr_image_url: categoryData.qr_image_url || null,
         is_active: categoryData.is_active
       };
 
@@ -158,6 +160,7 @@ export const useCategoriesManagement = (permissions: any) => {
       actual_fee: category.actual_fee.toString(),
       offer_fee: category.offer_fee.toString(),
       popup_image_url: category.popup_image_url || '',
+      qr_image_url: category.qr_image_url || '',
       is_active: category.is_active
     });
     setIsDialogOpen(true);
@@ -207,6 +210,7 @@ export const useCategoriesManagement = (permissions: any) => {
       actual_fee: '',
       offer_fee: '',
       popup_image_url: '',
+      qr_image_url: '',
       is_active: true
     });
   };

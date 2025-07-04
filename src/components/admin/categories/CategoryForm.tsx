@@ -82,6 +82,17 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             />
           </div>
           
+          <div>
+            <Label htmlFor="qr_image_url">QR Code Image URL</Label>
+            <Input
+              id="qr_image_url"
+              type="url"
+              value={formData.qr_image_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, qr_image_url: e.target.value }))}
+              placeholder="https://example.com/qr-code.png"
+            />
+          </div>
+          
           <div className="flex items-center space-x-2">
             <Switch
               id="is_active"

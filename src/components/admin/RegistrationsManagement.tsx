@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Download, CheckCircle, XCircle, Edit } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import RegistrationEditDialog from './RegistrationEditDialog';
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 interface Registration {
   id: string;
@@ -248,6 +249,10 @@ const RegistrationsManagement = ({
     setEditingRegistration(registration);
     setIsEditDialogOpen(true);
   };
+
+  const handleEditUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
+  };
   const handleBulkApprove = () => {
     if (selectedRows.length === 0) {
       toast({
@@ -449,6 +454,13 @@ const RegistrationsManagement = ({
         {!isLoading && (!registrations || registrations.length === 0) && <div className="text-center py-8 text-gray-500">
             No registrations found matching your criteria.
           </div>}
+
+        <RegistrationEditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          registration={editingRegistration}
+          onUpdate={handleEditUpdate}
+        />
       </CardContent>
     </Card>;
 };
