@@ -73,6 +73,7 @@ export type Database = {
         Row: {
           actual_fee: number
           created_at: string | null
+          description: string | null
           id: string
           is_active: boolean | null
           is_highlighted: boolean | null
@@ -85,6 +86,7 @@ export type Database = {
         Insert: {
           actual_fee?: number
           created_at?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean | null
           is_highlighted?: boolean | null
@@ -97,6 +99,7 @@ export type Database = {
         Update: {
           actual_fee?: number
           created_at?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean | null
           is_highlighted?: boolean | null

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
+import JobCardHighlight from '@/components/landing/JobCardHighlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -67,6 +68,9 @@ Self Employment Registration Portal</h1>
           </div>
         </div>
       </div>
+
+      {/* Job Card Special Offer */}
+      <JobCardHighlight />
 
       {/* Announcements Section */}
       {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 py-8 bg-yellow-200">

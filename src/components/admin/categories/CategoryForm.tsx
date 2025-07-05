@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Category, CategoryData } from './types';
+import ImageUpload from './ImageUpload';
 
 interface CategoryFormProps {
   isOpen: boolean;
@@ -29,7 +31,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editingCategory ? 'Edit Category' : 'Add New Category'}
@@ -43,6 +45,17 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description & Tips</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Add important tips and description for this category..."
+              rows={3}
             />
           </div>
           
@@ -71,27 +84,21 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             </div>
           </div>
           
-          <div>
-            <Label htmlFor="popup_image_url">Popup Image URL</Label>
-            <Input
-              id="popup_image_url"
-              type="url"
-              value={formData.popup_image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, popup_image_url: e.target.value }))}
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          <ImageUpload
+            bucketName="popup-images"
+            currentUrl={formData.popup_image_url}
+            onUrlChange={(url) => setFormData(prev => ({ ...prev, popup_image_url: url }))}
+            label="Popup Image"
+            accept="image/*"
+          />
           
-          <div>
-            <Label htmlFor="qr_image_url">QR Code Image URL</Label>
-            <Input
-              id="qr_image_url"
-              type="url"
-              value={formData.qr_image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, qr_image_url: e.target.value }))}
-              placeholder="https://example.com/qr-code.png"
-            />
-          </div>
+          <ImageUpload
+            bucketName="qr-codes"
+            currentUrl={formData.qr_image_url}
+            onUrlChange={(url) => setFormData(prev => ({ ...prev, qr_image_url: url }))}
+            label="QR Code Image"
+            accept="image/*"
+          />
           
           <div className="flex items-center space-x-2">
             <Switch
@@ -102,7 +109,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             <Label htmlFor="is_active">Active</Label>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1">
               {editingCategory ? 'Update' : 'Create'} Category
             </Button>

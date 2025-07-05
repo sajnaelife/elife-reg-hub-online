@@ -16,6 +16,7 @@ import { Loader2, CheckCircle, X } from 'lucide-react';
 interface Category {
   id: string;
   name: string;
+  description: string | null;
   actual_fee: number;
   offer_fee: number;
   popup_image_url: string | null;
@@ -284,7 +285,7 @@ const RegistrationPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Registration Form */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
@@ -383,14 +384,17 @@ const RegistrationPage = () => {
           </div>
 
           {/* Category Summary */}
-          <div>
-            <Card className="sticky top-24">
+          <div className="order-1 lg:order-2">
+            <Card className="lg:sticky lg:top-24">
               <CardHeader>
                 <CardTitle>Registration Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-lg">{category.name}</h3>
+                  {category.description && (
+                    <p className="text-sm text-gray-600 mt-1">{category.description}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">

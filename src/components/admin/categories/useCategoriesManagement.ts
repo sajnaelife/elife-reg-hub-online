@@ -11,6 +11,7 @@ export const useCategoriesManagement = (permissions: any) => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState<CategoryData>({
     name: '',
+    description: '',
     actual_fee: '',
     offer_fee: '',
     popup_image_url: '',
@@ -67,6 +68,7 @@ export const useCategoriesManagement = (permissions: any) => {
       
       const dataToSave = {
         name: categoryData.name,
+        description: categoryData.description || null,
         actual_fee: parseFloat(categoryData.actual_fee),
         offer_fee: parseFloat(categoryData.offer_fee),
         popup_image_url: categoryData.popup_image_url || null,
@@ -157,6 +159,7 @@ export const useCategoriesManagement = (permissions: any) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
+      description: category.description || '',
       actual_fee: category.actual_fee.toString(),
       offer_fee: category.offer_fee.toString(),
       popup_image_url: category.popup_image_url || '',
@@ -207,6 +210,7 @@ export const useCategoriesManagement = (permissions: any) => {
     setEditingCategory(null);
     setFormData({
       name: '',
+      description: '',
       actual_fee: '',
       offer_fee: '',
       popup_image_url: '',

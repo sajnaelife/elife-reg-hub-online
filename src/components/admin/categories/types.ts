@@ -1,5 +1,6 @@
 export interface CategoryData {
   name: string;
+  description: string;
   actual_fee: string;
   offer_fee: string;
   popup_image_url: string;
@@ -10,6 +11,7 @@ export interface CategoryData {
 export interface Category {
   id: string;
   name: string;
+  description: string | null;
   actual_fee: number;
   offer_fee: number;
   popup_image_url: string | null;
