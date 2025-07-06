@@ -48,6 +48,7 @@ export type Database = {
           is_active: boolean | null
           title: string
           updated_at: string | null
+          youtube_video_url: string | null
         }
         Insert: {
           content: string
@@ -57,6 +58,7 @@ export type Database = {
           is_active?: boolean | null
           title: string
           updated_at?: string | null
+          youtube_video_url?: string | null
         }
         Update: {
           content?: string
@@ -66,6 +68,7 @@ export type Database = {
           is_active?: boolean | null
           title?: string
           updated_at?: string | null
+          youtube_video_url?: string | null
         }
         Relationships: []
       }

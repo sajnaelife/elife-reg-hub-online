@@ -72,8 +72,13 @@ const ReportsManagement = ({
         head: true
       }).eq('is_active', true), supabase.from('registrations').select('fee_paid')]);
 
-      // Calculate total fees collected
-      const totalFeesCollected = feesData.data?.reduce((sum, reg) => {
+      // Calculate total fees collected only from approved registrations
+      const approvedFeesData = await supabase
+        .from('registrations')
+        .select('fee_paid')
+        .eq('status', 'approved');
+      
+      const totalFeesCollected = approvedFeesData.data?.reduce((sum, reg) => {
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
       return {

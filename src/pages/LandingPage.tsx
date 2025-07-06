@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin } from 'lucide-react';
+import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin, Youtube } from 'lucide-react';
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
 
@@ -71,6 +71,53 @@ Self Employment Registration Portal</h1>
 
       {/* Job Card Special Offer */}
       <JobCardHighlight />
+
+      {/* YouTube Videos Section */}
+      {announcementsData && announcementsData.some(a => a.youtube_video_url) && (
+        <div className="max-w-7xl mx-auto px-4 py-12 bg-gradient-to-r from-red-50 to-pink-50">
+          <div className="flex items-center gap-2 mb-8">
+            <Youtube className="h-8 w-8 text-red-600" />
+            <h2 className="text-3xl font-bold text-gray-900">Program Videos</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {announcementsData
+              .filter(announcement => announcement.youtube_video_url)
+              .map(announcement => {
+                const videoId = announcement.youtube_video_url?.includes('youtube.com/watch?v=') 
+                  ? announcement.youtube_video_url.split('watch?v=')[1]?.split('&')[0]
+                  : announcement.youtube_video_url?.includes('youtu.be/') 
+                    ? announcement.youtube_video_url.split('youtu.be/')[1]?.split('?')[0]
+                    : null;
+                
+                return (
+                  <Card key={announcement.id} className="overflow-hidden">
+                    <div className="aspect-video">
+                      {videoId ? (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${videoId}`}
+                          title={announcement.title}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full bg-gray-100">
+                          <Youtube className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-lg mb-2">{announcement.title}</h3>
+                      <p className="text-gray-600 text-sm">{announcement.content}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {/* Announcements Section */}
       {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 py-8 bg-yellow-200">

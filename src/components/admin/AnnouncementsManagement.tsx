@@ -17,6 +17,7 @@ interface AnnouncementData {
   content: string;
   expiry_date: string | null;
   is_active: boolean;
+  youtube_video_url: string | null;
 }
 
 interface Announcement {
@@ -27,6 +28,7 @@ interface Announcement {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  youtube_video_url: string | null;
 }
 
 const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
@@ -38,7 +40,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
     title: '',
     content: '',
     expiry_date: null,
-    is_active: true
+    is_active: true,
+    youtube_video_url: null
   });
 
   // Fetch announcements
@@ -111,7 +114,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
         title: '',
         content: '',
         expiry_date: null,
-        is_active: true
+        is_active: true,
+        youtube_video_url: null
       });
       toast({
         title: editingAnnouncement ? "Announcement Updated" : "Announcement Created",
@@ -160,7 +164,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
       content: announcement.content,
       expiry_date: announcement.expiry_date ? 
         new Date(announcement.expiry_date).toISOString().split('T')[0] : null,
-      is_active: announcement.is_active
+      is_active: announcement.is_active,
+      youtube_video_url: announcement.youtube_video_url
     });
     setIsDialogOpen(true);
   };
@@ -186,7 +191,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
       title: '',
       content: '',
       expiry_date: null,
-      is_active: true
+      is_active: true,
+      youtube_video_url: null
     });
   };
 
@@ -233,6 +239,17 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
                       onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                       rows={4}
                       required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="youtube_video_url">YouTube Video URL (Optional)</Label>
+                    <Input
+                      id="youtube_video_url"
+                      type="url"
+                      value={formData.youtube_video_url || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, youtube_video_url: e.target.value || null }))}
+                      placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
                   

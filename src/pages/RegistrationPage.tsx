@@ -245,25 +245,25 @@ const RegistrationPage = () => {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <Label htmlFor="name">Full Name *</Label>
-                    <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter your full name" required />
+                    <Label htmlFor="name">Full Name * / പൂർണ്ണ നാമം *</Label>
+                    <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter your full name / നിങ്ങളുടെ പൂർണ്ണ നാമം നൽകുക" required />
                   </div>
 
                   <div>
-                    <Label htmlFor="mobile">Mobile Number *</Label>
-                    <Input id="mobile" type="tel" value={formData.mobile_number} onChange={e => handleInputChange('mobile_number', e.target.value)} placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required />
+                    <Label htmlFor="mobile">Mobile Number * / മൊബൈൽ നമ്പർ *</Label>
+                    <Input id="mobile" type="tel" value={formData.mobile_number} onChange={e => handleInputChange('mobile_number', e.target.value)} placeholder="Enter 10-digit mobile number / 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക" pattern="[0-9]{10}" required />
                   </div>
 
                   <div>
-                    <Label htmlFor="address">Address *</Label>
-                    <Textarea id="address" value={formData.address} onChange={e => handleInputChange('address', e.target.value)} placeholder="Enter your complete address" required />
+                    <Label htmlFor="address">Address * / വിലാസം *</Label>
+                    <Textarea id="address" value={formData.address} onChange={e => handleInputChange('address', e.target.value)} placeholder="Enter your complete address / നിങ്ങളുടെ പൂർണ്ണ വിലാസം നൽകുക" required />
                   </div>
 
                   <div>
-                    <Label htmlFor="panchayath">Panchayath</Label>
+                    <Label htmlFor="panchayath">Panchayath / പഞ്ചായത്ത്</Label>
                     <Select onValueChange={value => handleInputChange('panchayath_id', value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select Panchayath" />
+                        <SelectValue placeholder="Select Panchayath / പഞ്ചായത്ത് തിരഞ്ഞെടുക്കുക" />
                       </SelectTrigger>
                       <SelectContent>
                         {panchayaths?.map(panchayath => <SelectItem key={panchayath.id} value={panchayath.id}>
@@ -274,13 +274,13 @@ const RegistrationPage = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="ward">Ward *</Label>
-                    <Input id="ward" value={formData.ward} onChange={e => handleInputChange('ward', e.target.value)} placeholder="Enter ward number/name" required />
+                    <Label htmlFor="ward">Ward * / വാർഡ് *</Label>
+                    <Input id="ward" value={formData.ward} onChange={e => handleInputChange('ward', e.target.value)} placeholder="Enter ward number/name / വാർഡ് നമ്പർ/പേര് നൽകുക" required />
                   </div>
 
                   <div>
-                    <Label htmlFor="agent">Agent / P.R.O</Label>
-                    <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional)" />
+                    <Label htmlFor="agent">Agent / P.R.O / ഏജന്റ് / പി.ആർ.ഒ</Label>
+                    <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional) / ഏജന്റ് അല്ലെങ്കിൽ പിആർഒ പേര് (ഓപ്ഷണൽ)" />
                   </div>
 
                   <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
