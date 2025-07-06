@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, X } from 'lucide-react';
-
 interface Category {
   id: string;
   name: string;
@@ -22,13 +21,11 @@ interface Category {
   popup_image_url: string | null;
   qr_image_url: string | null;
 }
-
 interface Panchayath {
   id: string;
   name: string;
   district: string;
 }
-
 interface RegistrationData {
   name: string;
   address: string;
@@ -40,11 +37,16 @@ interface RegistrationData {
   fee_paid: number;
   customer_id: string;
 }
-
 const RegistrationPage = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const {
+    categoryId
+  } = useParams<{
+    categoryId: string;
+  }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
@@ -56,43 +58,43 @@ const RegistrationPage = () => {
     ward: '',
     agent_pro: ''
   });
-
-  const { data: category, isLoading: categoryLoading } = useQuery({
+  const {
+    data: category,
+    isLoading: categoryLoading
+  } = useQuery({
     queryKey: ['category', categoryId],
     queryFn: async () => {
       if (!categoryId) throw new Error('Category ID is required');
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('categories').select('*').eq('id', categoryId).single();
       if (error) throw error;
       return data as Category;
     },
     enabled: !!categoryId
   });
-
-  const { data: panchayaths } = useQuery({
+  const {
+    data: panchayaths
+  } = useQuery({
     queryKey: ['panchayaths'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('panchayaths')
-        .select('*')
-        .order('name');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('panchayaths').select('*').order('name');
       if (error) throw error;
       return data as Panchayath[];
     }
   });
-
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.name || !formData.address || !formData.mobile_number || !formData.ward || !categoryId || !category) {
       toast({
         title: "Missing Information",
@@ -101,9 +103,7 @@ const RegistrationPage = () => {
       });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const registrationData: RegistrationData = {
         name: formData.name,
@@ -116,13 +116,10 @@ const RegistrationPage = () => {
         fee_paid: category.offer_fee,
         customer_id: 'ESEP' + formData.mobile_number + formData.name.charAt(0).toUpperCase()
       };
-
-      const { data, error } = await supabase
-        .from('registrations')
-        .insert(registrationData)
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('registrations').insert(registrationData).select().single();
       if (error) {
         if (error.code === '23505') {
           toast({
@@ -135,15 +132,12 @@ const RegistrationPage = () => {
         }
         return;
       }
-
       setGeneratedCustomerId(data.customer_id);
       setShowSuccess(true);
-      
       toast({
         title: "Registration Successful!",
-        description: `Your Customer ID is: ${data.customer_id}`,
+        description: `Your Customer ID is: ${data.customer_id}`
       });
-
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -155,38 +149,30 @@ const RegistrationPage = () => {
       setIsSubmitting(false);
     }
   };
-
   if (categoryLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!category) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center text-red-600">
             Category not found. Please go back and select a valid category.
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Card className="text-center max-w-4xl mx-auto">
-            <CardContent className="pt-8">
+            <CardContent className="pt-8 bg-teal-100">
               <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Registration Successful!</h2>
               
@@ -195,7 +181,7 @@ const RegistrationPage = () => {
                 <div className="space-y-4 text-left">
                   <div className="flex justify-between">
                     <span className="font-semibold">Customer ID:</span>
-                    <span className="font-mono text-sm">{generatedCustomerId}</span>
+                    <span className="font-mono text-sm text-rose-600">{generatedCustomerId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold">Category:</span>
@@ -212,56 +198,25 @@ const RegistrationPage = () => {
                 </div>
 
                 {/* QR Code */}
-                {category.qr_image_url && (
-                  <div className="flex flex-col items-center">
+                {category.qr_image_url && <div className="flex flex-col items-center">
                     <div className="bg-teal-600 p-4 rounded-lg relative">
-                      <img 
-                        src={category.qr_image_url} 
-                        alt="QR Code"
-                        className="w-48 h-48 object-contain bg-white p-2 rounded"
-                      />
-                      <Button 
-                        size="sm" 
-                        className="absolute top-2 right-2 bg-black text-white hover:bg-gray-800"
-                        onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = category.qr_image_url!;
-                          link.download = `qr-code-${generatedCustomerId}.png`;
-                          link.click();
-                        }}
-                      >
+                      <img src={category.qr_image_url} alt="QR Code" className="w-48 h-48 object-contain bg-white p-2 rounded" />
+                      <Button size="sm" className="absolute top-2 right-2 bg-black text-white hover:bg-gray-800" onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = category.qr_image_url!;
+                    link.download = `qr-code-${generatedCustomerId}.png`;
+                    link.click();
+                  }}>
                         DOWNLOAD ⬇
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
 
               {/* Popup Image Dialog */}
-              {category.popup_image_url && (
-                <div className="mb-6">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="mb-4">
-                        View Special Offer
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-                      <div className="relative">
-                        <img 
-                          src={category.popup_image_url} 
-                          alt={`${category.name} special offer`}
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              )}
+              {category.popup_image_url}
 
-              <p className="text-gray-600 mb-6">
-                Please save your Customer ID for future reference. You can check your application status using your mobile number and Customer ID.
-              </p>
+              <p className="text-gray-600 mb-6">Please save your Customer ID for future reference. You can check your application status using your mobile number and Customer ID.</p>
               
               <Button onClick={() => navigate('/status')} className="w-full max-w-md mx-auto bg-gray-800 hover:bg-gray-900">
                 Check Status
@@ -269,12 +224,9 @@ const RegistrationPage = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -294,89 +246,48 @@ const RegistrationPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="name">Full Name *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Enter your full name"
-                      required
-                    />
+                    <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter your full name" required />
                   </div>
 
                   <div>
                     <Label htmlFor="mobile">Mobile Number *</Label>
-                    <Input
-                      id="mobile"
-                      type="tel"
-                      value={formData.mobile_number}
-                      onChange={(e) => handleInputChange('mobile_number', e.target.value)}
-                      placeholder="Enter 10-digit mobile number"
-                      pattern="[0-9]{10}"
-                      required
-                    />
+                    <Input id="mobile" type="tel" value={formData.mobile_number} onChange={e => handleInputChange('mobile_number', e.target.value)} placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required />
                   </div>
 
                   <div>
                     <Label htmlFor="address">Address *</Label>
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      placeholder="Enter your complete address"
-                      required
-                    />
+                    <Textarea id="address" value={formData.address} onChange={e => handleInputChange('address', e.target.value)} placeholder="Enter your complete address" required />
                   </div>
 
                   <div>
                     <Label htmlFor="panchayath">Panchayath</Label>
-                    <Select onValueChange={(value) => handleInputChange('panchayath_id', value)}>
+                    <Select onValueChange={value => handleInputChange('panchayath_id', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Panchayath" />
                       </SelectTrigger>
                       <SelectContent>
-                        {panchayaths?.map((panchayath) => (
-                          <SelectItem key={panchayath.id} value={panchayath.id}>
+                        {panchayaths?.map(panchayath => <SelectItem key={panchayath.id} value={panchayath.id}>
                             {panchayath.name} - {panchayath.district}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
                     <Label htmlFor="ward">Ward *</Label>
-                    <Input
-                      id="ward"
-                      value={formData.ward}
-                      onChange={(e) => handleInputChange('ward', e.target.value)}
-                      placeholder="Enter ward number/name"
-                      required
-                    />
+                    <Input id="ward" value={formData.ward} onChange={e => handleInputChange('ward', e.target.value)} placeholder="Enter ward number/name" required />
                   </div>
 
                   <div>
                     <Label htmlFor="agent">Agent / P.R.O</Label>
-                    <Input
-                      id="agent"
-                      value={formData.agent_pro}
-                      onChange={(e) => handleInputChange('agent_pro', e.target.value)}
-                      placeholder="Enter agent or PRO name (optional)"
-                    />
+                    <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional)" />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                    {isSubmitting ? <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Processing...
-                      </>
-                    ) : (
-                      'Submit Registration'
-                    )}
+                      </> : 'Submit Registration'}
                   </Button>
                 </form>
               </CardContent>
@@ -392,9 +303,7 @@ const RegistrationPage = () => {
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-lg">{category.name}</h3>
-                  {category.description && (
-                    <p className="text-sm text-gray-600 mt-1">{category.description}</p>
-                  )}
+                  {category.description && <p className="text-sm text-gray-600 mt-1">{category.description}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -426,8 +335,6 @@ const RegistrationPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RegistrationPage;
