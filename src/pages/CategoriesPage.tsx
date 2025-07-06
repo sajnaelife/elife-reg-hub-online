@@ -109,14 +109,7 @@ const CategoriesPage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-gray-800 mb-2">Description</h4>
                   <p className="text-sm text-gray-600">
-                    {category.name === 'Pennyekart Free Registration' && 'Free registration for basic Pennyekart services and marketplace access.'}
-                    {category.name === 'Pennyekart Paid Registration' && 'Premium registration with enhanced features and priority support.'}
-                    {category.name === 'Farmelife' && 'Comprehensive farming solutions and agricultural services registration.'}
-                    {category.name === 'Organelife' && 'Organic products certification and marketplace registration.'}
-                    {category.name === 'Foodelife' && 'Food business licensing and restaurant service registration.'}
-                    {category.name === 'Entrelife' && 'Entrepreneurship support and business development registration.'}
-                    {category.name === 'Job Card' && 'Employment registration and job placement services with priority matching.'}
-                    {!['Pennyekart Free Registration', 'Pennyekart Paid Registration', 'Farmelife', 'Organelife', 'Foodelife', 'Entrelife', 'Job Card'].includes(category.name) && 'Professional registration service for your business needs.'}
+                    {category.description || 'Registration service for your business needs.'}
                   </p>
                 </div>
                 
