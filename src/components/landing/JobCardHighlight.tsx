@@ -6,31 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, ArrowRight } from 'lucide-react';
-
 const JobCardHighlight = () => {
-  const { data: jobCategory } = useQuery({
+  const {
+    data: jobCategory
+  } = useQuery({
     queryKey: ['job-card-category'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .ilike('name', '%job card%')
-        .eq('is_active', true)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('categories').select('*').ilike('name', '%job card%').eq('is_active', true).single();
       if (error) return null;
       return data;
     }
   });
-
   if (!jobCategory) return null;
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-16">
+  return <div className="max-w-7xl mx-auto px-4 py-16">
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 border-2 border-orange-200">
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-300/20 to-orange-400/20"></div>
         
-        <div className="relative p-8 md:p-12">
+        <div className="relative p-8 md:p-12 bg-yellow-100">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-1 text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
@@ -77,25 +72,17 @@ const JobCardHighlight = () => {
               </Link>
             </div>
             
-            {jobCategory.popup_image_url && (
-              <div className="flex-shrink-0">
+            {jobCategory.popup_image_url && <div className="flex-shrink-0">
                 <div className="relative">
-                  <img
-                    src={jobCategory.popup_image_url}
-                    alt={`${jobCategory.name} offer`}
-                    className="w-72 h-72 object-cover rounded-2xl shadow-2xl border-4 border-white"
-                  />
+                  <img src={jobCategory.popup_image_url} alt={`${jobCategory.name} offer`} className="w-72 h-72 object-cover rounded-2xl shadow-2xl border-4 border-white" />
                   <div className="absolute -top-4 -right-4 bg-red-500 text-white rounded-full p-3 shadow-lg animate-pulse">
                     <Star className="h-6 w-6 fill-current" />
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default JobCardHighlight;
