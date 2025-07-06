@@ -40,7 +40,7 @@ const JobCardHighlight = () => {
                 {jobCategory.name}
               </h2>
               
-              <p className="text-lg text-gray-700 mb-6 max-w-2xl">
+              <p className="text-gray-700 mb-6 max-w-2xl text-base font-thin text-center">
                 {jobCategory.description || "Single window registration for all categories! Get access to multiple employment opportunities with one registration."}
               </p>
               
