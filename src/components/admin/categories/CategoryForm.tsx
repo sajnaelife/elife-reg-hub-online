@@ -70,7 +70,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
           <div>
             <Label htmlFor="preference">Preference / മുൻഗണന</Label>
-            <Select onValueChange={(value) => setFormData(prev => ({ ...prev, preference: value }))}>
+            <Select value={formData.preference} onValueChange={(value) => setFormData(prev => ({ ...prev, preference: value }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
               </SelectTrigger>
