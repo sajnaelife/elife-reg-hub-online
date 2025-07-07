@@ -36,6 +36,7 @@ interface RegistrationData {
   category_id: string;
   fee_paid: number;
   customer_id: string;
+  preference: string;
 }
 const RegistrationPage = () => {
   const {
@@ -56,7 +57,8 @@ const RegistrationPage = () => {
     mobile_number: '',
     panchayath_id: '',
     ward: '',
-    agent_pro: ''
+    agent_pro: '',
+    preference: ''
   });
   const {
     data: category,
@@ -114,7 +116,8 @@ const RegistrationPage = () => {
         agent_pro: formData.agent_pro || '',
         category_id: categoryId,
         fee_paid: category.offer_fee,
-        customer_id: 'ESEP' + formData.mobile_number + formData.name.charAt(0).toUpperCase()
+        customer_id: 'ESEP' + formData.mobile_number + formData.name.charAt(0).toUpperCase(),
+        preference: formData.preference
       };
       const {
         data,
@@ -226,6 +229,12 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
+  const preferenceOptions = [
+    { value: 'farmelife', label: 'Farmelife' },
+    { value: 'foodelife', label: 'Foodelife' },
+    { value: 'organelife', label: 'Organelife' },
+    { value: 'entrelife', label: 'Entrelife' }
+  ];
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -281,6 +290,20 @@ const RegistrationPage = () => {
                   <div>
                     <Label htmlFor="agent">Agent / P.R.O / ഏജന്റ് / പി.ആർ.ഒ</Label>
                     <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional) / ഏജന്റ് അല്ലെങ്കിൽ പിആർഒ പേര് (ഓപ്ഷണൽ)" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="preference">Preference / മുൻഗണന</Label>
+                    <Select value={formData.preference} onValueChange={value => handleInputChange('preference', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {preferenceOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>

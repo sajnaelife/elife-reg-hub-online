@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,6 @@ const initialFormData: CategoryData = {
   offer_fee: '',
   popup_image_url: '',
   qr_image_url: '',
-  preference: '',
   is_active: true
 };
 
@@ -46,7 +46,6 @@ export const useCategoriesManagement = (permissions: any) => {
           offer_fee: parseFloat(data.offer_fee),
           popup_image_url: data.popup_image_url || null,
           qr_image_url: data.qr_image_url || null,
-          preference: data.preference || null,
           is_active: data.is_active
         });
       
@@ -78,7 +77,6 @@ export const useCategoriesManagement = (permissions: any) => {
           offer_fee: parseFloat(data.offer_fee),
           popup_image_url: data.popup_image_url || null,
           qr_image_url: data.qr_image_url || null,
-          preference: data.preference || null,
           is_active: data.is_active
         })
         .eq('id', id);
@@ -132,7 +130,6 @@ export const useCategoriesManagement = (permissions: any) => {
       offer_fee: category.offer_fee.toString(),
       popup_image_url: category.popup_image_url || '',
       qr_image_url: category.qr_image_url || '',
-      preference: category.preference || '',
       is_active: category.is_active
     });
     setIsDialogOpen(true);

@@ -6,7 +6,6 @@ export interface CategoryData {
   offer_fee: string;
   popup_image_url: string;
   qr_image_url: string;
-  preference: string;
   is_active: boolean;
 }
 

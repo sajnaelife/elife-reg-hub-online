@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Category, CategoryData } from './types';
 import ImageUpload from './ImageUpload';
@@ -30,13 +29,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   permissions
 }) => {
   if (!permissions.canWrite) return null;
-
-  const preferenceOptions = [
-    { value: 'farmelife', label: 'Farmelife' },
-    { value: 'foodelife', label: 'Foodelife' },
-    { value: 'organelife', label: 'Organelife' },
-    { value: 'entrelife', label: 'Entrelife' }
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -66,22 +58,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               placeholder="Add important tips and description for this category..."
               rows={3}
             />
-          </div>
-
-          <div>
-            <Label htmlFor="preference">Preference / മുൻഗണന</Label>
-            <Select value={formData.preference} onValueChange={(value) => setFormData(prev => ({ ...prev, preference: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
-              </SelectTrigger>
-              <SelectContent>
-                {preferenceOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
