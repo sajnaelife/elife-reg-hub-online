@@ -1,161 +1,130 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Category, CategoryData } from './types';
 
+const initialFormData: CategoryData = {
+  name: '',
+  description: '',
+  actual_fee: '',
+  offer_fee: '',
+  popup_image_url: '',
+  qr_image_url: '',
+  preference: '',
+  is_active: true
+};
+
 export const useCategoriesManagement = (permissions: any) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [formData, setFormData] = useState<CategoryData>({
-    name: '',
-    description: '',
-    actual_fee: '',
-    offer_fee: '',
-    popup_image_url: '',
-    qr_image_url: '',
-    is_active: true
-  });
+  const [formData, setFormData] = useState<CategoryData>(initialFormData);
 
-  // Fetch categories
   const { data: categories, isLoading, error } = useQuery({
-    queryKey: ['admin-categories'],
+    queryKey: ['categories'],
     queryFn: async () => {
-      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .order('name');
+        .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error fetching categories:', error);
-        throw error;
-      }
-      console.log('Fetched categories:', data);
+      if (error) throw error;
       return data as Category[];
     }
   });
 
-  // Real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('categories-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'categories'
-        },
-        () => {
-          console.log('Real-time update received for categories');
-          queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  // Create/Update category mutation
-  const saveCategoryMutation = useMutation({
-    mutationFn: async (categoryData: CategoryData) => {
-      console.log('Saving category:', categoryData, 'editing:', editingCategory?.id);
+  const createMutation = useMutation({
+    mutationFn: async (data: CategoryData) => {
+      const { error } = await supabase
+        .from('categories')
+        .insert({
+          name: data.name,
+          description: data.description,
+          actual_fee: parseFloat(data.actual_fee),
+          offer_fee: parseFloat(data.offer_fee),
+          popup_image_url: data.popup_image_url || null,
+          qr_image_url: data.qr_image_url || null,
+          preference: data.preference || null,
+          is_active: data.is_active
+        });
       
-      const dataToSave = {
-        name: categoryData.name,
-        description: categoryData.description || null,
-        actual_fee: parseFloat(categoryData.actual_fee),
-        offer_fee: parseFloat(categoryData.offer_fee),
-        popup_image_url: categoryData.popup_image_url || null,
-        qr_image_url: categoryData.qr_image_url || null,
-        is_active: categoryData.is_active
-      };
-
-      if (editingCategory) {
-        const { error } = await supabase
-          .from('categories')
-          .update({
-            ...dataToSave,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingCategory.id);
-        
-        if (error) {
-          console.error('Error updating category:', error);
-          throw error;
-        }
-        console.log('Category updated successfully');
-      } else {
-        const { error } = await supabase
-          .from('categories')
-          .insert([dataToSave]);
-        
-        if (error) {
-          console.error('Error creating category:', error);
-          throw error;
-        }
-        console.log('Category created successfully');
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast({ title: 'Category created successfully!' });
       setIsDialogOpen(false);
-      setEditingCategory(null);
-      resetForm();
-      toast({
-        title: editingCategory ? "Category Updated" : "Category Created",
-        description: `Category has been ${editingCategory ? 'updated' : 'created'} successfully.`,
-      });
+      setFormData(initialFormData);
     },
     onError: (error) => {
-      console.error('Save category failed:', error);
       toast({
-        title: "Operation Failed",
-        description: "Failed to save category. Please try again.",
-        variant: "destructive"
+        title: 'Error creating category',
+        description: error.message,
+        variant: 'destructive'
       });
     }
   });
 
-  // Delete category mutation
-  const deleteCategoryMutation = useMutation({
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: CategoryData }) => {
+      const { error } = await supabase
+        .from('categories')
+        .update({
+          name: data.name,
+          description: data.description,
+          actual_fee: parseFloat(data.actual_fee),
+          offer_fee: parseFloat(data.offer_fee),
+          popup_image_url: data.popup_image_url || null,
+          qr_image_url: data.qr_image_url || null,
+          preference: data.preference || null,
+          is_active: data.is_active
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast({ title: 'Category updated successfully!' });
+      setIsDialogOpen(false);
+      setEditingCategory(null);
+      setFormData(initialFormData);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error updating category',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting category:', id);
       const { error } = await supabase
         .from('categories')
         .delete()
         .eq('id', id);
       
-      if (error) {
-        console.error('Error deleting category:', error);
-        throw error;
-      }
-      console.log('Category deleted successfully');
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      toast({
-        title: "Category Deleted",
-        description: "Category has been deleted successfully.",
-      });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast({ title: 'Category deleted successfully!' });
     },
     onError: (error) => {
-      console.error('Delete category failed:', error);
       toast({
-        title: "Delete Failed",
-        description: "Failed to delete category. It may be in use by registrations.",
-        variant: "destructive"
+        title: 'Error deleting category',
+        description: error.message,
+        variant: 'destructive'
       });
     }
   });
 
   const handleEdit = (category: Category) => {
-    console.log('Editing category:', category);
     setEditingCategory(category);
     setFormData({
       name: category.name,
@@ -164,63 +133,31 @@ export const useCategoriesManagement = (permissions: any) => {
       offer_fee: category.offer_fee.toString(),
       popup_image_url: category.popup_image_url || '',
       qr_image_url: category.qr_image_url || '',
+      preference: category.preference || '',
       is_active: category.is_active
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
-    if (permissions.canDelete) {
-      if (window.confirm('Are you sure you want to delete this category?')) {
-        deleteCategoryMutation.mutate(id);
-      }
-    } else {
-      toast({
-        title: "Permission Denied",
-        description: "You don't have permission to delete categories.",
-        variant: "destructive"
-      });
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      deleteMutation.mutate(id);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Handle submit called:', formData, 'canWrite:', permissions.canWrite);
-    if (permissions.canWrite) {
-      if (!formData.name || !formData.actual_fee || !formData.offer_fee) {
-        toast({
-          title: "Validation Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-      saveCategoryMutation.mutate(formData);
+    
+    if (editingCategory) {
+      updateMutation.mutate({ id: editingCategory.id, data: formData });
     } else {
-      toast({
-        title: "Permission Denied",
-        description: "You don't have permission to modify categories.",
-        variant: "destructive"
-      });
+      createMutation.mutate(formData);
     }
   };
 
-  const resetForm = () => {
-    setEditingCategory(null);
-    setFormData({
-      name: '',
-      description: '',
-      actual_fee: '',
-      offer_fee: '',
-      popup_image_url: '',
-      qr_image_url: '',
-      is_active: true
-    });
-  };
-
   const openAddDialog = () => {
-    resetForm();
+    setEditingCategory(null);
+    setFormData(initialFormData);
     setIsDialogOpen(true);
   };
 
