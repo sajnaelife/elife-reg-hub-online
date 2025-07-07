@@ -88,6 +88,7 @@ export type Database = {
           name: string
           offer_fee: number
           popup_image_url: string | null
+          preference: string | null
           qr_image_url: string | null
           updated_at: string | null
         }
@@ -101,6 +102,7 @@ export type Database = {
           name: string
           offer_fee?: number
           popup_image_url?: string | null
+          preference?: string | null
           qr_image_url?: string | null
           updated_at?: string | null
         }
@@ -114,6 +116,7 @@ export type Database = {
           name?: string
           offer_fee?: number
           popup_image_url?: string | null
+          preference?: string | null
           qr_image_url?: string | null
           updated_at?: string | null
         }

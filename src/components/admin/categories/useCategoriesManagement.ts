@@ -28,7 +28,7 @@ export const useCategoriesManagement = (permissions: any) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categories')
-        .select('*')
+        .select('id, name, description, actual_fee, offer_fee, popup_image_url, qr_image_url, preference, is_active, created_at, updated_at')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
