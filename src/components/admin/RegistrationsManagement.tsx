@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,15 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Download, CheckCircle, XCircle, Edit, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
-
-// Extend jsPDF type to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
 
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 interface Registration {
@@ -320,10 +314,22 @@ const RegistrationsManagement = ({
   };
 
   const exportToPDF = () => {
-    if (!registrations) return;
+    if (!registrations || registrations.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No registrations available to export.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
-      const doc = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+      console.log('Starting PDF export...');
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
       
       // Add title
       doc.setFontSize(16);
@@ -335,18 +341,20 @@ const RegistrationsManagement = ({
       
       // Prepare table data
       const tableData = registrations.map(reg => [
-        reg.customer_id,
-        reg.name,
-        reg.mobile_number,
+        reg.customer_id || '',
+        reg.name || '',
+        reg.mobile_number || '',
         reg.categories?.name || '',
         reg.preference || '-',
-        reg.status,
+        reg.status || '',
         `₹${reg.fee_paid || 0}`,
         new Date(reg.created_at).toLocaleDateString('en-IN')
       ]);
       
+      console.log('Table data prepared:', tableData.length, 'rows');
+      
       // Add table using autoTable
-      doc.autoTable({
+      autoTable(doc, {
         head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
         body: tableData,
         startY: 35,
@@ -372,7 +380,9 @@ const RegistrationsManagement = ({
       });
       
       // Save the PDF
-      doc.save(`registrations_${new Date().toISOString().split('T')[0]}.pdf`);
+      const fileName = `registrations_${new Date().toISOString().split('T')[0]}.pdf`;
+      console.log('Saving PDF as:', fileName);
+      doc.save(fileName);
       
       toast({
         title: "Export Successful",
@@ -382,7 +392,7 @@ const RegistrationsManagement = ({
       console.error('PDF export error:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to export registrations to PDF. Please try again.",
+        description: `Failed to export registrations to PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     }
