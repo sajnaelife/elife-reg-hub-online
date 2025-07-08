@@ -12,6 +12,14 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
+
+// Extend jsPDF type to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
+
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 interface Registration {
   id: string;
@@ -314,61 +322,70 @@ const RegistrationsManagement = ({
   const exportToPDF = () => {
     if (!registrations) return;
     
-    const doc = new jsPDF('l', 'mm', 'a4'); // landscape orientation
-    
-    // Add title
-    doc.setFontSize(16);
-    doc.text('Registrations Report', 14, 15);
-    
-    // Add export date
-    doc.setFontSize(10);
-    doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
-    
-    // Prepare table data
-    const tableData = registrations.map(reg => [
-      reg.customer_id,
-      reg.name,
-      reg.mobile_number,
-      reg.categories?.name || '',
-      reg.preference || '-',
-      reg.status,
-      `₹${reg.fee_paid}`,
-      new Date(reg.created_at).toLocaleDateString('en-IN')
-    ]);
-    
-    // Add table
-    (doc as any).autoTable({
-      head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
-      body: tableData,
-      startY: 35,
-      styles: {
-        fontSize: 8,
-        cellPadding: 2,
-      },
-      headStyles: {
-        fillColor: [66, 139, 202],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        0: { cellWidth: 25 }, // Customer ID
-        1: { cellWidth: 35 }, // Name
-        2: { cellWidth: 25 }, // Mobile
-        3: { cellWidth: 30 }, // Category
-        4: { cellWidth: 20 }, // Preference
-        5: { cellWidth: 20 }, // Status
-        6: { cellWidth: 20 }, // Fee
-        7: { cellWidth: 25 }  // Date
-      }
-    });
-    
-    // Save the PDF
-    doc.save(`registrations_${new Date().toISOString().split('T')[0]}.pdf`);
-    
-    toast({
-      title: "Export Successful",
-      description: "Registrations have been exported to PDF."
-    });
+    try {
+      const doc = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Registrations Report', 14, 15);
+      
+      // Add export date
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
+      
+      // Prepare table data
+      const tableData = registrations.map(reg => [
+        reg.customer_id,
+        reg.name,
+        reg.mobile_number,
+        reg.categories?.name || '',
+        reg.preference || '-',
+        reg.status,
+        `₹${reg.fee_paid || 0}`,
+        new Date(reg.created_at).toLocaleDateString('en-IN')
+      ]);
+      
+      // Add table using autoTable
+      doc.autoTable({
+        head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
+        body: tableData,
+        startY: 35,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+        },
+        headStyles: {
+          fillColor: [66, 139, 202],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          0: { cellWidth: 25 }, // Customer ID
+          1: { cellWidth: 35 }, // Name
+          2: { cellWidth: 25 }, // Mobile
+          3: { cellWidth: 30 }, // Category
+          4: { cellWidth: 20 }, // Preference
+          5: { cellWidth: 20 }, // Status
+          6: { cellWidth: 20 }, // Fee
+          7: { cellWidth: 25 }  // Date
+        }
+      });
+      
+      // Save the PDF
+      doc.save(`registrations_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: "Export Successful",
+        description: "Registrations have been exported to PDF."
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export registrations to PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusBadge = (status: ApplicationStatus) => {
