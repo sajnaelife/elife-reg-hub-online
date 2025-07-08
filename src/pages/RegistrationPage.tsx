@@ -233,8 +233,10 @@ const RegistrationPage = () => {
     { value: 'farmelife', label: 'Farmelife' },
     { value: 'foodelife', label: 'Foodelife' },
     { value: 'organelife', label: 'Organelife' },
-    { value: 'entrelife', label: 'Entrelife' }
+    { value: 'entrelife', label: 'Entrelife' },
+    { value: 'no', label: 'No' }
   ];
+  const isJobCardCategory = category?.name.toLowerCase().includes('job card');
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -292,19 +294,19 @@ const RegistrationPage = () => {
                     <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional) / ഏജന്റ് അല്ലെങ്കിൽ പിആർഒ പേര് (ഓപ്ഷണൽ)" />
                   </div>
 
-                  <div>
-                    <Label htmlFor="preference">Preference / മുൻഗണന</Label>
-                    <Select value={formData.preference} onValueChange={value => handleInputChange('preference', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {preferenceOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {isJobCardCategory && <div>
+                      <Label htmlFor="preference">Preference / മുൻഗണന</Label>
+                      <Select value={formData.preference} onValueChange={value => handleInputChange('preference', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {preferenceOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>}
 
                   <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
                     {isSubmitting ? <>

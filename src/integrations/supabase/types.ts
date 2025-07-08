@@ -158,6 +158,7 @@ export type Database = {
           mobile_number: string
           name: string
           panchayath_id: string | null
+          preference: string | null
           status: Database["public"]["Enums"]["application_status"] | null
           updated_at: string | null
           ward: string
@@ -173,6 +174,7 @@ export type Database = {
           mobile_number: string
           name: string
           panchayath_id?: string | null
+          preference?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
           updated_at?: string | null
           ward: string
@@ -188,6 +190,7 @@ export type Database = {
           mobile_number?: string
           name?: string
           panchayath_id?: string | null
+          preference?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
           updated_at?: string | null
           ward?: string
