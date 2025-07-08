@@ -25,6 +25,7 @@ interface Registration {
   updated_at: string;
   category_id: string;
   panchayath_id: string | null;
+  preference: string | null;
   categories: {
     name: string;
   } | null;
@@ -292,6 +293,7 @@ const RegistrationsManagement = ({
       'District': reg.panchayaths?.district,
       'Ward': reg.ward,
       'Agent/PRO': reg.agent_pro || '',
+      'Preference': reg.preference || '',
       'Status': reg.status,
       'Fee Paid': reg.fee_paid,
       'Applied Date': new Date(reg.created_at).toLocaleDateString('en-IN'),
@@ -342,7 +344,7 @@ const RegistrationsManagement = ({
         </div>
       </CardHeader>
       <CardContent>
-        {/* Filters */}
+        
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
@@ -398,6 +400,7 @@ const RegistrationsManagement = ({
                 <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Mobile</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Category</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Preference</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Date</th>
@@ -416,6 +419,9 @@ const RegistrationsManagement = ({
                   <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
                   <td className="border border-gray-200 px-4 py-2 bg-slate-50">
                     {registration.categories?.name}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2">
+                    {registration.preference || '-'}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     {getStatusBadge(registration.status)}
