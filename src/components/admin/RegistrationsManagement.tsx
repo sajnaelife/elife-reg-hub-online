@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Download, CheckCircle, XCircle, Edit } from 'lucide-react';
+import { Search, Download, CheckCircle, XCircle, Edit, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 interface Registration {
@@ -308,6 +310,67 @@ const RegistrationsManagement = ({
       description: "Registrations have been exported to Excel."
     });
   };
+
+  const exportToPDF = () => {
+    if (!registrations) return;
+    
+    const doc = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Registrations Report', 14, 15);
+    
+    // Add export date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
+    
+    // Prepare table data
+    const tableData = registrations.map(reg => [
+      reg.customer_id,
+      reg.name,
+      reg.mobile_number,
+      reg.categories?.name || '',
+      reg.preference || '-',
+      reg.status,
+      `₹${reg.fee_paid}`,
+      new Date(reg.created_at).toLocaleDateString('en-IN')
+    ]);
+    
+    // Add table
+    (doc as any).autoTable({
+      head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
+      body: tableData,
+      startY: 35,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [66, 139, 202],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { cellWidth: 25 }, // Customer ID
+        1: { cellWidth: 35 }, // Name
+        2: { cellWidth: 25 }, // Mobile
+        3: { cellWidth: 30 }, // Category
+        4: { cellWidth: 20 }, // Preference
+        5: { cellWidth: 20 }, // Status
+        6: { cellWidth: 20 }, // Fee
+        7: { cellWidth: 25 }  // Date
+      }
+    });
+    
+    // Save the PDF
+    doc.save(`registrations_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "Export Successful",
+      description: "Registrations have been exported to PDF."
+    });
+  };
+
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case 'approved':
@@ -318,6 +381,7 @@ const RegistrationsManagement = ({
         return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
     }
   };
+
   if (error) {
     return <Card>
         <CardContent className="p-6">
@@ -327,6 +391,7 @@ const RegistrationsManagement = ({
         </CardContent>
       </Card>;
   }
+
   return <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -336,6 +401,10 @@ const RegistrationsManagement = ({
                 <CheckCircle className="h-4 w-4" />
                 Bulk Approve ({selectedRows.length})
               </Button>}
+            <Button onClick={exportToPDF} className="flex items-center gap-2 bg-red-600 hover:bg-red-700">
+              <FileText className="h-4 w-4" />
+              Export PDF
+            </Button>
             <Button onClick={exportToExcel} className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export Excel
