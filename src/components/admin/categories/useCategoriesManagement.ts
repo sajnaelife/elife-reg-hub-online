@@ -8,6 +8,7 @@ import { Category, CategoryData } from './types';
 const initialFormData: CategoryData = {
   name: '',
   description: '',
+  warning_message: '',
   actual_fee: '',
   offer_fee: '',
   popup_image_url: '',
@@ -27,7 +28,7 @@ export const useCategoriesManagement = (permissions: any) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name, description, actual_fee, offer_fee, popup_image_url, qr_image_url, preference, is_active, created_at, updated_at')
+        .select('id, name, description, warning_message, actual_fee, offer_fee, popup_image_url, qr_image_url, preference, is_active, created_at, updated_at')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -42,6 +43,7 @@ export const useCategoriesManagement = (permissions: any) => {
         .insert({
           name: data.name,
           description: data.description,
+          warning_message: data.warning_message || null,
           actual_fee: parseFloat(data.actual_fee),
           offer_fee: parseFloat(data.offer_fee),
           popup_image_url: data.popup_image_url || null,
@@ -73,6 +75,7 @@ export const useCategoriesManagement = (permissions: any) => {
         .update({
           name: data.name,
           description: data.description,
+          warning_message: data.warning_message || null,
           actual_fee: parseFloat(data.actual_fee),
           offer_fee: parseFloat(data.offer_fee),
           popup_image_url: data.popup_image_url || null,
@@ -126,6 +129,7 @@ export const useCategoriesManagement = (permissions: any) => {
     setFormData({
       name: category.name,
       description: category.description || '',
+      warning_message: category.warning_message || '',
       actual_fee: category.actual_fee.toString(),
       offer_fee: category.offer_fee.toString(),
       popup_image_url: category.popup_image_url || '',

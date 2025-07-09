@@ -2,6 +2,7 @@
 export interface CategoryData {
   name: string;
   description: string;
+  warning_message: string;
   actual_fee: string;
   offer_fee: string;
   popup_image_url: string;
@@ -13,6 +14,7 @@ export interface Category {
   id: string;
   name: string;
   description: string | null;
+  warning_message: string | null;
   actual_fee: number;
   offer_fee: number;
   popup_image_url: string | null;

@@ -59,6 +59,17 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               rows={3}
             />
           </div>
+
+          <div>
+            <Label htmlFor="warning_message">Warning Message</Label>
+            <Textarea
+              id="warning_message"
+              value={formData.warning_message}
+              onChange={(e) => setFormData(prev => ({ ...prev, warning_message: e.target.value }))}
+              placeholder="Add a warning message that will appear when users try to register for this category..."
+              rows={2}
+            />
+          </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
