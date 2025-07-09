@@ -12,7 +12,9 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
+
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
+
 interface Registration {
   id: string;
   customer_id: string;
@@ -36,22 +38,23 @@ interface Registration {
     district: string;
   } | null;
 }
+
 interface Category {
   id: string;
   name: string;
 }
+
 interface UpdateStatusParams {
   id: string;
   status: ApplicationStatus;
 }
+
 const RegistrationsManagement = ({
   permissions
 }: {
   permissions: any;
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -60,6 +63,7 @@ const RegistrationsManagement = ({
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
+
   console.log('RegistrationsManagement permissions:', permissions);
 
   // Fetch registrations with real-time updates
@@ -78,6 +82,7 @@ const RegistrationsManagement = ({
         `).order('created_at', {
         ascending: false
       });
+
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,mobile_number.ilike.%${searchTerm}%,customer_id.ilike.%${searchTerm}%`);
       }
@@ -90,10 +95,8 @@ const RegistrationsManagement = ({
       if (panchayathFilter !== 'all') {
         query = query.eq('panchayath_id', panchayathFilter);
       }
-      const {
-        data,
-        error
-      } = await query;
+
+      const { data, error } = await query;
       if (error) {
         console.error('Error fetching registrations:', error);
         throw error;
@@ -104,30 +107,20 @@ const RegistrationsManagement = ({
   });
 
   // Fetch categories for filter
-  const {
-    data: categories
-  } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('categories').select('*');
+      const { data, error } = await supabase.from('categories').select('*');
       if (error) throw error;
       return data as Category[];
     }
   });
 
   // Fetch panchayaths for filter
-  const {
-    data: panchayaths
-  } = useQuery({
+  const { data: panchayaths } = useQuery({
     queryKey: ['panchayaths'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('panchayaths').select('*').order('name');
+      const { data, error } = await supabase.from('panchayaths').select('*').order('name');
       if (error) throw error;
       return data;
     }
@@ -145,6 +138,7 @@ const RegistrationsManagement = ({
         queryKey: ['admin-registrations']
       });
     }).subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -152,14 +146,9 @@ const RegistrationsManagement = ({
 
   // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({
-      id,
-      status
-    }: UpdateStatusParams) => {
+    mutationFn: async ({ id, status }: UpdateStatusParams) => {
       console.log('Updating status for registration:', id, 'to:', status);
-      const {
-        error
-      } = await supabase.from('registrations').update({
+      const { error } = await supabase.from('registrations').update({
         status,
         updated_at: new Date().toISOString()
       }).eq('id', id);
@@ -192,9 +181,7 @@ const RegistrationsManagement = ({
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       console.log('Deleting registration:', id);
-      const {
-        error
-      } = await supabase.from('registrations').delete().eq('id', id);
+      const { error } = await supabase.from('registrations').delete().eq('id', id);
       if (error) {
         console.error('Error deleting registration:', error);
         throw error;
@@ -219,13 +206,11 @@ const RegistrationsManagement = ({
       });
     }
   });
+
   const handleStatusUpdate = (id: string, status: ApplicationStatus) => {
     console.log('Handle status update called:', id, status, 'canWrite:', permissions.canWrite);
     if (permissions.canWrite) {
-      updateStatusMutation.mutate({
-        id,
-        status
-      });
+      updateStatusMutation.mutate({ id, status });
     } else {
       toast({
         title: "Permission Denied",
@@ -234,6 +219,7 @@ const RegistrationsManagement = ({
       });
     }
   };
+
   const handleDelete = (id: string) => {
     console.log('Handle delete called:', id, 'canDelete:', permissions.canDelete);
     if (permissions.canDelete) {
@@ -248,15 +234,18 @@ const RegistrationsManagement = ({
       });
     }
   };
+
   const handleEdit = (registration: Registration) => {
     setEditingRegistration(registration);
     setIsEditDialogOpen(true);
   };
+
   const handleEditUpdate = () => {
     queryClient.invalidateQueries({
       queryKey: ['admin-registrations']
     });
   };
+
   const handleBulkApprove = () => {
     if (selectedRows.length === 0) {
       toast({
@@ -266,17 +255,19 @@ const RegistrationsManagement = ({
       });
       return;
     }
+
     selectedRows.forEach(id => {
-      updateStatusMutation.mutate({
-        id,
-        status: 'approved'
-      });
+      updateStatusMutation.mutate({ id, status: 'approved' });
     });
     setSelectedRows([]);
   };
+
   const toggleRowSelection = (id: string) => {
-    setSelectedRows(prev => prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]);
+    setSelectedRows(prev =>
+      prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
+    );
   };
+
   const toggleAllSelection = () => {
     if (selectedRows.length === registrations?.length) {
       setSelectedRows([]);
@@ -284,6 +275,7 @@ const RegistrationsManagement = ({
       setSelectedRows(registrations?.map(r => r.id) || []);
     }
   };
+
   const exportToExcel = () => {
     if (!registrations) return;
     const exportData = registrations.map(reg => ({
@@ -416,25 +408,64 @@ const RegistrationsManagement = ({
         return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
     }
   };
+
+  // Generate category colors based on category name
+  const getCategoryRowColor = (categoryName: string | undefined) => {
+    if (!categoryName) return '';
+    
+    const colors = [
+      'bg-blue-50 hover:bg-blue-100',
+      'bg-green-50 hover:bg-green-100', 
+      'bg-yellow-50 hover:bg-yellow-100',
+      'bg-purple-50 hover:bg-purple-100',
+      'bg-pink-50 hover:bg-pink-100',
+      'bg-indigo-50 hover:bg-indigo-100',
+      'bg-orange-50 hover:bg-orange-100',
+      'bg-teal-50 hover:bg-teal-100',
+      'bg-red-50 hover:bg-red-100',
+      'bg-cyan-50 hover:bg-cyan-100'
+    ];
+    
+    // Create a simple hash from category name to get consistent colors
+    let hash = 0;
+    for (let i = 0; i < categoryName.length; i++) {
+      hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+
   if (error) {
-    return <Card>
+    return (
+      <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-600">
             Error loading registrations: {error.message}
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <Card>
+
+  return (
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Registrations Management</CardTitle>
           <div className="flex gap-2">
-            {selectedRows.length > 0 && <Button onClick={handleBulkApprove} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+            {selectedRows.length > 0 && (
+              <Button
+                onClick={handleBulkApprove}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              >
                 <CheckCircle className="h-4 w-4" />
                 Bulk Approve ({selectedRows.length})
-              </Button>}
-            <Button onClick={exportToPDF} className="flex items-center gap-2 bg-red-600 hover:bg-red-700">
+              </Button>
+            )}
+            <Button
+              onClick={exportToPDF}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
+            >
               <FileText className="h-4 w-4" />
               Export PDF
             </Button>
@@ -451,7 +482,12 @@ const RegistrationsManagement = ({
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search by name, mobile, or customer ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Search by name, mobile, or customer ID..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -471,9 +507,11 @@ const RegistrationsManagement = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map(category => <SelectItem key={category.id} value={category.id}>
+              {categories?.map(category => (
+                <SelectItem key={category.id} value={category.id}>
                   {category.name}
-                </SelectItem>)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={panchayathFilter} onValueChange={setPanchayathFilter}>
@@ -482,9 +520,11 @@ const RegistrationsManagement = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Panchayaths</SelectItem>
-              {panchayaths?.map(panchayath => <SelectItem key={panchayath.id} value={panchayath.id}>
+              {panchayaths?.map(panchayath => (
+                <SelectItem key={panchayath.id} value={panchayath.id}>
                   {panchayath.name}
-                </SelectItem>)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -495,13 +535,18 @@ const RegistrationsManagement = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="border border-gray-200 px-4 py-2 text-left">
-                  <input type="checkbox" checked={selectedRows.length === registrations?.length && registrations?.length > 0} onChange={toggleAllSelection} className="mr-2" />
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.length === registrations?.length && registrations?.length > 0}
+                    onChange={toggleAllSelection}
+                    className="mr-2"
+                  />
                   Select
                 </th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Customer ID</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Mobile</th>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-lime-500">Category</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Category</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Preference</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
@@ -510,22 +555,30 @@ const RegistrationsManagement = ({
               </tr>
             </thead>
             <tbody>
-              {registrations?.map(registration => <tr key={registration.id} className="hover:bg-gray-50">
+              {registrations?.map(registration => (
+                <tr 
+                  key={registration.id} 
+                  className={`${getCategoryRowColor(registration.categories?.name)} hover:bg-gray-50`}
+                >
                   <td className="border border-gray-200 px-4 py-2">
-                    <input type="checkbox" checked={selectedRows.includes(registration.id)} onChange={() => toggleRowSelection(registration.id)} />
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(registration.id)}
+                      onChange={() => toggleRowSelection(registration.id)}
+                    />
                   </td>
                   <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
                     {registration.customer_id}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">{registration.name}</td>
                   <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
-                  <td className="border border-gray-200 px-4 py-2 bg-lime-500">
+                  <td className="border border-gray-200 px-4 py-2 font-medium">
                     {registration.categories?.name}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     {registration.preference || '-'}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2 bg-slate-50">
+                  <td className="border border-gray-200 px-4 py-2">
                     {getStatusBadge(registration.status)}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">₹{registration.fee_paid}</td>
@@ -534,37 +587,71 @@ const RegistrationsManagement = ({
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     <div className="flex gap-2">
-                      {permissions.canWrite && <Button size="sm" variant="outline" onClick={() => handleEdit(registration)}>
+                      {permissions.canWrite && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(registration)}
+                        >
                           <Edit className="h-3 w-3" />
-                        </Button>}
-                      {permissions.canWrite && registration.status === 'pending' && <>
-                          <Button size="sm" onClick={() => handleStatusUpdate(registration.id, 'approved')} className="bg-green-600 hover:bg-green-700">
+                        </Button>
+                      )}
+                      {permissions.canWrite && registration.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => handleStatusUpdate(registration.id, 'approved')}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
                             <CheckCircle className="h-3 w-3" />
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(registration.id, 'rejected')}>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleStatusUpdate(registration.id, 'rejected')}
+                          >
                             <XCircle className="h-3 w-3" />
                           </Button>
-                        </>}
-                      {permissions.canDelete && <Button size="sm" variant="outline" onClick={() => handleDelete(registration.id)}>
+                        </>
+                      )}
+                      {permissions.canDelete && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(registration.id)}
+                        >
                           Delete
-                        </Button>}
+                        </Button>
+                      )}
                     </div>
                   </td>
-                </tr>)}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        {isLoading && <div className="text-center py-8">
+        {isLoading && (
+          <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>}
+          </div>
+        )}
 
-        {!isLoading && (!registrations || registrations.length === 0) && <div className="text-center py-8 text-gray-500">
+        {!isLoading && (!registrations || registrations.length === 0) && (
+          <div className="text-center py-8 text-gray-500">
             No registrations found matching your criteria.
-          </div>}
+          </div>
+        )}
 
-        <RegistrationEditDialog isOpen={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} registration={editingRegistration} onUpdate={handleEditUpdate} />
+        <RegistrationEditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          registration={editingRegistration}
+          onUpdate={handleEditUpdate}
+        />
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default RegistrationsManagement;
