@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,10 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, X, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -51,6 +51,8 @@ const RegistrationPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -71,7 +73,7 @@ const RegistrationPage = () => {
         .eq('id', categoryId)
         .single();
       if (error) throw error;
-      return data as Category;
+      return data;
     },
     enabled: !!categoryId
   });
@@ -87,6 +89,23 @@ const RegistrationPage = () => {
       return data as Panchayath[];
     }
   });
+
+  // Show warning dialog when category loads and has a warning message
+  useEffect(() => {
+    if (category && category.warning_message && !warningAcknowledged) {
+      setShowWarningDialog(true);
+    }
+  }, [category, warningAcknowledged]);
+
+  const handleWarningAccept = () => {
+    setShowWarningDialog(false);
+    setWarningAcknowledged(true);
+  };
+
+  const handleWarningCancel = () => {
+    setShowWarningDialog(false);
+    navigate('/categories');
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -179,6 +198,34 @@ const RegistrationPage = () => {
     );
   }
 
+  // Show warning dialog before showing the registration form
+  if (category.warning_message && !warningAcknowledged) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                Warning
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-left whitespace-pre-wrap">
+                {category.warning_message}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleWarningCancel}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700">
+                Continue Registration
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -232,9 +279,6 @@ const RegistrationPage = () => {
                 )}
               </div>
 
-              {/* Popup Image Dialog */}
-              {category.popup_image_url}
-
               <p className="text-gray-600 mb-6">Please save your Customer ID for future reference. You can check your application status using your mobile number and Customer ID.</p>
               
               <Button onClick={() => navigate('/status')} className="w-full max-w-md mx-auto bg-gray-800 hover:bg-gray-900">
@@ -256,7 +300,6 @@ const RegistrationPage = () => {
   ];
 
   const isJobCardCategory = category?.name.toLowerCase().includes('job card');
-  const isPennyekartCategory = category?.name.toLowerCase().includes('pennyekart free registration');
 
   const RegistrationForm = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -350,50 +393,16 @@ const RegistrationPage = () => {
         </div>
       )}
 
-      {isPennyekartCategory && category.warning_message ? (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                'Submit Registration'
-              )}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                Warning
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-left whitespace-pre-wrap">
-                {category.warning_message}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
-                Continue Registration
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      ) : (
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Processing...
-            </>
-          ) : (
-            'Submit Registration'
-          )}
-        </Button>
-      )}
+      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Processing...
+          </>
+        ) : (
+          'Submit Registration'
+        )}
+      </Button>
     </form>
   );
 

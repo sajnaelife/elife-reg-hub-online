@@ -91,6 +91,7 @@ export type Database = {
           preference: string | null
           qr_image_url: string | null
           updated_at: string | null
+          warning_message: string | null
         }
         Insert: {
           actual_fee?: number
@@ -105,6 +106,7 @@ export type Database = {
           preference?: string | null
           qr_image_url?: string | null
           updated_at?: string | null
+          warning_message?: string | null
         }
         Update: {
           actual_fee?: number
@@ -119,6 +121,7 @@ export type Database = {
           preference?: string | null
           qr_image_url?: string | null
           updated_at?: string | null
+          warning_message?: string | null
         }
         Relationships: []
       }
