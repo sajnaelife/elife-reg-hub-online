@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Phone, Mail, MapPin, Sparkles, Star, Crown } from 'lucide-react';
-
 const CategoriesPage = () => {
   const {
     data: categories,
@@ -32,7 +30,6 @@ const CategoriesPage = () => {
       }) || [];
     }
   });
-
   const getCardGradient = (index: number, isHighlighted?: boolean) => {
     if (isHighlighted) {
       return 'from-yellow-400 via-yellow-500 to-yellow-600';
@@ -40,7 +37,6 @@ const CategoriesPage = () => {
     const gradients = ['from-blue-500 to-purple-600', 'from-green-500 to-teal-600', 'from-pink-500 to-rose-600', 'from-orange-500 to-red-600', 'from-indigo-500 to-blue-600', 'from-purple-500 to-pink-600', 'from-teal-500 to-green-600'];
     return gradients[index % gradients.length];
   };
-
   const getCategoryLogo = (categoryName: string, isHighlighted?: boolean) => {
     const logoMap: {
       [key: string]: string;
@@ -60,11 +56,9 @@ const CategoriesPage = () => {
     // Fallback to crown icon for categories without specific logos
     return <Crown className="h-6 w-6 text-white" />;
   };
-
   const isJobCard = (categoryName: string) => {
     return categoryName.toLowerCase().includes('job card');
   };
-
   if (isLoading) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
@@ -73,7 +67,6 @@ const CategoriesPage = () => {
         </div>
       </div>;
   }
-
   if (error) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
@@ -84,9 +77,7 @@ const CategoriesPage = () => {
         </div>
       </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -96,53 +87,37 @@ const CategoriesPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories?.map((category, index) => (
-            <Card 
-              key={category.id} 
-              className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-xl ${
-                category.is_highlighted ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''
-              } ${isJobCard(category.name) ? 'ring-4 ring-yellow-400 ring-opacity-60' : ''}`}
-            >
+          {categories?.map((category, index) => <Card key={category.id} className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-xl ${category.is_highlighted ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''} ${isJobCard(category.name) ? 'ring-4 ring-yellow-400 ring-opacity-60' : ''}`}>
               {/* Golden Sparkles for Job Card */}
-              {isJobCard(category.name) && (
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {isJobCard(category.name) && <div className="absolute inset-0 pointer-events-none overflow-hidden">
                   <span className="absolute top-4 left-4 text-yellow-400 text-lg animate-pulse">✨</span>
                   <span className="absolute top-8 right-6 text-yellow-500 text-sm animate-bounce">⭐</span>
-                  <span className="absolute bottom-16 left-8 text-amber-400 text-base animate-pulse" style={{ animationDelay: '1s' }}>✨</span>
-                  <span className="absolute bottom-8 right-4 text-yellow-400 text-xs animate-bounce" style={{ animationDelay: '0.5s' }}>💫</span>
-                </div>
-              )}
+                  <span className="absolute bottom-16 left-8 text-amber-400 text-base animate-pulse" style={{
+              animationDelay: '1s'
+            }}>✨</span>
+                  <span className="absolute bottom-8 right-4 text-yellow-400 text-xs animate-bounce" style={{
+              animationDelay: '0.5s'
+            }}>💫</span>
+                </div>}
 
               {/* Gradient Header */}
-              <div className={`h-20 bg-gradient-to-r ${
-                isJobCard(category.name) ? 'from-yellow-400 via-amber-500 to-yellow-600' :
-                getCardGradient(index, category.is_highlighted)
-              } relative ${category.is_highlighted ? 'animate-pulse' : ''} ${isJobCard(category.name) ? 'animate-pulse' : ''}`}>
+              <div className={`h-20 bg-gradient-to-r ${isJobCard(category.name) ? 'from-yellow-400 via-amber-500 to-yellow-600' : getCardGradient(index, category.is_highlighted)} relative ${category.is_highlighted ? 'animate-pulse' : ''} ${isJobCard(category.name) ? 'animate-pulse' : ''}`}>
                 <div className="absolute top-4 left-4 flex items-center space-x-2">
                   {getCategoryLogo(category.name, category.is_highlighted)}
-                  {category.is_highlighted && (
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm animate-bounce">
+                  {category.is_highlighted && <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm animate-bounce">
                       Featured
-                    </Badge>
-                  )}
-                  {isJobCard(category.name) && (
-                    <Badge className="bg-gradient-to-r from-yellow-300 to-amber-300 text-yellow-900 border-yellow-400 font-bold animate-pulse">
+                    </Badge>}
+                  {isJobCard(category.name) && <Badge className="bg-gradient-to-r from-yellow-300 to-amber-300 text-yellow-900 border-yellow-400 font-bold animate-pulse">
                       SPECIAL ⭐
-                    </Badge>
-                  )}
-                  {category.offer_fee === 0 && (
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    </Badge>}
+                  {category.offer_fee === 0 && <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
                       Free
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
               </div>
               
               <CardHeader className="pb-4 pt-6">
-                <CardTitle className={`text-xl font-bold ${
-                  category.is_highlighted ? 'text-yellow-600' : 
-                  isJobCard(category.name) ? 'text-amber-600' : 'text-gray-900'
-                }`}>
+                <CardTitle className={`text-xl font-bold ${category.is_highlighted ? 'text-yellow-600' : isJobCard(category.name) ? 'text-amber-600' : 'text-gray-900'}`}>
                   {category.name}
                 </CardTitle>
               </CardHeader>
@@ -167,9 +142,7 @@ const CategoriesPage = () => {
                   
                   <div className="text-center flex-1">
                     <p className="text-sm text-gray-500 mb-1">Offer Price</p>
-                    <p className={`text-3xl font-bold bg-gradient-to-r ${
-                      isJobCard(category.name) ? 'from-yellow-500 to-amber-600' : getCardGradient(index, category.is_highlighted)
-                    } bg-clip-text text-transparent`}>
+                    <p className={`text-3xl font-bold bg-gradient-to-r ${isJobCard(category.name) ? 'from-yellow-500 to-amber-600' : getCardGradient(index, category.is_highlighted)} bg-clip-text text-transparent`}>
                       ₹{category.offer_fee}
                     </p>
                   </div>
@@ -191,25 +164,17 @@ const CategoriesPage = () => {
                 </div>
 
                 <Link to={`/register/${category.id}`} className="block">
-                  <Button className={`w-full bg-gradient-to-r ${
-                    isJobCard(category.name) ? 'from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 shadow-lg shadow-yellow-200' : 
-                    getCardGradient(index, category.is_highlighted)
-                  } hover:opacity-90 text-white py-3 text-lg font-semibold border-0 shadow-lg ${
-                    category.is_highlighted ? 'animate-pulse' : ''
-                  } ${isJobCard(category.name) ? 'animate-pulse' : ''}`}>
+                  <Button className={`w-full bg-gradient-to-r ${isJobCard(category.name) ? 'from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 shadow-lg shadow-yellow-200' : getCardGradient(index, category.is_highlighted)} hover:opacity-90 text-white py-3 text-lg font-semibold border-0 shadow-lg ${category.is_highlighted ? 'animate-pulse' : ''} ${isJobCard(category.name) ? 'animate-pulse' : ''}`}>
                     {isJobCard(category.name) ? '⭐ Register Now ⭐' : 'Register Now'}
                   </Button>
                 </Link>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
-        {(!categories || categories.length === 0) && (
-          <div className="text-center py-12">
+        {(!categories || categories.length === 0) && <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No categories available at the moment.</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Contact Us Section */}
@@ -226,28 +191,26 @@ const CategoriesPage = () => {
             <div className="text-center">
               <Phone className="h-12 w-12 mx-auto mb-4 text-purple-200" />
               <h3 className="text-xl font-semibold mb-2">Phone Support</h3>
-              <p className="text-purple-100">+91 9876543210</p>
+              <p className="text-purple-100">+91 7025715877</p>
               <p className="text-purple-100">Mon-Fri, 9AM-6PM</p>
             </div>
             
             <div className="text-center">
               <Mail className="h-12 w-12 mx-auto mb-4 text-purple-200" />
               <h3 className="text-xl font-semibold mb-2">Email Support</h3>
-              <p className="text-purple-100">support@esep.gov.in</p>
+              <p className="text-purple-100">teamelifesociety@gmail.com</p>
               <p className="text-purple-100">We'll respond within 24 hours</p>
             </div>
             
             <div className="text-center">
               <MapPin className="h-12 w-12 mx-auto mb-4 text-purple-200" />
               <h3 className="text-xl font-semibold mb-2">Office Address</h3>
-              <p className="text-purple-100">ESEP Office, Government Building</p>
-              <p className="text-purple-100">Kerala, India - 695001</p>
+              <p className="text-purple-100">ESEP Office, forza mall tirur</p>
+              <p className="text-purple-100">Kerala, India - 676101</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CategoriesPage;
