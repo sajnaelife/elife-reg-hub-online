@@ -64,7 +64,7 @@ const StatusCheckPage = () => {
       case 'rejected':
         return <Badge className="bg-red-100 text-red-800 border-red-200">Rejected</Badge>;
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
+        return <Badge className="text-yellow-800 border-yellow-200 bg-amber-400 rounded-xl">Pending</Badge>;
     }
   };
   return <div className="min-h-screen bg-gray-50">
