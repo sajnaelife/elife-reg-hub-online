@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,49 +8,45 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Search, CheckCircle, Clock, XCircle } from 'lucide-react';
-
 const StatusCheckPage = () => {
   const [searchData, setSearchData] = useState({
     mobile_number: ''
   });
   const [shouldSearch, setShouldSearch] = useState(false);
-
-  const { data: registration, isLoading, error } = useQuery({
+  const {
+    data: registration,
+    isLoading,
+    error
+  } = useQuery({
     queryKey: ['registration-status', searchData.mobile_number],
     queryFn: async () => {
       if (!searchData.mobile_number) {
         return null;
       }
-
-      const { data, error } = await supabase
-        .from('registrations')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('registrations').select(`
           *,
           categories (name, actual_fee, offer_fee),
           panchayaths (name, district)
-        `)
-        .eq('mobile_number', searchData.mobile_number)
-        .single();
-
+        `).eq('mobile_number', searchData.mobile_number).single();
       if (error) {
         if (error.code === 'PGRST116') {
           return null; // No matching record found
         }
         throw error;
       }
-      
       return data;
     },
     enabled: shouldSearch && !!searchData.mobile_number
   });
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchData.mobile_number) {
       setShouldSearch(true);
     }
   };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -62,7 +57,6 @@ const StatusCheckPage = () => {
         return <Clock className="h-6 w-6 text-yellow-600" />;
     }
   };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -73,9 +67,7 @@ const StatusCheckPage = () => {
         return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -97,14 +89,10 @@ const StatusCheckPage = () => {
             <form onSubmit={handleSearch} className="space-y-4">
               <div>
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input
-                  id="mobile"
-                  type="tel"
-                  value={searchData.mobile_number}
-                  onChange={(e) => setSearchData(prev => ({ ...prev, mobile_number: e.target.value }))}
-                  placeholder="Enter your mobile number"
-                  required
-                />
+                <Input id="mobile" type="tel" value={searchData.mobile_number} onChange={e => setSearchData(prev => ({
+                ...prev,
+                mobile_number: e.target.value
+              }))} placeholder="Enter your mobile number" required />
               </div>
               <Button type="submit" className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
                 Check Status
@@ -113,16 +101,12 @@ const StatusCheckPage = () => {
           </CardContent>
         </Card>
 
-        {shouldSearch && (
-          <Card>
+        {shouldSearch && <Card>
             <CardContent className="pt-6">
-              {isLoading ? (
-                <div className="text-center py-8">
+              {isLoading ? <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   <p className="mt-4 text-gray-600">Searching for your application...</p>
-                </div>
-              ) : registration ? (
-                <div className="space-y-6">
+                </div> : registration ? <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {getStatusIcon(registration.status)}
@@ -132,7 +116,7 @@ const StatusCheckPage = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
+                    <div className="space-y-4 bg-green-200">
                       <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
                       <div className="space-y-2">
                         <div>
@@ -154,25 +138,23 @@ const StatusCheckPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 bg-green-300">
                       <h3 className="text-lg font-semibold text-gray-900">Registration Details</h3>
                       <div className="space-y-2">
                         <div>
                           <span className="text-sm text-gray-500">Category:</span>
-                          <p className="font-medium">{registration.categories?.name}</p>
+                          <p className="text-zinc-950 text-xl font-bold text-center">{registration.categories?.name}</p>
                         </div>
                         <div>
                           <span className="text-sm text-gray-500">Fee Paid:</span>
                           <p className="font-medium">₹{registration.fee_paid}</p>
                         </div>
-                        {registration.panchayaths && (
-                          <div>
+                        {registration.panchayaths && <div>
                             <span className="text-sm text-gray-500">Panchayath:</span>
                             <p className="font-medium">
                               {registration.panchayaths.name}, {registration.panchayaths.district}
                             </p>
-                          </div>
-                        )}
+                          </div>}
                         <div>
                           <span className="text-sm text-gray-500">Ward:</span>
                           <p className="font-medium">{registration.ward}</p>
@@ -190,31 +172,22 @@ const StatusCheckPage = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-2">Status Information</h4>
                     <p className="text-gray-700">
-                      {registration.status === 'approved' && 
-                        "Congratulations! Your application has been approved and is now active."}
-                      {registration.status === 'rejected' && 
-                        "Unfortunately, your application has been rejected. Please contact support for more information."}
-                      {registration.status === 'pending' && 
-                        "Your application is currently under review. You will be notified once a decision is made."}
+                      {registration.status === 'approved' && "Congratulations! Your application has been approved and is now active."}
+                      {registration.status === 'rejected' && "Unfortunately, your application has been rejected. Please contact support for more information."}
+                      {registration.status === 'pending' && "Your application is currently under review. You will be notified once a decision is made."}
                     </p>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
+                </div> : <div className="text-center py-8">
                   <XCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Application Found</h3>
                   <p className="text-gray-600">
                     No registration found with the provided mobile number. 
                     Please check your mobile number and try again.
                   </p>
-                </div>
-              )}
+                </div>}
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default StatusCheckPage;
