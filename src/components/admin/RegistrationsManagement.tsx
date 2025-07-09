@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +12,6 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
-
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 interface Registration {
   id: string;
@@ -254,9 +252,10 @@ const RegistrationsManagement = ({
     setEditingRegistration(registration);
     setIsEditDialogOpen(true);
   };
-
   const handleEditUpdate = () => {
-    queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
+    queryClient.invalidateQueries({
+      queryKey: ['admin-registrations']
+    });
   };
   const handleBulkApprove = () => {
     if (selectedRows.length === 0) {
@@ -312,7 +311,6 @@ const RegistrationsManagement = ({
       description: "Registrations have been exported to Excel."
     });
   };
-
   const exportToPDF = () => {
     if (!registrations || registrations.length === 0) {
       toast({
@@ -322,7 +320,6 @@ const RegistrationsManagement = ({
       });
       return;
     }
-    
     try {
       console.log('Starting PDF export...');
       const doc = new jsPDF({
@@ -330,29 +327,19 @@ const RegistrationsManagement = ({
         unit: 'mm',
         format: 'a4'
       });
-      
+
       // Add title
       doc.setFontSize(16);
       doc.text('Registrations Report', 14, 15);
-      
+
       // Add export date
       doc.setFontSize(10);
       doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
-      
+
       // Prepare table data
-      const tableData = registrations.map(reg => [
-        reg.customer_id || '',
-        reg.name || '',
-        reg.mobile_number || '',
-        reg.categories?.name || '',
-        reg.preference || '-',
-        reg.status || '',
-        `₹${reg.fee_paid || 0}`,
-        new Date(reg.created_at).toLocaleDateString('en-IN')
-      ]);
-      
+      const tableData = registrations.map(reg => [reg.customer_id || '', reg.name || '', reg.mobile_number || '', reg.categories?.name || '', reg.preference || '-', reg.status || '', `₹${reg.fee_paid || 0}`, new Date(reg.created_at).toLocaleDateString('en-IN')]);
       console.log('Table data prepared:', tableData.length, 'rows');
-      
+
       // Add table using autoTable
       autoTable(doc, {
         head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
@@ -360,7 +347,7 @@ const RegistrationsManagement = ({
         startY: 35,
         styles: {
           fontSize: 8,
-          cellPadding: 2,
+          cellPadding: 2
         },
         headStyles: {
           fillColor: [66, 139, 202],
@@ -368,22 +355,44 @@ const RegistrationsManagement = ({
           fontStyle: 'bold'
         },
         columnStyles: {
-          0: { cellWidth: 25 }, // Customer ID
-          1: { cellWidth: 35 }, // Name
-          2: { cellWidth: 25 }, // Mobile
-          3: { cellWidth: 30 }, // Category
-          4: { cellWidth: 20 }, // Preference
-          5: { cellWidth: 20 }, // Status
-          6: { cellWidth: 20 }, // Fee
-          7: { cellWidth: 25 }  // Date
+          0: {
+            cellWidth: 25
+          },
+          // Customer ID
+          1: {
+            cellWidth: 35
+          },
+          // Name
+          2: {
+            cellWidth: 25
+          },
+          // Mobile
+          3: {
+            cellWidth: 30
+          },
+          // Category
+          4: {
+            cellWidth: 20
+          },
+          // Preference
+          5: {
+            cellWidth: 20
+          },
+          // Status
+          6: {
+            cellWidth: 20
+          },
+          // Fee
+          7: {
+            cellWidth: 25
+          } // Date
         }
       });
-      
+
       // Save the PDF
       const fileName = `registrations_${new Date().toISOString().split('T')[0]}.pdf`;
       console.log('Saving PDF as:', fileName);
       doc.save(fileName);
-      
       toast({
         title: "Export Successful",
         description: "Registrations have been exported to PDF."
@@ -397,7 +406,6 @@ const RegistrationsManagement = ({
       });
     }
   };
-
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case 'approved':
@@ -408,7 +416,6 @@ const RegistrationsManagement = ({
         return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
     }
   };
-
   if (error) {
     return <Card>
         <CardContent className="p-6">
@@ -418,7 +425,6 @@ const RegistrationsManagement = ({
         </CardContent>
       </Card>;
   }
-
   return <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -495,7 +501,7 @@ const RegistrationsManagement = ({
                 <th className="border border-gray-200 px-4 py-2 text-left">Customer ID</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Mobile</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Category</th>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-lime-500">Category</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Preference</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
@@ -513,13 +519,13 @@ const RegistrationsManagement = ({
                   </td>
                   <td className="border border-gray-200 px-4 py-2">{registration.name}</td>
                   <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
-                  <td className="border border-gray-200 px-4 py-2 bg-slate-50">
+                  <td className="border border-gray-200 px-4 py-2 bg-lime-500">
                     {registration.categories?.name}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     {registration.preference || '-'}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-4 py-2 bg-slate-50">
                     {getStatusBadge(registration.status)}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">₹{registration.fee_paid}</td>
@@ -557,12 +563,7 @@ const RegistrationsManagement = ({
             No registrations found matching your criteria.
           </div>}
 
-        <RegistrationEditDialog
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          registration={editingRegistration}
-          onUpdate={handleEditUpdate}
-        />
+        <RegistrationEditDialog isOpen={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} registration={editingRegistration} onUpdate={handleEditUpdate} />
       </CardContent>
     </Card>;
 };
