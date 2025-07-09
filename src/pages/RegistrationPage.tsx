@@ -200,7 +200,7 @@ const RegistrationPage = () => {
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 Warning
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-left whitespace-pre-wrap">
+              <AlertDialogDescription className="whitespace-pre-wrap text-center">
                 {category.warning_message}
               </AlertDialogDescription>
             </AlertDialogHeader>
