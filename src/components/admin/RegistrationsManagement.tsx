@@ -1,58 +1,27 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Download, CheckCircle, XCircle, Edit, FileText } from 'lucide-react';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import RegistrationEditDialog from './RegistrationEditDialog';
-
-type ApplicationStatus = 'pending' | 'approved' | 'rejected';
-
-interface Registration {
-  id: string;
-  customer_id: string;
-  name: string;
-  mobile_number: string;
-  address: string;
-  ward: string;
-  agent_pro: string | null;
-  status: ApplicationStatus;
-  fee_paid: number;
-  created_at: string;
-  updated_at: string;
-  category_id: string;
-  panchayath_id: string | null;
-  preference: string | null;
-  categories: {
-    name: string;
-  } | null;
-  panchayaths: {
-    name: string;
-    district: string;
-  } | null;
-}
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface UpdateStatusParams {
-  id: string;
-  status: ApplicationStatus;
-}
+import RegistrationsFilters from './registrations/RegistrationsFilters';
+import RegistrationsTableHeader from './registrations/RegistrationsTableHeader';
+import RegistrationsTableActions from './registrations/RegistrationsTableActions';
+import { getCategoryColor, getStatusBadge } from './registrations/utils';
+import { exportToExcel, exportToPDF } from './registrations/exportUtils';
+import { 
+  Registration, 
+  Category, 
+  ApplicationStatus, 
+  UpdateStatusParams,
+  RegistrationsPermissions 
+} from './registrations/types';
 
 const RegistrationsManagement = ({
   permissions
 }: {
-  permissions: any;
+  permissions: RegistrationsPermissions;
 }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -276,35 +245,25 @@ const RegistrationsManagement = ({
     }
   };
 
-  const exportToExcel = () => {
+  const handleExportExcel = () => {
     if (!registrations) return;
-    const exportData = registrations.map(reg => ({
-      'Customer ID': reg.customer_id,
-      'Name': reg.name,
-      'Mobile Number': reg.mobile_number,
-      'Address': reg.address,
-      'Category': reg.categories?.name,
-      'Panchayath': reg.panchayaths?.name,
-      'District': reg.panchayaths?.district,
-      'Ward': reg.ward,
-      'Agent/PRO': reg.agent_pro || '',
-      'Preference': reg.preference || '',
-      'Status': reg.status,
-      'Fee Paid': reg.fee_paid,
-      'Applied Date': new Date(reg.created_at).toLocaleDateString('en-IN'),
-      'Updated Date': new Date(reg.updated_at).toLocaleDateString('en-IN')
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
-    XLSX.writeFile(workbook, `registrations_${new Date().toISOString().split('T')[0]}.xlsx`);
-    toast({
-      title: "Export Successful",
-      description: "Registrations have been exported to Excel."
-    });
+    try {
+      exportToExcel(registrations);
+      toast({
+        title: "Export Successful",
+        description: "Registrations have been exported to Excel."
+      });
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export registrations to Excel.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const exportToPDF = () => {
+  const handleExportPDF = () => {
     if (!registrations || registrations.length === 0) {
       toast({
         title: "No Data",
@@ -314,78 +273,7 @@ const RegistrationsManagement = ({
       return;
     }
     try {
-      console.log('Starting PDF export...');
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      // Add title
-      doc.setFontSize(16);
-      doc.text('Registrations Report', 14, 15);
-
-      // Add export date
-      doc.setFontSize(10);
-      doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
-
-      // Prepare table data
-      const tableData = registrations.map(reg => [reg.customer_id || '', reg.name || '', reg.mobile_number || '', reg.categories?.name || '', reg.preference || '-', reg.status || '', `₹${reg.fee_paid || 0}`, new Date(reg.created_at).toLocaleDateString('en-IN')]);
-      console.log('Table data prepared:', tableData.length, 'rows');
-
-      // Add table using autoTable
-      autoTable(doc, {
-        head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
-        body: tableData,
-        startY: 35,
-        styles: {
-          fontSize: 8,
-          cellPadding: 2
-        },
-        headStyles: {
-          fillColor: [66, 139, 202],
-          textColor: 255,
-          fontStyle: 'bold'
-        },
-        columnStyles: {
-          0: {
-            cellWidth: 25
-          },
-          // Customer ID
-          1: {
-            cellWidth: 35
-          },
-          // Name
-          2: {
-            cellWidth: 25
-          },
-          // Mobile
-          3: {
-            cellWidth: 30
-          },
-          // Category
-          4: {
-            cellWidth: 20
-          },
-          // Preference
-          5: {
-            cellWidth: 20
-          },
-          // Status
-          6: {
-            cellWidth: 20
-          },
-          // Fee
-          7: {
-            cellWidth: 25
-          } // Date
-        }
-      });
-
-      // Save the PDF
-      const fileName = `registrations_${new Date().toISOString().split('T')[0]}.pdf`;
-      console.log('Saving PDF as:', fileName);
-      doc.save(fileName);
+      exportToPDF(registrations);
       toast({
         title: "Export Successful",
         description: "Registrations have been exported to PDF."
@@ -398,56 +286,6 @@ const RegistrationsManagement = ({
         variant: "destructive"
       });
     }
-  };
-
-  const getStatusBadge = (status: ApplicationStatus) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="text-green-800 bg-lime-500">Approved</Badge>;
-      case 'rejected':
-        return <Badge className="text-red-800 bg-red-500">Rejected</Badge>;
-      default:
-        return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
-    }
-  };
-
-  // Create a mapping of category names to consistent colors
-  const getCategoryColor = (categoryName: string | undefined, categoryId: string) => {
-    if (!categoryName) return 'bg-gray-50 hover:bg-gray-100';
-    
-    console.log('Getting color for category:', categoryName, 'ID:', categoryId);
-    
-    // Use category ID for more consistent hashing
-    const colorMap: { [key: string]: string } = {
-      // Pre-defined colors for better visibility
-      'default-1': 'bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-400',
-      'default-2': 'bg-green-50 hover:bg-green-100 border-l-4 border-l-green-400',
-      'default-3': 'bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-400',
-      'default-4': 'bg-purple-50 hover:bg-purple-100 border-l-4 border-l-purple-400',
-      'default-5': 'bg-pink-50 hover:bg-pink-100 border-l-4 border-l-pink-400',
-      'default-6': 'bg-indigo-50 hover:bg-indigo-100 border-l-4 border-l-indigo-400',
-      'default-7': 'bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-400',
-      'default-8': 'bg-teal-50 hover:bg-teal-100 border-l-4 border-l-teal-400',
-      'default-9': 'bg-red-50 hover:bg-red-100 border-l-4 border-l-red-400',
-      'default-10': 'bg-cyan-50 hover:bg-cyan-100 border-l-4 border-l-cyan-400'
-    };
-
-    // Create a simple hash from category ID for consistent coloring
-    let hash = 0;
-    const stringToHash = categoryId || categoryName;
-    for (let i = 0; i < stringToHash.length; i++) {
-      const char = stringToHash.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    
-    const colorKeys = Object.keys(colorMap);
-    const colorIndex = Math.abs(hash) % colorKeys.length;
-    const selectedKey = colorKeys[colorIndex];
-    
-    console.log('Category color mapping:', categoryName, '-> hash:', hash, '-> index:', colorIndex, '-> color:', colorMap[selectedKey]);
-    
-    return colorMap[selectedKey];
   };
 
   if (error) {
@@ -467,82 +305,27 @@ const RegistrationsManagement = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Registrations Management</CardTitle>
-          <div className="flex gap-2">
-            {selectedRows.length > 0 && (
-              <Button
-                onClick={handleBulkApprove}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="h-4 w-4" />
-                Bulk Approve ({selectedRows.length})
-              </Button>
-            )}
-            <Button
-              onClick={exportToPDF}
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
-            >
-              <FileText className="h-4 w-4" />
-              Export PDF
-            </Button>
-            <Button onClick={exportToExcel} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export Excel
-            </Button>
-          </div>
+          <RegistrationsTableHeader
+            selectedRows={selectedRows}
+            onBulkApprove={handleBulkApprove}
+            onExportPDF={handleExportPDF}
+            onExportExcel={handleExportExcel}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by name, mobile, or customer ID..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map(category => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={panchayathFilter} onValueChange={setPanchayathFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by panchayath" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Panchayaths</SelectItem>
-              {panchayaths?.map(panchayath => (
-                <SelectItem key={panchayath.id} value={panchayath.id}>
-                  {panchayath.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <RegistrationsFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          panchayathFilter={panchayathFilter}
+          setPanchayathFilter={setPanchayathFilter}
+          categories={categories}
+          panchayaths={panchayaths}
+        />
 
         {/* Registrations Table */}
         <div className="overflow-x-auto">
@@ -601,44 +384,13 @@ const RegistrationsManagement = ({
                     {new Date(registration.created_at).toLocaleDateString('en-IN')}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
-                    <div className="flex gap-2">
-                      {permissions.canWrite && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(registration)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      )}
-                      {permissions.canWrite && registration.status === 'pending' && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleStatusUpdate(registration.id, 'approved')}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleStatusUpdate(registration.id, 'rejected')}
-                          >
-                            <XCircle className="h-3 w-3" />
-                          </Button>
-                        </>
-                      )}
-                      {permissions.canDelete && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(registration.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </div>
+                    <RegistrationsTableActions
+                      registration={registration}
+                      permissions={permissions}
+                      onStatusUpdate={handleStatusUpdate}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
                   </td>
                 </tr>
               ))}
