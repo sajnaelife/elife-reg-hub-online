@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,11 @@ interface Registration {
   } | null;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 interface RegistrationEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -51,9 +57,33 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
     mobile_number: '',
     ward: '',
     agent_pro: '',
-    fee_paid: ''
+    fee_paid: '',
+    category_id: '',
+    status: 'pending' as 'pending' | 'approved' | 'rejected'
   });
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+      } else {
+        setCategories(data || []);
+      }
+    };
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (registration) {
@@ -63,7 +93,9 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
         mobile_number: registration.mobile_number,
         ward: registration.ward,
         agent_pro: registration.agent_pro || '',
-        fee_paid: registration.fee_paid.toString()
+        fee_paid: registration.fee_paid.toString(),
+        category_id: registration.category_id,
+        status: registration.status
       });
     }
   }, [registration]);
@@ -83,6 +115,8 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
           ward: formData.ward,
           agent_pro: formData.agent_pro || null,
           fee_paid: parseFloat(formData.fee_paid),
+          category_id: formData.category_id,
+          status: formData.status,
           updated_at: new Date().toISOString()
         })
         .eq('id', registration.id);
@@ -112,7 +146,7 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Registration</DialogTitle>
         </DialogHeader>
@@ -176,6 +210,42 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, fee_paid: e.target.value }))}
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={formData.category_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'pending' | 'approved' | 'rejected' }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2">
