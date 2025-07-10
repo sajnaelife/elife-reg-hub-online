@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Edit, Trash2, Plus, ExternalLink } from 'lucide-react';
 
 interface Utility {
   id: string;
@@ -23,15 +22,10 @@ interface Utility {
   updated_at: string;
 }
 
-interface UtilitiesManagementProps {
-  permissions: {
-    canRead: boolean;
-    canWrite: boolean;
-    canDelete: boolean;
-  };
-}
-
-const UtilitiesManagement = ({ permissions }: UtilitiesManagementProps) => {
+const UtilitiesManagement = () => {
+  const { toast } = useToast();
+  const [utilities, setUtilities] = useState<Utility[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUtility, setEditingUtility] = useState<Utility | null>(null);
   const [formData, setFormData] = useState({
@@ -40,127 +34,92 @@ const UtilitiesManagement = ({ permissions }: UtilitiesManagementProps) => {
     description: '',
     is_active: true
   });
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: utilities = [], isLoading } = useQuery({
-    queryKey: ['utilities'],
-    queryFn: async () => {
+  const fetchUtilities = async () => {
+    try {
       const { data, error } = await supabase
         .from('utilities')
         .select('*')
         .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Utility[];
-    },
-    enabled: permissions.canRead
-  });
 
-  const createUtilityMutation = useMutation({
-    mutationFn: async (newUtility: Omit<Utility, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('utilities')
-        .insert(newUtility)
-        .select()
-        .single();
-      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['utilities'] });
-      toast({
-        title: "Success",
-        description: "Utility created successfully",
-      });
-      handleCloseDialog();
-    },
-    onError: (error) => {
+      setUtilities(data || []);
+    } catch (error) {
+      console.error('Error fetching utilities:', error);
       toast({
         title: "Error",
-        description: "Failed to create utility",
-        variant: "destructive",
+        description: "Failed to fetch utilities.",
+        variant: "destructive"
       });
-      console.error('Error creating utility:', error);
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
-  const updateUtilityMutation = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Utility> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('utilities')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['utilities'] });
-      toast({
-        title: "Success",
-        description: "Utility updated successfully",
-      });
-      handleCloseDialog();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update utility",
-        variant: "destructive",
-      });
-      console.error('Error updating utility:', error);
-    }
-  });
+  useEffect(() => {
+    fetchUtilities();
+  }, []);
 
-  const deleteUtilityMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('utilities')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['utilities'] });
-      toast({
-        title: "Success",
-        description: "Utility deleted successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to delete utility",
-        variant: "destructive",
-      });
-      console.error('Error deleting utility:', error);
-    }
-  });
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      url: '',
+      description: '',
+      is_active: true
+    });
+    setEditingUtility(null);
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.url.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Name and URL are required",
-        variant: "destructive",
-      });
-      return;
-    }
+    try {
+      if (editingUtility) {
+        const { error } = await supabase
+          .from('utilities')
+          .update({
+            name: formData.name,
+            url: formData.url,
+            description: formData.description || null,
+            is_active: formData.is_active,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingUtility.id);
 
-    if (editingUtility) {
-      updateUtilityMutation.mutate({
-        id: editingUtility.id,
-        ...formData
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Utility updated successfully."
+        });
+      } else {
+        const { error } = await supabase
+          .from('utilities')
+          .insert([{
+            name: formData.name,
+            url: formData.url,
+            description: formData.description || null,
+            is_active: formData.is_active
+          }]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Utility created successfully."
+        });
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      fetchUtilities();
+    } catch (error) {
+      console.error('Error saving utility:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save utility.",
+        variant: "destructive"
       });
-    } else {
-      createUtilityMutation.mutate(formData);
     }
   };
 
@@ -175,119 +134,169 @@ const UtilitiesManagement = ({ permissions }: UtilitiesManagementProps) => {
     setIsDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setEditingUtility(null);
-    setFormData({
-      name: '',
-      url: '',
-      description: '',
-      is_active: true
-    });
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this utility?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('utilities')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Utility deleted successfully."
+      });
+      
+      fetchUtilities();
+    } catch (error) {
+      console.error('Error deleting utility:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete utility.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleToggleActive = (utility: Utility) => {
-    updateUtilityMutation.mutate({
-      id: utility.id,
-      is_active: !utility.is_active
-    });
+  const toggleUtilityStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('utilities')
+        .update({ 
+          is_active: !currentStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Utility ${!currentStatus ? 'activated' : 'deactivated'} successfully.`
+      });
+      
+      fetchUtilities();
+    } catch (error) {
+      console.error('Error updating utility status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update utility status.",
+        variant: "destructive"
+      });
+    }
   };
 
-  if (!permissions.canRead) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">You don't have permission to view utilities.</p>
-        </CardContent>
-      </Card>
-    );
+  if (isLoading) {
+    return <div className="p-6">Loading utilities...</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Utilities Management</h2>
-          <p className="text-muted-foreground">Manage website links and utilities</p>
+          <h1 className="text-3xl font-bold">Utilities Management</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage website utilities that appear in the navigation dropdown
+          </p>
         </div>
-        {permissions.canWrite && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Utility
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingUtility ? 'Edit Utility' : 'Add New Utility'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Government Portal"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="url">URL *</Label>
-                  <Input
-                    id="url"
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    placeholder="https://example.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Brief description of the utility"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingUtility ? 'Update' : 'Create'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+        
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Utility
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingUtility ? 'Edit Utility' : 'Add New Utility'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingUtility 
+                  ? 'Update the utility information below.'
+                  : 'Add a new utility link that will appear in the navigation dropdown.'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter utility name"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="url">URL *</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Brief description of the utility"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                />
+                <Label>Active</Label>
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {editingUtility ? 'Update' : 'Create'} Utility
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Utilities ({utilities.length})</CardTitle>
+          <CardTitle>Utilities List</CardTitle>
+          <CardDescription>
+            All utilities that can appear in the navigation dropdown
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          {utilities.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No utilities found.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Add your first utility to get started.
+              </p>
             </div>
-          ) : utilities.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No utilities found</p>
           ) : (
             <Table>
               <TableHeader>
@@ -302,53 +311,55 @@ const UtilitiesManagement = ({ permissions }: UtilitiesManagementProps) => {
               <TableBody>
                 {utilities.map((utility) => (
                   <TableRow key={utility.id}>
-                    <TableCell className="font-medium">{utility.name}</TableCell>
-                    <TableCell>
-                      <a 
-                        href={utility.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        {utility.url.length > 40 ? `${utility.url.substring(0, 40)}...` : utility.url}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                    <TableCell className="font-medium">
+                      {utility.name}
                     </TableCell>
-                    <TableCell>{utility.description || '-'}</TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={utility.is_active ? "default" : "secondary"}>
-                          {utility.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                        {permissions.canWrite && (
-                          <Switch
-                            checked={utility.is_active}
-                            onCheckedChange={() => handleToggleActive(utility)}
-                            size="sm"
-                          />
-                        )}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                          {utility.url}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(utility.url, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        {permissions.canWrite && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(utility)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {permissions.canDelete && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => deleteUtilityMutation.mutate(utility.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                      <span className="text-sm truncate max-w-[150px] block">
+                        {utility.description || 'No description'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={utility.is_active}
+                          onCheckedChange={() => toggleUtilityStatus(utility.id, utility.is_active)}
+                        />
+                        <span className={`text-sm ${utility.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                          {utility.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(utility)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(utility.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>

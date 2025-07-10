@@ -23,6 +23,7 @@ interface Registration {
   updated_at: string;
   category_id: string;
   panchayath_id: string | null;
+  preference: string | null;
   categories: {
     name: string;
   } | null;
@@ -59,9 +60,11 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
     agent_pro: '',
     fee_paid: '',
     category_id: '',
+    preference: '',
     status: 'pending' as 'pending' | 'approved' | 'rejected'
   });
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch categories
@@ -95,10 +98,26 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
         agent_pro: registration.agent_pro || '',
         fee_paid: registration.fee_paid.toString(),
         category_id: registration.category_id,
+        preference: registration.preference || '',
         status: registration.status
       });
+      
+      // Find and set the selected category
+      const category = categories.find(cat => cat.id === registration.category_id);
+      setSelectedCategory(category || null);
     }
-  }, [registration]);
+  }, [registration, categories]);
+
+  const handleCategoryChange = (categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    setSelectedCategory(category || null);
+    setFormData(prev => ({ 
+      ...prev, 
+      category_id: categoryId,
+      // Clear preference if not Job Card category
+      preference: category?.name.toLowerCase().includes('job card') ? prev.preference : ''
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +135,7 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
           agent_pro: formData.agent_pro || null,
           fee_paid: parseFloat(formData.fee_paid),
           category_id: formData.category_id,
+          preference: formData.preference || null,
           status: formData.status,
           updated_at: new Date().toISOString()
         })
@@ -143,6 +163,8 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
   };
 
   if (!registration) return null;
+
+  const isJobCardCategory = selectedCategory?.name.toLowerCase().includes('job card');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -216,7 +238,7 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
             <Label htmlFor="category">Category</Label>
             <Select
               value={formData.category_id}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+              onValueChange={handleCategoryChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
@@ -230,6 +252,18 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
+
+          {isJobCardCategory && (
+            <div>
+              <Label htmlFor="preference">Preference</Label>
+              <Input
+                id="preference"
+                value={formData.preference}
+                onChange={(e) => setFormData(prev => ({ ...prev, preference: e.target.value }))}
+                placeholder="Enter your preference for job card"
+              />
+            </div>
+          )}
 
           <div>
             <Label htmlFor="status">Status</Label>
