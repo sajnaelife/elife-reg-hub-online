@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,7 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [jobCardPreferences, setJobCardPreferences] = useState<string[]>([]);
 
   // Fetch categories
   useEffect(() => {
@@ -86,6 +88,27 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
       fetchCategories();
     }
   }, [isOpen]);
+
+  // Fetch job card preferences from the job card category
+  useEffect(() => {
+    const fetchJobCardPreferences = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('preference')
+        .ilike('name', '%job card%')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching job card preferences:', error);
+      } else if (data?.preference) {
+        // Split preferences by comma and clean up
+        const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
+        setJobCardPreferences(preferences);
+      }
+    };
+
+    fetchJobCardPreferences();
+  }, []);
 
   useEffect(() => {
     if (registration) {
@@ -278,12 +301,21 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
           {isJobCardCategory && (
             <div>
               <Label htmlFor="preference">Preference</Label>
-              <Input
-                id="preference"
+              <Select
                 value={formData.preference}
-                onChange={(e) => setFormData(prev => ({ ...prev, preference: e.target.value }))}
-                placeholder="Enter your preference for job card"
-              />
+                onValueChange={(value) => setFormData(prev => ({ ...prev, preference: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your preference for job card" />
+                </SelectTrigger>
+                <SelectContent>
+                  {jobCardPreferences.map((preference, index) => (
+                    <SelectItem key={index} value={preference}>
+                      {preference}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 

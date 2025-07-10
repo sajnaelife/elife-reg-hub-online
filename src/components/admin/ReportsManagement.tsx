@@ -4,13 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet } from 'lucide-react';
-import { exportToExcel, exportToPDF } from '@/components/admin/registrations/exportUtils';
+import { useToast } from '@/hooks/use-toast';
 
 const ReportsManagement = ({
   permissions
 }: {
   permissions: any;
 }) => {
+  const { toast } = useToast();
+
   // Fetch registration summary by panchayath
   const {
     data: panchayathSummary,
@@ -94,32 +96,63 @@ const ReportsManagement = ({
     }
   });
 
-  const handleExportExcel = () => {
-    if (!panchayathSummary) return;
-    
-    const exportData = panchayathSummary.map((item: any) => ({
-      'Panchayath': item.panchayath,
-      'District': item.district,
-      'Total Registrations': item.totalRegistrations,
-      ...Object.entries(item.categories).reduce((acc, [category, count]) => {
-        acc[`${category} Count`] = count;
-        return acc;
-      }, {} as Record<string, any>)
-    }));
-
-    const XLSX = require('xlsx');
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Panchayath Report');
-    XLSX.writeFile(workbook, `panchayath_performance_${new Date().toISOString().split('T')[0]}.xlsx`);
-  };
-
-  const handleExportPDF = () => {
-    if (!panchayathSummary) return;
+  const handleExportExcel = async () => {
+    if (!panchayathSummary) {
+      toast({
+        title: "Export Failed",
+        description: "No data available to export.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
-      const jsPDF = require('jspdf');
-      require('jspdf-autotable');
+      // Dynamic import to avoid build issues
+      const XLSX = await import('xlsx');
+      
+      const exportData = panchayathSummary.map((item: any) => ({
+        'Panchayath': item.panchayath,
+        'District': item.district,
+        'Total Registrations': item.totalRegistrations,
+        ...Object.entries(item.categories).reduce((acc, [category, count]) => {
+          acc[`${category} Count`] = count;
+          return acc;
+        }, {} as Record<string, any>)
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Panchayath Report');
+      XLSX.writeFile(workbook, `panchayath_performance_${new Date().toISOString().split('T')[0]}.xlsx`);
+      
+      toast({
+        title: "Export Successful",
+        description: "Excel file has been downloaded.",
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export Excel file.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExportPDF = async () => {
+    if (!panchayathSummary) {
+      toast({
+        title: "Export Failed",
+        description: "No data available to export.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      // Dynamic imports to avoid build issues
+      const jsPDF = (await import('jspdf')).default;
+      await import('jspdf-autotable');
       
       const doc = new jsPDF({
         orientation: 'landscape',
@@ -144,7 +177,7 @@ const ReportsManagement = ({
       ]);
 
       // Add table using autoTable
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [['Panchayath', 'District', 'Total Registrations', 'Category Breakdown']],
         body: tableData,
         startY: 35,
@@ -168,8 +201,18 @@ const ReportsManagement = ({
       // Save the PDF
       const fileName = `panchayath_performance_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
+      
+      toast({
+        title: "Export Successful",
+        description: "PDF file has been downloaded.",
+      });
     } catch (error) {
       console.error('Error generating PDF:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export PDF file.",
+        variant: "destructive"
+      });
     }
   };
 
