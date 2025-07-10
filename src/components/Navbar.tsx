@@ -33,7 +33,7 @@ const Navbar = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map(({ path, label, icon: Icon, color }) => (
+            {navItems.slice(0, 4).map(({ path, label, icon: Icon, color }) => (
               <Link
                 key={path}
                 to={path}
@@ -48,6 +48,20 @@ const Navbar = () => {
               </Link>
             ))}
             <UtilitiesDropdown />
+            {navItems.slice(4).map(({ path, label, icon: Icon, color }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  location.pathname === path
+                    ? `${color} bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm`
+                    : `text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 ${color}`
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </Link>
+            ))}
           </div>
           
           {/* Mobile menu button */}
@@ -64,7 +78,7 @@ const Navbar = () => {
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 space-y-2">
-            {navItems.map(({ path, label, icon: Icon, color }) => (
+            {navItems.slice(0, 4).map(({ path, label, icon: Icon, color }) => (
               <Link
                 key={path}
                 to={path}
@@ -82,6 +96,21 @@ const Navbar = () => {
             <div className="px-3 py-2">
               <UtilitiesDropdown />
             </div>
+            {navItems.slice(4).map(({ path, label, icon: Icon, color }) => (
+              <Link
+                key={path}
+                to={path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  location.pathname === path
+                    ? `${color} bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm`
+                    : `text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 ${color}`
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </Link>
+            ))}
           </div>
         )}
       </div>

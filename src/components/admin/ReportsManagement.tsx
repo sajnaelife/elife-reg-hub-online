@@ -2,7 +2,10 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, TrendingUp, Users, MapPin, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '@/components/admin/registrations/exportUtils';
+
 const ReportsManagement = ({
   permissions
 }: {
@@ -90,6 +93,86 @@ const ReportsManagement = ({
       };
     }
   });
+
+  const handleExportExcel = () => {
+    if (!panchayathSummary) return;
+    
+    const exportData = panchayathSummary.map((item: any) => ({
+      'Panchayath': item.panchayath,
+      'District': item.district,
+      'Total Registrations': item.totalRegistrations,
+      ...Object.entries(item.categories).reduce((acc, [category, count]) => {
+        acc[`${category} Count`] = count;
+        return acc;
+      }, {} as Record<string, any>)
+    }));
+
+    const XLSX = require('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Panchayath Report');
+    XLSX.writeFile(workbook, `panchayath_performance_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!panchayathSummary) return;
+    
+    try {
+      const jsPDF = require('jspdf');
+      require('jspdf-autotable');
+      
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Panchayath Performance Report', 14, 15);
+
+      // Add export date
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
+
+      // Prepare table data
+      const tableData = panchayathSummary.map((item: any) => [
+        item.panchayath || '',
+        item.district || '',
+        item.totalRegistrations || 0,
+        Object.entries(item.categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')
+      ]);
+
+      // Add table using autoTable
+      doc.autoTable({
+        head: [['Panchayath', 'District', 'Total Registrations', 'Category Breakdown']],
+        body: tableData,
+        startY: 35,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [66, 139, 202],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          0: { cellWidth: 50 }, // Panchayath
+          1: { cellWidth: 40 }, // District
+          2: { cellWidth: 30 }, // Total
+          3: { cellWidth: 80 }  // Categories
+        }
+      });
+
+      // Save the PDF
+      const fileName = `panchayath_performance_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
   if (!permissions.canRead) {
     return <Card>
         <CardContent className="p-6">
@@ -99,6 +182,7 @@ const ReportsManagement = ({
         </CardContent>
       </Card>;
   }
+
   return <div className="space-y-6">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -173,10 +257,36 @@ const ReportsManagement = ({
       {/* Panchayath Performance Report */}
       <Card>
         <CardHeader>
-          <CardTitle>Panchayath Performance Report</CardTitle>
-          <p className="text-sm text-gray-600">
-            Total registrations and category breakdown for each panchayath
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Panchayath Performance Report</CardTitle>
+              <p className="text-sm text-gray-600">
+                Total registrations and category breakdown for each panchayath
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                disabled={loadingPanchayath || !panchayathSummary?.length}
+                className="flex items-center gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Export Excel
+              </Button>
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                size="sm"
+                disabled={loadingPanchayath || !panchayathSummary?.length}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export PDF
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loadingPanchayath ? <div className="text-center py-8">
@@ -226,4 +336,5 @@ const ReportsManagement = ({
       </Card>
     </div>;
 };
+
 export default ReportsManagement;

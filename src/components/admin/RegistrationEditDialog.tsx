@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -108,15 +107,38 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
     }
   }, [registration, categories]);
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = async (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     setSelectedCategory(category || null);
-    setFormData(prev => ({ 
-      ...prev, 
-      category_id: categoryId,
-      // Clear preference if not Job Card category
-      preference: category?.name.toLowerCase().includes('job card') ? prev.preference : ''
-    }));
+    
+    // Fetch category details to get the fee
+    if (category) {
+      try {
+        const { data: categoryData, error } = await supabase
+          .from('categories')
+          .select('offer_fee')
+          .eq('id', categoryId)
+          .single();
+        
+        if (error) throw error;
+        
+        setFormData(prev => ({ 
+          ...prev, 
+          category_id: categoryId,
+          fee_paid: categoryData.offer_fee.toString(),
+          // Clear preference if not Job Card category
+          preference: category?.name.toLowerCase().includes('job card') ? prev.preference : ''
+        }));
+      } catch (error) {
+        console.error('Error fetching category fee:', error);
+        setFormData(prev => ({ 
+          ...prev, 
+          category_id: categoryId,
+          // Clear preference if not Job Card category
+          preference: category?.name.toLowerCase().includes('job card') ? prev.preference : ''
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -223,18 +245,6 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="fee_paid">Fee Paid</Label>
-            <Input
-              id="fee_paid"
-              type="number"
-              step="0.01"
-              value={formData.fee_paid}
-              onChange={(e) => setFormData(prev => ({ ...prev, fee_paid: e.target.value }))}
-              required
-            />
-          </div>
-
-          <div>
             <Label htmlFor="category">Category</Label>
             <Select
               value={formData.category_id}
@@ -251,6 +261,18 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="fee_paid">Fee Paid</Label>
+            <Input
+              id="fee_paid"
+              type="number"
+              step="0.01"
+              value={formData.fee_paid}
+              onChange={(e) => setFormData(prev => ({ ...prev, fee_paid: e.target.value }))}
+              required
+            />
           </div>
 
           {isJobCardCategory && (
