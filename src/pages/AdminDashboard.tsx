@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Grid3X3, MapPin, Bell, Shield, BarChart3 } from 'lucide-react';
+import { LogOut, Users, Grid3X3, MapPin, Bell, Shield, BarChart3, Settings } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import RegistrationsManagement from '@/components/admin/RegistrationsManagement';
 import CategoriesManagement from '@/components/admin/CategoriesManagement';
@@ -12,6 +11,7 @@ import PanchayathsManagement from '@/components/admin/PanchayathsManagement';
 import AnnouncementsManagement from '@/components/admin/AnnouncementsManagement';
 import AdminManagement from '@/components/admin/AdminManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
+import UtilitiesManagement from '@/components/admin/UtilitiesManagement';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full mb-6 ${permissions.canManageAdmins ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'}`}>
+          <TabsList className={`grid w-full mb-6 ${permissions.canManageAdmins ? 'grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : 'grid-cols-3 md:grid-cols-3 lg:grid-cols-6'}`}>
             <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
               <Users className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Registrations</span>
@@ -159,6 +159,11 @@ const AdminDashboard = () => {
               <Bell className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Announcements</span>
               <span className="sm:hidden">Ann</span>
+            </TabsTrigger>
+            <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
+              <Settings className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Utilities</span>
+              <span className="sm:hidden">Util</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
@@ -188,6 +193,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="announcements">
             <AnnouncementsManagement permissions={permissions} />
+          </TabsContent>
+
+          <TabsContent value="utilities">
+            <UtilitiesManagement permissions={permissions} />
           </TabsContent>
 
           <TabsContent value="reports">

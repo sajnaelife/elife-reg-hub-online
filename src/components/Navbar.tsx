@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Info, Grid3X3, Search, Shield, Menu, X } from 'lucide-react';
+import UtilitiesDropdown from '@/components/UtilitiesDropdown';
 
 const Navbar = () => {
   const location = useLocation();
@@ -31,7 +32,7 @@ const Navbar = () => {
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             {navItems.map(({ path, label, icon: Icon, color }) => (
               <Link
                 key={path}
@@ -46,6 +47,7 @@ const Navbar = () => {
                 <span>{label}</span>
               </Link>
             ))}
+            <UtilitiesDropdown />
           </div>
           
           {/* Mobile menu button */}
@@ -77,6 +79,9 @@ const Navbar = () => {
                 <span>{label}</span>
               </Link>
             ))}
+            <div className="px-3 py-2">
+              <UtilitiesDropdown />
+            </div>
           </div>
         )}
       </div>
