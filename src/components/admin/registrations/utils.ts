@@ -42,12 +42,13 @@ export const getCategoryColor = (categoryName: string | undefined, categoryId: s
 };
 
 export const getStatusBadge = (status: ApplicationStatus) => {
-  switch (status) {
-    case 'approved':
-      return <Badge className="text-green-800 bg-lime-500">Approved</Badge>;
-    case 'rejected':
-      return <Badge className="text-red-800 bg-red-500">Rejected</Badge>;
-    default:
-      return <Badge className="text-yellow-800 bg-orange-500">Pending</Badge>;
-  }
+  const badgeProps = {
+    approved: { className: "text-green-800 bg-lime-500", text: "Approved" },
+    rejected: { className: "text-red-800 bg-red-500", text: "Rejected" },
+    pending: { className: "text-yellow-800 bg-orange-500", text: "Pending" }
+  };
+
+  const props = badgeProps[status] || badgeProps.pending;
+  
+  return Badge({ className: props.className, children: props.text });
 };
