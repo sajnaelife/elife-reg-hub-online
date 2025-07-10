@@ -206,7 +206,7 @@ const RegistrationPage = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">ജോബ് കാർഡ് റജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">സമ്മതം, മുന്നോട്ട് പോകാം</AlertDialogAction>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">സമ്മതം, ഫ്രീ റജിസ്ട്രേഷൻ</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
