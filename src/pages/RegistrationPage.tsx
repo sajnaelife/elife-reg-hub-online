@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -43,6 +44,15 @@ interface RegistrationData {
   preference: string;
 }
 
+// Job Card preference options as provided by the user
+const JOB_CARD_PREFERENCES = [
+  { value: 'farmelife', label: 'Farmelife (കന്നുകാലി വളർത്തൽ)' },
+  { value: 'foodelife', label: 'Foodelife (അച്ചാർ പോലുള്ള ഭക്ഷ്യോത്പന്നങ്ങൾ)' },
+  { value: 'organelife', label: 'Organelife (കഷിക പദ്ധതികൾ)' },
+  { value: 'entrelife', label: 'Entrelife (തയ്യൽ പോലുള്ള കൈതൊഴിലുകൽ)' },
+  { value: 'no', label: 'No (പ്രത്യേകം ഇല്ല)' }
+];
+
 const RegistrationPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
@@ -53,7 +63,6 @@ const RegistrationPage = () => {
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
-  const [preferenceOptions, setPreferenceOptions] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -83,28 +92,6 @@ const RegistrationPage = () => {
       return data as Panchayath[];
     }
   });
-
-  // Fetch job card preferences when category is job card
-  useEffect(() => {
-    const fetchJobCardPreferences = async () => {
-      if (category && category.name.toLowerCase().includes('job card')) {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('preference')
-          .eq('id', category.id)
-          .single();
-        
-        if (error) {
-          console.error('Error fetching job card preferences:', error);
-        } else if (data?.preference) {
-          const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
-          setPreferenceOptions(preferences);
-        }
-      }
-    };
-
-    fetchJobCardPreferences();
-  }, [category]);
 
   // Show warning dialog when category loads and has a warning message
   useEffect(() => {
@@ -394,12 +381,12 @@ const RegistrationPage = () => {
                       <Label htmlFor="preference">Preference / മുൻഗണന</Label>
                       <Select value={formData.preference} onValueChange={value => handleInputChange('preference', value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
+                          <SelectValue placeholder="Select your preference for job card / ജോബ് കാർഡിനുള്ള നിങ്ങളുടെ മുൻഗണന തിരഞ്ഞെടുക്കുക" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white z-50">
-                          {preferenceOptions.map((option, index) => 
-                            <SelectItem key={index} value={option}>
-                              {option}
+                        <SelectContent className="bg-white z-50 max-h-80">
+                          {JOB_CARD_PREFERENCES.map((option) => 
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
                             </SelectItem>
                           )}
                         </SelectContent>

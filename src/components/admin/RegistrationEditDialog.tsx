@@ -45,6 +45,15 @@ interface RegistrationEditDialogProps {
   onUpdate: () => void;
 }
 
+// Job Card preference options as provided by the user
+const JOB_CARD_PREFERENCES = [
+  { value: 'farmelife', label: 'Farmelife (കന്നുകാലി വളർത്തൽ)' },
+  { value: 'foodelife', label: 'Foodelife (അച്ചാർ പോലുള്ള ഭക്ഷ്യോത്പന്നങ്ങൾ)' },
+  { value: 'organelife', label: 'Organelife (കഷിക പദ്ധതികൾ)' },
+  { value: 'entrelife', label: 'Entrelife (തയ്യൽ പോലുള്ള കൈതൊഴിലുകൽ)' },
+  { value: 'no', label: 'No (പ്രത്യേകം ഇല്ല)' }
+];
+
 const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
   isOpen,
   onClose,
@@ -66,7 +75,6 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [jobCardPreferences, setJobCardPreferences] = useState<string[]>([]);
 
   // Fetch categories
   useEffect(() => {
@@ -88,27 +96,6 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
       fetchCategories();
     }
   }, [isOpen]);
-
-  // Fetch job card preferences from the job card category
-  useEffect(() => {
-    const fetchJobCardPreferences = async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('preference')
-        .ilike('name', '%job card%')
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching job card preferences:', error);
-      } else if (data?.preference) {
-        // Split preferences by comma and clean up
-        const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
-        setJobCardPreferences(preferences);
-      }
-    };
-
-    fetchJobCardPreferences();
-  }, []);
 
   useEffect(() => {
     if (registration) {
@@ -308,10 +295,10 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
                 <SelectTrigger>
                   <SelectValue placeholder="Select your preference for job card" />
                 </SelectTrigger>
-                <SelectContent>
-                  {jobCardPreferences.map((preference, index) => (
-                    <SelectItem key={index} value={preference}>
-                      {preference}
+                <SelectContent className="max-h-80">
+                  {JOB_CARD_PREFERENCES.map((preference) => (
+                    <SelectItem key={preference.value} value={preference.value}>
+                      {preference.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
