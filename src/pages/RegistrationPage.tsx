@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
-
 interface Category {
   id: string;
   name: string;
@@ -23,13 +22,11 @@ interface Category {
   popup_image_url: string | null;
   qr_image_url: string | null;
 }
-
 interface Panchayath {
   id: string;
   name: string;
   district: string;
 }
-
 interface RegistrationData {
   name: string;
   address: string;
@@ -44,19 +41,32 @@ interface RegistrationData {
 }
 
 // Job Card preference options as provided by the user
-const JOB_CARD_PREFERENCES = [
-  { value: 'farmelife', label: 'Farmelife (കന്നുകാലി വളർത്തൽ)' },
-  { value: 'foodelife', label: 'Foodelife (അച്ചാർ പോലുള്ള ഭക്ഷ്യോത്പന്നങ്ങൾ)' },
-  { value: 'organelife', label: 'Organelife (കഷിക പദ്ധതികൾ)' },
-  { value: 'entrelife', label: 'Entrelife (തയ്യൽ പോലുള്ള കൈതൊഴിലുകൽ)' },
-  { value: 'no', label: 'No (പ്രത്യേകം ഇല്ല)' }
-];
-
+const JOB_CARD_PREFERENCES = [{
+  value: 'farmelife',
+  label: 'Farmelife (കന്നുകാലി വളർത്തൽ)'
+}, {
+  value: 'foodelife',
+  label: 'Foodelife (അച്ചാർ പോലുള്ള ഭക്ഷ്യോത്പന്നങ്ങൾ)'
+}, {
+  value: 'organelife',
+  label: 'Organelife (കഷിക പദ്ധതികൾ)'
+}, {
+  value: 'entrelife',
+  label: 'Entrelife (തയ്യൽ പോലുള്ള കൈതൊഴിലുകൽ)'
+}, {
+  value: 'no',
+  label: 'No (പ്രത്യേകം ഇല്ല)'
+}];
 const RegistrationPage = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const {
+    categoryId
+  } = useParams<{
+    categoryId: string;
+  }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
@@ -71,22 +81,31 @@ const RegistrationPage = () => {
     agent_pro: '',
     preference: ''
   });
-
-  const { data: category, isLoading: categoryLoading } = useQuery({
+  const {
+    data: category,
+    isLoading: categoryLoading
+  } = useQuery({
     queryKey: ['category', categoryId],
     queryFn: async () => {
       if (!categoryId) throw new Error('Category ID is required');
-      const { data, error } = await supabase.from('categories').select('*').eq('id', categoryId).single();
+      const {
+        data,
+        error
+      } = await supabase.from('categories').select('*').eq('id', categoryId).single();
       if (error) throw error;
       return data;
     },
     enabled: !!categoryId
   });
-
-  const { data: panchayaths } = useQuery({
+  const {
+    data: panchayaths
+  } = useQuery({
     queryKey: ['panchayaths'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('panchayaths').select('*').order('name');
+      const {
+        data,
+        error
+      } = await supabase.from('panchayaths').select('*').order('name');
       if (error) throw error;
       return data as Panchayath[];
     }
@@ -99,24 +118,20 @@ const RegistrationPage = () => {
       setShowWarningDialog(true);
     }
   }, [category, warningAcknowledged]);
-
   const handleWarningAccept = () => {
     setShowWarningDialog(false);
     setWarningAcknowledged(true);
   };
-
   const handleWarningCancel = () => {
     setShowWarningDialog(false);
     navigate('/categories');
   };
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.address || !formData.mobile_number || !formData.ward || !categoryId || !category) {
@@ -141,7 +156,10 @@ const RegistrationPage = () => {
         customer_id: 'ESEP' + formData.mobile_number + formData.name.charAt(0).toUpperCase(),
         preference: formData.preference
       };
-      const { data, error } = await supabase.from('registrations').insert(registrationData).select().single();
+      const {
+        data,
+        error
+      } = await supabase.from('registrations').insert(registrationData).select().single();
       if (error) {
         if (error.code === '23505') {
           toast({
@@ -171,35 +189,28 @@ const RegistrationPage = () => {
       setIsSubmitting(false);
     }
   };
-
   if (categoryLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!category) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center text-red-600">
             Category not found. Please go back and select a valid category.
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Show warning dialog if category has a warning message and user hasn't acknowledged it
   if (category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
           <AlertDialogContent>
@@ -213,18 +224,15 @@ const RegistrationPage = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">Proceed</AlertDialogAction>
+              <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">ജോബ് കാർഡ് റജിസ്ട്രേഷൻ</AlertDialogCancel>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">സമ്മതം, ഫ്രീ റജിസ്ട്രേഷൻ</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
-    );
+      </div>;
   }
-
   if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Card className="text-center max-w-4xl mx-auto">
@@ -254,21 +262,19 @@ const RegistrationPage = () => {
                 </div>
 
                 {/* QR Code */}
-                {category.qr_image_url && (
-                  <div className="flex flex-col items-center">
+                {category.qr_image_url && <div className="flex flex-col items-center">
                     <div className="bg-teal-600 p-4 rounded-lg relative">
                       <img src={category.qr_image_url} alt="QR Code" className="w-48 h-48 object-contain bg-white p-2 rounded" />
                       <Button size="sm" className="absolute top-2 right-2 bg-black text-white hover:bg-gray-800" onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = category.qr_image_url!;
-                        link.download = `qr-code-${generatedCustomerId}.png`;
-                        link.click();
-                      }}>
+                    const link = document.createElement('a');
+                    link.href = category.qr_image_url!;
+                    link.download = `qr-code-${generatedCustomerId}.png`;
+                    link.click();
+                  }}>
                         DOWNLOAD ⬇
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
 
               <p className="text-gray-600 mb-6">Please save your Customer ID for future reference. You can check your application status using your mobile number and Customer ID.</p>
@@ -279,14 +285,10 @@ const RegistrationPage = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const isJobCardCategory = category?.name.toLowerCase().includes('job card');
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -306,37 +308,17 @@ const RegistrationPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="name">Full Name * / പൂർണ്ണ നാമം *</Label>
-                    <Input 
-                      id="name" 
-                      value={formData.name} 
-                      onChange={e => handleInputChange('name', e.target.value)} 
-                      placeholder="Enter your full name / നിങ്ങളുടെ പൂർണ്ണ നാമം നൽകുക" 
-                      required 
-                    />
+                    <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter your full name / നിങ്ങളുടെ പൂർണ്ണ നാമം നൽകുക" required />
                   </div>
 
                   <div>
                     <Label htmlFor="mobile">Mobile Number * / മൊബൈൽ നമ്പർ *</Label>
-                    <Input 
-                      id="mobile" 
-                      type="tel" 
-                      value={formData.mobile_number} 
-                      onChange={e => handleInputChange('mobile_number', e.target.value)} 
-                      placeholder="Enter 10-digit mobile number / 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക" 
-                      pattern="[0-9]{10}" 
-                      required 
-                    />
+                    <Input id="mobile" type="tel" value={formData.mobile_number} onChange={e => handleInputChange('mobile_number', e.target.value)} placeholder="Enter 10-digit mobile number / 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക" pattern="[0-9]{10}" required />
                   </div>
 
                   <div>
                     <Label htmlFor="address">Address * / വിലാസം *</Label>
-                    <Textarea 
-                      id="address" 
-                      value={formData.address} 
-                      onChange={e => handleInputChange('address', e.target.value)} 
-                      placeholder="Enter your complete address / നിങ്ങളുടെ പൂർണ്ണ വിലാസം നൽകുക" 
-                      required 
-                    />
+                    <Textarea id="address" value={formData.address} onChange={e => handleInputChange('address', e.target.value)} placeholder="Enter your complete address / നിങ്ങളുടെ പൂർണ്ണ വിലാസം നൽകുക" required />
                   </div>
 
                   <div>
@@ -346,63 +328,42 @@ const RegistrationPage = () => {
                         <SelectValue placeholder="Select Panchayath / പഞ്ചായത്ത് തിരഞ്ഞെടുക്കുക" />
                       </SelectTrigger>
                       <SelectContent className="bg-white z-50">
-                        {panchayaths?.map(panchayath => 
-                          <SelectItem key={panchayath.id} value={panchayath.id}>
+                        {panchayaths?.map(panchayath => <SelectItem key={panchayath.id} value={panchayath.id}>
                             {panchayath.name} - {panchayath.district}
-                          </SelectItem>
-                        )}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
                     <Label htmlFor="ward">Ward * / വാർഡ് *</Label>
-                    <Input 
-                      id="ward" 
-                      value={formData.ward} 
-                      onChange={e => handleInputChange('ward', e.target.value)} 
-                      placeholder="Enter ward number/name / വാർഡ് നമ്പർ/പേര് നൽകുക" 
-                      required 
-                    />
+                    <Input id="ward" value={formData.ward} onChange={e => handleInputChange('ward', e.target.value)} placeholder="Enter ward number/name / വാർഡ് നമ്പർ/പേര് നൽകുക" required />
                   </div>
 
                   <div>
                     <Label htmlFor="agent">Agent / P.R.O / ഏജന്റ് / പി.ആർ.ഒ</Label>
-                    <Input 
-                      id="agent" 
-                      value={formData.agent_pro} 
-                      onChange={e => handleInputChange('agent_pro', e.target.value)} 
-                      placeholder="Enter agent or PRO name (optional) / ഏജന്റ് അല്ലെങ്കിൽ പിആർഒ പേര് (ഓപ്ഷണൽ)" 
-                    />
+                    <Input id="agent" value={formData.agent_pro} onChange={e => handleInputChange('agent_pro', e.target.value)} placeholder="Enter agent or PRO name (optional) / ഏജന്റ് അല്ലെങ്കിൽ പിആർഒ പേര് (ഓപ്ഷണൽ)" />
                   </div>
 
-                  {isJobCardCategory && (
-                    <div>
+                  {isJobCardCategory && <div>
                       <Label htmlFor="preference">Preference / മുൻഗണന</Label>
                       <Select value={formData.preference} onValueChange={value => handleInputChange('preference', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your preference for job card / ജോബ് കാർഡിനുള്ള നിങ്ങളുടെ മുൻഗണന തിരഞ്ഞെടുക്കുക" />
                         </SelectTrigger>
                         <SelectContent className="bg-white z-50 max-h-80">
-                          {JOB_CARD_PREFERENCES.map((option) => 
-                            <SelectItem key={option.value} value={option.value}>
+                          {JOB_CARD_PREFERENCES.map(option => <SelectItem key={option.value} value={option.value}>
                               {option.label}
-                            </SelectItem>
-                          )}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </div>
-                  )}
+                    </div>}
 
                   <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
+                    {isSubmitting ? <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Processing...
-                      </>
-                    ) : (
-                      'Submit Registration'
-                    )}
+                      </> : 'Submit Registration'}
                   </Button>
                 </form>
               </CardContent>
@@ -440,8 +401,6 @@ const RegistrationPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RegistrationPage;
