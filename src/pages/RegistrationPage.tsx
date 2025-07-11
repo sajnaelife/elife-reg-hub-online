@@ -54,6 +54,7 @@ const RegistrationPage = () => {
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
+  const [preferenceOptions, setPreferenceOptions] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -63,6 +64,7 @@ const RegistrationPage = () => {
     agent_pro: '',
     preference: ''
   });
+
   const {
     data: category,
     isLoading: categoryLoading
@@ -92,6 +94,28 @@ const RegistrationPage = () => {
       return data as Panchayath[];
     }
   });
+
+  // Fetch job card preferences when category is job card
+  useEffect(() => {
+    const fetchJobCardPreferences = async () => {
+      if (category && category.name.toLowerCase().includes('job card')) {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('preference')
+          .eq('id', category.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching job card preferences:', error);
+        } else if (data?.preference) {
+          const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
+          setPreferenceOptions(preferences);
+        }
+      }
+    };
+
+    fetchJobCardPreferences();
+  }, [category]);
 
   // Show warning dialog when category loads and has a warning message
   useEffect(() => {
@@ -268,30 +292,7 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-  const [preferenceOptions, setPreferenceOptions] = useState<string[]>([]);
   const isJobCardCategory = category?.name.toLowerCase().includes('job card');
-
-  // Fetch job card preferences when category is job card
-  useEffect(() => {
-    const fetchJobCardPreferences = async () => {
-      if (isJobCardCategory && category) {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('preference')
-          .eq('id', category.id)
-          .single();
-        
-        if (error) {
-          console.error('Error fetching job card preferences:', error);
-        } else if (data?.preference) {
-          const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
-          setPreferenceOptions(preferences);
-        }
-      }
-    };
-
-    fetchJobCardPreferences();
-  }, [isJobCardCategory, category]);
   const RegistrationForm = () => <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="name">Full Name * / പൂർണ്ണ നാമം *</Label>
