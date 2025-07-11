@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -95,7 +94,8 @@ const RegistrationPage = () => {
 
   // Show warning dialog when category loads and has a warning message
   useEffect(() => {
-    if (category && category.warning_message && !warningAcknowledged) {
+    if (category && category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
+      console.log('Category warning message:', category.warning_message);
       setShowWarningDialog(true);
     }
   }, [category, warningAcknowledged]);
@@ -196,8 +196,8 @@ const RegistrationPage = () => {
     );
   }
 
-  // Show warning dialog before showing the registration form
-  if (category.warning_message && !warningAcknowledged) {
+  // Show warning dialog if category has a warning message and user hasn't acknowledged it
+  if (category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -213,8 +213,8 @@ const RegistrationPage = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">ജോബ് കാർഡ് റജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">സമ്മതം, ഫ്രീ റജിസ്ട്രേഷൻ</AlertDialogAction>
+              <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">Proceed</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
