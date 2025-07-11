@@ -196,7 +196,7 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="utilities">
-            <UtilitiesManagement permissions={permissions} />
+            <UtilitiesManagement />
           </TabsContent>
 
           <TabsContent value="reports">

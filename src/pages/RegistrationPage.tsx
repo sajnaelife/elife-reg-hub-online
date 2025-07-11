@@ -268,23 +268,30 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-  const preferenceOptions = [{
-    value: 'farmelife',
-    label: 'Farmelife'
-  }, {
-    value: 'foodelife',
-    label: 'Foodelife'
-  }, {
-    value: 'organelife',
-    label: 'Organelife'
-  }, {
-    value: 'entrelife',
-    label: 'Entrelife'
-  }, {
-    value: 'no',
-    label: 'No'
-  }];
+  const [preferenceOptions, setPreferenceOptions] = useState<string[]>([]);
   const isJobCardCategory = category?.name.toLowerCase().includes('job card');
+
+  // Fetch job card preferences when category is job card
+  useEffect(() => {
+    const fetchJobCardPreferences = async () => {
+      if (isJobCardCategory && category) {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('preference')
+          .eq('id', category.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching job card preferences:', error);
+        } else if (data?.preference) {
+          const preferences = data.preference.split(',').map(p => p.trim()).filter(p => p);
+          setPreferenceOptions(preferences);
+        }
+      }
+    };
+
+    fetchJobCardPreferences();
+  }, [isJobCardCategory, category]);
   const RegistrationForm = () => <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="name">Full Name * / പൂർണ്ണ നാമം *</Label>
@@ -332,8 +339,8 @@ const RegistrationPage = () => {
               <SelectValue placeholder="Select preference / മുൻഗണന തിരഞ്ഞെടുക്കുക" />
             </SelectTrigger>
             <SelectContent>
-              {preferenceOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+              {preferenceOptions.map((option, index) => <SelectItem key={index} value={option}>
+                  {option}
                 </SelectItem>)}
             </SelectContent>
           </Select>

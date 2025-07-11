@@ -96,7 +96,7 @@ const RegistrationEditDialog: React.FC<RegistrationEditDialogProps> = ({
         .from('categories')
         .select('preference')
         .ilike('name', '%job card%')
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching job card preferences:', error);
