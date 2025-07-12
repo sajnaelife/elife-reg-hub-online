@@ -11,8 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, AlertTriangle, PartyPopper } from 'lucide-react';
-
+import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 interface Category {
   id: string;
   name: string;
@@ -23,13 +22,11 @@ interface Category {
   popup_image_url: string | null;
   qr_image_url: string | null;
 }
-
 interface Panchayath {
   id: string;
   name: string;
   district: string;
 }
-
 interface RegistrationData {
   name: string;
   address: string;
@@ -60,7 +57,6 @@ const JOB_CARD_PREFERENCES = [{
   value: 'no',
   label: 'No (പ്രത്യേകം ഇല്ല)'
 }];
-
 const RegistrationPage = () => {
   const {
     categoryId
@@ -75,9 +71,7 @@ const RegistrationPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [generatedCustomerId, setGeneratedCustomerId] = useState('');
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [showCongratulationsDialog, setShowCongratulationsDialog] = useState(false);
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
-  const [congratulationsAcknowledged, setCongratulationsAcknowledged] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -87,7 +81,6 @@ const RegistrationPage = () => {
     agent_pro: '',
     preference: ''
   });
-
   const {
     data: category,
     isLoading: categoryLoading
@@ -104,7 +97,6 @@ const RegistrationPage = () => {
     },
     enabled: !!categoryId
   });
-
   const {
     data: panchayaths
   } = useQuery({
@@ -119,48 +111,27 @@ const RegistrationPage = () => {
     }
   });
 
-  // Show appropriate dialog when category loads
+  // Show warning dialog when category loads and has a warning message
   useEffect(() => {
-    if (category) {
-      const isJobCardCategory = category.name.toLowerCase().includes('job card');
-      
-      if (isJobCardCategory && !congratulationsAcknowledged) {
-        console.log('Job card category detected, showing congratulations popup');
-        setShowCongratulationsDialog(true);
-      } else if (!isJobCardCategory && category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
-        console.log('Category warning message:', category.warning_message);
-        setShowWarningDialog(true);
-      }
+    if (category && category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
+      console.log('Category warning message:', category.warning_message);
+      setShowWarningDialog(true);
     }
-  }, [category, warningAcknowledged, congratulationsAcknowledged]);
-
+  }, [category, warningAcknowledged]);
   const handleWarningAccept = () => {
     setShowWarningDialog(false);
     setWarningAcknowledged(true);
   };
-
   const handleWarningCancel = () => {
     setShowWarningDialog(false);
     navigate('/categories');
   };
-
-  const handleCongratulationsAccept = () => {
-    setShowCongratulationsDialog(false);
-    setCongratulationsAcknowledged(true);
-  };
-
-  const handleCongratulationsCancel = () => {
-    setShowCongratulationsDialog(false);
-    navigate('/categories');
-  };
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.address || !formData.mobile_number || !formData.ward || !categoryId || !category) {
@@ -218,7 +189,6 @@ const RegistrationPage = () => {
       setIsSubmitting(false);
     }
   };
-
   if (categoryLoading) {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -227,7 +197,6 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-
   if (!category) {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -239,34 +208,8 @@ const RegistrationPage = () => {
       </div>;
   }
 
-  const isJobCardCategory = category?.name.toLowerCase().includes('job card');
-
-  // Show congratulations dialog for job card categories
-  if (isJobCardCategory && !congratulationsAcknowledged) {
-    return <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <AlertDialog open={showCongratulationsDialog} onOpenChange={setShowCongratulationsDialog}>
-          <AlertDialogContent className="my-0 mx-0 px-0 py-0">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <PartyPopper className="h-5 w-5 text-green-600" />
-                Congratulations!
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-center mx-[20px]">
-                🎉 Congratulations! You have selected the Job Card registration. This is a great opportunity for employment and skill development. Please proceed to fill out your registration details.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleCongratulationsCancel} className="text-sm text-red-600 bg-gray-300 hover:bg-gray-200">മറ്റേതെങ്കിലും രജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleCongratulationsAccept} className="text-white text-xs text-center mx-0 my-0 px-0 py-0 rounded-md font-medium bg-green-600 hover:bg-green-700">രജിസ്റ്റേഷൻ തുടരുക</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>;
-  }
-
-  // Show warning dialog for non-job card categories that have warning messages
-  if (!isJobCardCategory && category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
+  // Show warning dialog if category has a warning message and user hasn't acknowledged it
+  if (category.warning_message && category.warning_message.trim() !== '' && !warningAcknowledged) {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
@@ -281,14 +224,13 @@ const RegistrationPage = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleWarningCancel} className="text-sm text-red-600 bg-yellow-300 hover:bg-yellow-200">മറ്റേതെങ്കിലും രജിസ്റ്റേഷൻ</AlertDialogCancel>
+              <AlertDialogCancel onClick={handleWarningCancel} className="text-sm text-red-600 bg-yellow-300 hover:bg-yellow-200">മറ്റേതെങ്കിലും രജിസ്ട്രേഷൻ</AlertDialogCancel>
               <AlertDialogAction onClick={handleWarningAccept} className="text-lime-50 text-xs text-center mx-0 my-0 px-0 py-0 rounded-md font-medium bg-blue-800 hover:bg-blue-700">സ്വയംതൊഴിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>;
   }
-
   if (showSuccess) {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -310,7 +252,9 @@ const RegistrationPage = () => {
                     <span>{category.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-semibold">Fee Paid:</span>
+                    <span className="font-semibold text-sm">🎉 നിങൾ ജോബ് കാർഡ തിരഞ്ഞെടുത്തതിന് നന്ദി.🎉  
+
+ജോബ് കാർഡിൻ്റെ ആനുകൂല്യങ്ങൾ . ഇത് ഒരു സ്പെഷ്യൽ ഡിസ്കൗണ്ട് കാർഡ് ആണ് . ഇത് ഒരു പ്രിവിലേജ് കാർഡ് ആണ് . ഇത് ഒരു ഫ്രീഡം കാർഡ് ആണ് . ഇത് ഒരു ലോൺ കാർഡ് ആണ് . ഇത് ഒരു ഇൻവെസ്റ്‌മെൻ്റ് കാർഡ് ആണ്</span>
                     <span>₹{category.offer_fee}</span>
                   </div>
                   <div className="flex justify-between">
@@ -345,7 +289,7 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-
+  const isJobCardCategory = category?.name.toLowerCase().includes('job card');
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -461,5 +405,4 @@ const RegistrationPage = () => {
       </div>
     </div>;
 };
-
 export default RegistrationPage;
