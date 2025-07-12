@@ -225,7 +225,7 @@ const RegistrationPage = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleWarningCancel} className="text-sm text-red-600 bg-yellow-300 hover:bg-yellow-200">മറ്റേതെങ്കിലും രജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="text-lime-50 text-xs text-center mx-0 my-0 px-0 py-0 rounded-md font-medium bg-purple-700 hover:bg-purple-600">സ്വയംതൊഴിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
+              <AlertDialogAction onClick={handleWarningAccept} className="text-lime-50 text-xs text-center mx-0 my-0 px-0 py-0 rounded-md font-medium bg-blue-800 hover:bg-blue-700">സ്വയംതൊഴിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
