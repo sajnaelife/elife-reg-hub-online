@@ -219,13 +219,13 @@ const RegistrationPage = () => {
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 Warning
               </AlertDialogTitle>
-              <AlertDialogDescription className="whitespace-pre-wrap text-center">
+              <AlertDialogDescription className="whitespace-pre-wrap text-center mx-[20px]">
                 {category.warning_message}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">ജോബ് കാർഡ് റജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-lime-50 text-xs text-center rounded-sm my-0 mx-0 px-0">സ്വയംതൊഴിൽ പദ്ധതികളിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-lime-50 text-xs text-center mx-0 my-0 px-0 py-0 rounded-md font-normal">സ്വയംതൊഴിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
