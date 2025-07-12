@@ -1,10 +1,12 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import DateRangeFilter from './reports/DateRangeFilter';
 
 const ReportsManagement = ({
   permissions
@@ -12,6 +14,8 @@ const ReportsManagement = ({
   permissions: any;
 }) => {
   const { toast } = useToast();
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   // Fetch registration summary by panchayath
   const {
@@ -56,36 +60,53 @@ const ReportsManagement = ({
     }
   });
 
-  // Fetch overall statistics
+  // Fetch overall statistics with date filtering for fees
   const {
     data: stats,
     isLoading: loadingStats
   } = useQuery({
-    queryKey: ['admin-stats'],
+    queryKey: ['admin-stats', startDate, endDate],
     queryFn: async () => {
-      const [registrationsCount, categoriesCount, panchayathsCount, activeCategories, feesData] = await Promise.all([supabase.from('registrations').select('*', {
-        count: 'exact',
-        head: true
-      }), supabase.from('categories').select('*', {
-        count: 'exact',
-        head: true
-      }), supabase.from('panchayaths').select('*', {
-        count: 'exact',
-        head: true
-      }), supabase.from('categories').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('is_active', true), supabase.from('registrations').select('fee_paid')]);
+      const [registrationsCount, categoriesCount, panchayathsCount, activeCategories] = await Promise.all([
+        supabase.from('registrations').select('*', {
+          count: 'exact',
+          head: true
+        }), 
+        supabase.from('categories').select('*', {
+          count: 'exact',
+          head: true
+        }), 
+        supabase.from('panchayaths').select('*', {
+          count: 'exact',
+          head: true
+        }), 
+        supabase.from('categories').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('is_active', true)
+      ]);
 
-      // Calculate total fees collected only from approved registrations
-      const approvedFeesData = await supabase
+      // Calculate total fees collected with date filtering
+      let feesQuery = supabase
         .from('registrations')
-        .select('fee_paid')
+        .select('fee_paid, approved_date')
         .eq('status', 'approved');
+      
+      if (startDate) {
+        feesQuery = feesQuery.gte('approved_date', startDate.toISOString());
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        feesQuery = feesQuery.lte('approved_date', endOfDay.toISOString());
+      }
+
+      const approvedFeesData = await feesQuery;
       
       const totalFeesCollected = approvedFeesData.data?.reduce((sum, reg) => {
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
+
       return {
         totalRegistrations: registrationsCount.count || 0,
         totalCategories: categoriesCount.count || 0,
@@ -216,6 +237,11 @@ const ReportsManagement = ({
     }
   };
 
+  const handleClearDateFilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+  };
+
   if (!permissions.canRead) {
     return <Card>
         <CardContent className="p-6">
@@ -227,6 +253,22 @@ const ReportsManagement = ({
   }
 
   return <div className="space-y-6">
+      {/* Date Filter for Fees */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Fee Collection Date Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onClear={handleClearDateFilter}
+          />
+        </CardContent>
+      </Card>
+
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card>
@@ -278,7 +320,7 @@ const ReportsManagement = ({
               ₹{loadingStats ? '...' : (stats?.totalFeesCollected || 0).toLocaleString('en-IN')}
             </div>
             <p className="text-xs text-muted-foreground">
-              Revenue from registrations
+              {startDate || endDate ? 'Filtered by date range' : 'All time revenue'}
             </p>
           </CardContent>
         </Card>

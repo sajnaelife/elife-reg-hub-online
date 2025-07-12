@@ -35,6 +35,15 @@ const RegistrationsManagement = ({
 
   console.log('RegistrationsManagement permissions:', permissions);
 
+  // Helper function to calculate days remaining for pending registrations
+  const calculateDaysRemaining = (createdAt: string): number => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffTime = now.getTime() - created.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, 15 - diffDays);
+  };
+
   // Fetch registrations with real-time updates
   const {
     data: registrations,
@@ -117,10 +126,17 @@ const RegistrationsManagement = ({
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: UpdateStatusParams) => {
       console.log('Updating status for registration:', id, 'to:', status);
-      const { error } = await supabase.from('registrations').update({
+      const updateData: any = {
         status,
         updated_at: new Date().toISOString()
-      }).eq('id', id);
+      };
+      
+      // Set approved_date when status is approved
+      if (status === 'approved') {
+        updateData.approved_date = new Date().toISOString();
+      }
+      
+      const { error } = await supabase.from('registrations').update(updateData).eq('id', id);
       if (error) {
         console.error('Error updating status:', error);
         throw error;
@@ -348,7 +364,9 @@ const RegistrationsManagement = ({
                 <th className="border border-gray-200 px-4 py-2 text-left">Preference</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Date</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Reg. Date</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Approved Date</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Expiry</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
@@ -382,6 +400,25 @@ const RegistrationsManagement = ({
                   <td className="border border-gray-200 px-4 py-2">₹{registration.fee_paid}</td>
                   <td className="border border-gray-200 px-4 py-2">
                     {new Date(registration.created_at).toLocaleDateString('en-IN')}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2">
+                    {registration.approved_date 
+                      ? new Date(registration.approved_date).toLocaleDateString('en-IN')
+                      : '-'
+                    }
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2">
+                    {registration.status === 'pending' ? (
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        calculateDaysRemaining(registration.created_at) <= 3 
+                          ? 'bg-red-100 text-red-800' 
+                          : calculateDaysRemaining(registration.created_at) <= 7
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {calculateDaysRemaining(registration.created_at)} days
+                      </span>
+                    ) : '-'}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     <RegistrationsTableActions

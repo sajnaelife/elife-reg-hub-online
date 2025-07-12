@@ -13,6 +13,7 @@ export interface Registration {
   fee_paid: number;
   created_at: string;
   updated_at: string;
+  approved_date: string | null;
   category_id: string;
   panchayath_id: string | null;
   preference: string | null;
