@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Search, CheckCircle, Clock, XCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+
 const StatusCheckPage = () => {
   const [searchData, setSearchData] = useState({
     mobile_number: ''
   });
   const [shouldSearch, setShouldSearch] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const {
     data: registration,
     isLoading,
@@ -41,12 +58,50 @@ const StatusCheckPage = () => {
     },
     enabled: shouldSearch && !!searchData.mobile_number
   });
+
+  const approveRegistrationMutation = useMutation({
+    mutationFn: async (registrationId: string) => {
+      const { error } = await supabase
+        .from('registrations')
+        .update({ 
+          status: 'approved',
+          approved_date: new Date().toISOString()
+        })
+        .eq('id', registrationId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Registration Approved",
+        description: "Your free registration has been confirmed and approved!",
+      });
+      // Refetch the registration data to show updated status
+      queryClient.invalidateQueries({ queryKey: ['registration-status', searchData.mobile_number] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to approve registration. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Error approving registration:', error);
+    }
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchData.mobile_number) {
       setShouldSearch(true);
     }
   };
+
+  const handleConfirmFreeRegistration = () => {
+    if (registration?.id) {
+      approveRegistrationMutation.mutate(registration.id);
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -57,6 +112,7 @@ const StatusCheckPage = () => {
         return <Clock className="h-6 w-6 text-yellow-600" />;
     }
   };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -67,6 +123,10 @@ const StatusCheckPage = () => {
         return <Badge className="text-yellow-800 border-yellow-200 bg-amber-400 rounded-xl">Pending</Badge>;
     }
   };
+
+  const isPennyekartFreeRegistration = registration?.categories?.name === 'Pennyekart Free Registration';
+  const isPendingStatus = registration?.status === 'pending';
+
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -114,6 +174,40 @@ const StatusCheckPage = () => {
                     </div>
                     {getStatusBadge(registration.status)}
                   </div>
+
+                  {/* Confirmation button for Pennyekart Free Registration */}
+                  {isPennyekartFreeRegistration && isPendingStatus && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2">Free Registration Confirmation</h4>
+                      <p className="text-blue-700 mb-4">
+                        Click the button below to confirm your free registration and get instant approval.
+                      </p>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                            Confirm Free Registration
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Free Registration</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              I confirmed as free registration. By clicking confirm, your registration will be automatically approved.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={handleConfirmFreeRegistration}
+                              disabled={approveRegistrationMutation.isPending}
+                            >
+                              {approveRegistrationMutation.isPending ? 'Confirming...' : 'Confirm'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4 bg-green-200">
