@@ -213,7 +213,7 @@ const RegistrationPage = () => {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
         <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="my-0 mx-0 px-0 py-0">
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -225,7 +225,7 @@ const RegistrationPage = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleWarningCancel} className="text-xs text-red-600">ജോബ് കാർഡ് റജിസ്ട്രേഷൻ</AlertDialogCancel>
-              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-xs text-lime-50">സ്വയംതൊഴിൽ പദ്ധതികളിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
+              <AlertDialogAction onClick={handleWarningAccept} className="bg-blue-600 hover:bg-blue-700 text-lime-50 text-xs text-center rounded-sm my-0 mx-0 px-0">സ്വയംതൊഴിൽ പദ്ധതികളിൽ താൽപര്യം ഇല്ല</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
