@@ -117,7 +117,6 @@ const RegistrationPage = () => {
   useEffect(() => {
     if (category) {
       const isJobCardCategory = category.name.toLowerCase().includes('job card');
-      
       if (isJobCardCategory && !congratulationsAcknowledged) {
         console.log('Showing congratulations dialog for job card category');
         setShowCongratulationsDialog(true);
@@ -127,22 +126,18 @@ const RegistrationPage = () => {
       }
     }
   }, [category, warningAcknowledged, congratulationsAcknowledged]);
-
   const handleWarningAccept = () => {
     setShowWarningDialog(false);
     setWarningAcknowledged(true);
   };
-
   const handleWarningCancel = () => {
     setShowWarningDialog(false);
     navigate('/categories');
   };
-
   const handleCongratulationsAccept = () => {
     setShowCongratulationsDialog(false);
     setCongratulationsAcknowledged(true);
   };
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -224,7 +219,6 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-
   const isJobCardCategory = category.name.toLowerCase().includes('job card');
 
   // Show congratulations dialog for job card categories
@@ -238,16 +232,8 @@ const RegistrationPage = () => {
                 <PartyPopper className="h-5 w-5 text-green-600" />
                 Congratulations! 🎉
               </AlertDialogTitle>
-              <AlertDialogDescription className="whitespace-pre-wrap text-center mx-[20px]">
-                🎉 നിങ്ങൾ ജോബ് കാർഡ് തിരഞ്ഞെടുത്തതിന് നന്ദി! 🎉
-
-                ജോബ് കാർഡിന്റെ ആനുകൂല്യങ്ങൾ:
-                ▫️ ഇത് ഒരു സ്പെഷ്യൽ ഡിസ്കൗണ്ട് കാർഡ് ആണ്
-                ▫️ ഇത് ഒരു പ്രിവിലേജ് കാർഡ് ആണ്
-                ▫️ ഇത് ഒരു ഫ്രീഡം കാർഡ് ആണ്
-                ▫️ ഇത് ഒരു ലോൺ കാർഡ് ആണ്
-                ▫️ ഇത് ഒരു ഇൻവെസ്റ്റ്മെന്റ് കാർഡ് ആണ്
-              </AlertDialogDescription>
+              <AlertDialogDescription className="whitespace-pre-wrap text-center mx-[20px]">🎉 നിങ്ങൾ ജോബ് കാർഡ് തിരഞ്ഞെടുത്തതിന് നന്ദി! 🎉 ജോബ് കാർഡിന്റെ ആനുകൂല്യങ്ങൾ: ▫️ ഇത് ഒരു സ്പെഷ്യൽ ഡിസ്കൗണ്ട് കാർഡ് ആണ് ▫️ ഇത് ഒരു പ്രിവിലേജ് കാർഡ് ആണ് ▫️ ഇത് ഒരു ഫ്രീഡം കാർഡ് ആണ് ▫️ ഇത് ഒരു ലോൺ കാർഡ് ആണ് ▫️ ഇത് ഒരു ഇൻവെസ്റ്റ്മെന്റ് കാർഡ് ആണ്...
+🎉കൂടുതൽ വിവരങ്ങൾക്ക് നിങ്ങളുടെ ഏജൻ്റ് മാരുമായി ബന്ധപെടുക🎉</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogAction onClick={handleCongratulationsAccept} className="text-white bg-green-600 hover:bg-green-700">
@@ -282,7 +268,6 @@ const RegistrationPage = () => {
         </AlertDialog>
       </div>;
   }
-
   if (showSuccess) {
     return <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -339,7 +324,6 @@ const RegistrationPage = () => {
         </div>
       </div>;
   }
-
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -455,5 +439,4 @@ const RegistrationPage = () => {
       </div>
     </div>;
 };
-
 export default RegistrationPage;
