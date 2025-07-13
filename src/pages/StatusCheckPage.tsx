@@ -18,9 +18,11 @@ const StatusCheckPage = () => {
   });
   const [shouldSearch, setShouldSearch] = useState(false);
   const [isEditingConfirmation, setIsEditingConfirmation] = useState(false);
+  const [isEditingButton, setIsEditingButton] = useState(false);
   const [editableConfirmationText, setEditableConfirmationText] = useState(
     "'ഒരു വീട്ടിൽ ഒരു സംരംഭക എന്ന ശീർഷകത്തിൽ' സ്ത്രീകളുടെ കൂട്ടായ്മയായ  ഇ - ലൈഫ് സൊസൈറ്റി നടപ്പാക്കുന്ന ' സംരംഭക.കോം ' എന്ന പദ്ധതിയുടെ ഭാഗമാകാൻ ഇപ്പൊൾ ആഗ്രഹമില്ല, ഭാവിയിൽ പദ്ധതിയുടെ ഭാഗമാകണം എന്നുണ്ടെങ്കിൽ അടുത്തുള്ള ഇ - ലൈഫ് ഏജൻ്റിനെ അറിയിക്കാം"
   );
+  const [editableButtonText, setEditableButtonText] = useState("Confirm Free Registration");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -105,6 +107,14 @@ const StatusCheckPage = () => {
     });
   };
 
+  const handleSaveButtonText = () => {
+    setIsEditingButton(false);
+    toast({
+      title: "Button text updated",
+      description: "The button text has been updated successfully."
+    });
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -119,11 +129,11 @@ const StatusCheckPage = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-100 text-green-800 border-green-200 text-2xl px-6 py-3 text-center font-bold">Approved</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200 text-4xl px-8 py-4 text-center font-bold">Approved</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 border-red-200 text-2xl px-6 py-3 text-center font-bold">Rejected</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-200 text-4xl px-8 py-4 text-center font-bold">Rejected</Badge>;
       default:
-        return <Badge className="text-yellow-800 border-yellow-200 bg-amber-400 rounded-xl text-2xl px-6 py-3 text-center font-bold">Pending</Badge>;
+        return <Badge className="text-yellow-800 border-yellow-200 bg-amber-400 rounded-xl text-4xl px-8 py-4 text-center font-bold">Pending</Badge>;
     }
   };
 
@@ -245,31 +255,75 @@ const StatusCheckPage = () => {
                       ) : (
                         <>
                           <p className="text-blue-700 mb-4 text-lg">{editableConfirmationText}</p>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold">
-                                Confirm Free Registration
+                          
+                          {/* Editable Button Section */}
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-blue-600">Button Text:</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingButton(!isEditingButton)}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                {isEditingButton ? <X className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirm Free Registration</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  I confirmed as free registration. By clicking confirm, your registration will be automatically approved.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleConfirmFreeRegistration}
-                                  disabled={approveRegistrationMutation.isPending}
-                                  className="bg-blue-600 hover:bg-blue-700"
-                                >
-                                  {approveRegistrationMutation.isPending ? 'Confirming...' : 'Confirm'}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                            </div>
+                            
+                            {isEditingButton ? (
+                              <div className="space-y-2">
+                                <Input
+                                  value={editableButtonText}
+                                  onChange={(e) => setEditableButtonText(e.target.value)}
+                                  className="text-blue-700"
+                                  placeholder="Enter button text..."
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={handleSaveButtonText}
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                    size="sm"
+                                  >
+                                    <Save className="h-4 w-4 mr-2" />
+                                    Save
+                                  </Button>
+                                  <Button
+                                    onClick={() => setIsEditingButton(false)}
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold">
+                                    {editableButtonText}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Free Registration</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      I confirmed as free registration. By clicking confirm, your registration will be automatically approved.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={handleConfirmFreeRegistration}
+                                      disabled={approveRegistrationMutation.isPending}
+                                      className="bg-blue-600 hover:bg-blue-700"
+                                    >
+                                      {approveRegistrationMutation.isPending ? 'Confirming...' : 'Confirm'}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
