@@ -124,10 +124,18 @@ const StatusCheckPage = () => {
     }
   };
 
+  // Check if this is a Pennyekart Free Registration with pending status
   const isPennyekartFreeRegistration = registration?.categories?.name === 'Pennyekart Free Registration';
   const isPendingStatus = registration?.status === 'pending';
+  const showConfirmationButton = isPennyekartFreeRegistration && isPendingStatus;
 
-  return <div className="min-h-screen bg-gray-50">
+  console.log('Registration data:', registration);
+  console.log('Category name:', registration?.categories?.name);
+  console.log('Status:', registration?.status);
+  console.log('Show confirmation button:', showConfirmationButton);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -149,10 +157,17 @@ const StatusCheckPage = () => {
             <form onSubmit={handleSearch} className="space-y-4">
               <div>
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input id="mobile" type="tel" value={searchData.mobile_number} onChange={e => setSearchData(prev => ({
-                ...prev,
-                mobile_number: e.target.value
-              }))} placeholder="Enter your mobile number" required />
+                <Input 
+                  id="mobile" 
+                  type="tel" 
+                  value={searchData.mobile_number} 
+                  onChange={e => setSearchData(prev => ({
+                    ...prev,
+                    mobile_number: e.target.value
+                  }))} 
+                  placeholder="Enter your mobile number" 
+                  required 
+                />
               </div>
               <Button type="submit" className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
                 Check Status
@@ -161,12 +176,16 @@ const StatusCheckPage = () => {
           </CardContent>
         </Card>
 
-        {shouldSearch && <Card>
+        {shouldSearch && (
+          <Card>
             <CardContent className="pt-6">
-              {isLoading ? <div className="text-center py-8">
+              {isLoading ? (
+                <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   <p className="mt-4 text-gray-600">Searching for your application...</p>
-                </div> : registration ? <div className="space-y-6">
+                </div>
+              ) : registration ? (
+                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {getStatusIcon(registration.status)}
@@ -176,15 +195,15 @@ const StatusCheckPage = () => {
                   </div>
 
                   {/* Confirmation button for Pennyekart Free Registration */}
-                  {isPennyekartFreeRegistration && isPendingStatus && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">Free Registration Confirmation</h4>
+                  {showConfirmationButton && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                      <h4 className="font-semibold text-blue-900 mb-2 text-lg">Free Registration Confirmation</h4>
                       <p className="text-blue-700 mb-4">
-                        Click the button below to confirm your free registration and get instant approval.
+                        Your Pennyekart Free Registration is pending approval. Click the button below to confirm your free registration and get instant approval.
                       </p>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
                             Confirm Free Registration
                           </Button>
                         </AlertDialogTrigger>
@@ -200,6 +219,7 @@ const StatusCheckPage = () => {
                             <AlertDialogAction 
                               onClick={handleConfirmFreeRegistration}
                               disabled={approveRegistrationMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700"
                             >
                               {approveRegistrationMutation.isPending ? 'Confirming...' : 'Confirm'}
                             </AlertDialogAction>
@@ -210,7 +230,7 @@ const StatusCheckPage = () => {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4 bg-green-200">
+                    <div className="space-y-4 bg-green-200 p-4 rounded-lg">
                       <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
                       <div className="space-y-2">
                         <div>
@@ -232,7 +252,7 @@ const StatusCheckPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4 bg-green-300">
+                    <div className="space-y-4 bg-green-300 p-4 rounded-lg">
                       <h3 className="text-lg font-semibold text-gray-900">Registration Details</h3>
                       <div className="space-y-2">
                         <div>
@@ -243,12 +263,14 @@ const StatusCheckPage = () => {
                           <span className="text-sm text-gray-500">Fee Paid:</span>
                           <p className="font-medium">₹{registration.fee_paid}</p>
                         </div>
-                        {registration.panchayaths && <div>
+                        {registration.panchayaths && (
+                          <div>
                             <span className="text-sm text-gray-500">Panchayath:</span>
                             <p className="font-medium">
                               {registration.panchayaths.name}, {registration.panchayaths.district}
                             </p>
-                          </div>}
+                          </div>
+                        )}
                         <div>
                           <span className="text-sm text-gray-500">Ward:</span>
                           <p className="font-medium">{registration.ward}</p>
@@ -259,6 +281,14 @@ const StatusCheckPage = () => {
                             {new Date(registration.created_at).toLocaleDateString('en-IN')}
                           </p>
                         </div>
+                        {registration.approved_date && (
+                          <div>
+                            <span className="text-sm text-gray-500">Approved On:</span>
+                            <p className="font-medium">
+                              {new Date(registration.approved_date).toLocaleDateString('en-IN')}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -271,17 +301,23 @@ const StatusCheckPage = () => {
                       {registration.status === 'pending' && "Your application is currently under review. You will be notified once a decision is made."}
                     </p>
                   </div>
-                </div> : <div className="text-center py-8">
+                </div>
+              ) : (
+                <div className="text-center py-8">
                   <XCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Application Found</h3>
                   <p className="text-gray-600">
                     No registration found with the provided mobile number. 
                     Please check your mobile number and try again.
                   </p>
-                </div>}
+                </div>
+              )}
             </CardContent>
-          </Card>}
+          </Card>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default StatusCheckPage;
