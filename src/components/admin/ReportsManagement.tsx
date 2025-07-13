@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DateRangeFilter from './reports/DateRangeFilter';
 
@@ -107,12 +106,23 @@ const ReportsManagement = ({
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
 
+      // Calculate pending amount from pending registrations
+      const pendingRegistrationsData = await supabase
+        .from('registrations')
+        .select('fee_paid')
+        .eq('status', 'pending');
+
+      const totalPendingAmount = pendingRegistrationsData.data?.reduce((sum, reg) => {
+        return sum + (reg.fee_paid || 0);
+      }, 0) || 0;
+
       return {
         totalRegistrations: registrationsCount.count || 0,
         totalCategories: categoriesCount.count || 0,
         totalPanchayaths: panchayathsCount.count || 0,
         activeCategories: activeCategories.count || 0,
-        totalFeesCollected
+        totalFeesCollected,
+        totalPendingAmount
       };
     }
   });
@@ -270,7 +280,7 @@ const ReportsManagement = ({
       </Card>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
@@ -321,6 +331,21 @@ const ReportsManagement = ({
             </div>
             <p className="text-xs text-muted-foreground">
               {startDate || endDate ? 'Filtered by date range' : 'All time revenue'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-orange-400">
+            <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="bg-orange-100">
+            <div className="text-2xl font-bold text-orange-600">
+              ₹{loadingStats ? '...' : (stats?.totalPendingAmount || 0).toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              From pending registrations
             </p>
           </CardContent>
         </Card>
