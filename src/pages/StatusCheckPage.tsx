@@ -125,13 +125,15 @@ const StatusCheckPage = () => {
   };
 
   // Check if this is a Pennyekart Free Registration with pending status
-  const isPennyekartFreeRegistration = registration?.categories?.name === 'Pennyekart Free Registration';
+  const isPennyekartFreeRegistration = registration?.categories?.name?.includes('Pennyekart Free Registration');
   const isPendingStatus = registration?.status === 'pending';
   const showConfirmationButton = isPennyekartFreeRegistration && isPendingStatus;
 
   console.log('Registration data:', registration);
   console.log('Category name:', registration?.categories?.name);
   console.log('Status:', registration?.status);
+  console.log('Is Pennyekart Free Registration:', isPennyekartFreeRegistration);
+  console.log('Is Pending Status:', isPendingStatus);
   console.log('Show confirmation button:', showConfirmationButton);
 
   return (
@@ -194,16 +196,16 @@ const StatusCheckPage = () => {
                     {getStatusBadge(registration.status)}
                   </div>
 
-                  {/* Confirmation button for Pennyekart Free Registration */}
+                  {/* Confirmation button for Pennyekart Free Registration - placed prominently at the top */}
                   {showConfirmationButton && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                      <h4 className="font-semibold text-blue-900 mb-2 text-lg">Free Registration Confirmation</h4>
-                      <p className="text-blue-700 mb-4">
+                    <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
+                      <h4 className="font-bold text-blue-900 mb-3 text-xl">Free Registration Confirmation</h4>
+                      <p className="text-blue-700 mb-4 text-lg">
                         Your Pennyekart Free Registration is pending approval. Click the button below to confirm your free registration and get instant approval.
                       </p>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold">
                             Confirm Free Registration
                           </Button>
                         </AlertDialogTrigger>
