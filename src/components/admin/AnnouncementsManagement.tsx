@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, Upload, X, ExternalLink, Image } from 'lucide-react';
+import ImageUpload from '@/components/admin/categories/ImageUpload';
 
 interface AnnouncementData {
   title: string;
@@ -18,6 +19,7 @@ interface AnnouncementData {
   expiry_date: string | null;
   is_active: boolean;
   youtube_video_url: string | null;
+  poster_image_url: string | null;
 }
 
 interface Announcement {
@@ -29,6 +31,7 @@ interface Announcement {
   created_at: string;
   updated_at: string;
   youtube_video_url: string | null;
+  poster_image_url: string | null;
 }
 
 const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
@@ -41,7 +44,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
     content: '',
     expiry_date: null,
     is_active: true,
-    youtube_video_url: null
+    youtube_video_url: null,
+    poster_image_url: null
   });
 
   // Fetch announcements
@@ -115,7 +119,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
         content: '',
         expiry_date: null,
         is_active: true,
-        youtube_video_url: null
+        youtube_video_url: null,
+        poster_image_url: null
       });
       toast({
         title: editingAnnouncement ? "Announcement Updated" : "Announcement Created",
@@ -165,7 +170,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
       expiry_date: announcement.expiry_date ? 
         new Date(announcement.expiry_date).toISOString().split('T')[0] : null,
       is_active: announcement.is_active,
-      youtube_video_url: announcement.youtube_video_url
+      youtube_video_url: announcement.youtube_video_url,
+      poster_image_url: announcement.poster_image_url
     });
     setIsDialogOpen(true);
   };
@@ -192,7 +198,8 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
       content: '',
       expiry_date: null,
       is_active: true,
-      youtube_video_url: null
+      youtube_video_url: null,
+      poster_image_url: null
     });
   };
 
@@ -214,7 +221,7 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
                   Add Announcement
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingAnnouncement ? 'Edit Announcement' : 'Add New Announcement'}
@@ -239,6 +246,16 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
                       onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                       rows={4}
                       required
+                    />
+                  </div>
+                  
+                  <div>
+                    <ImageUpload
+                      bucketName="announcement-posters"
+                      currentUrl={formData.poster_image_url || ''}
+                      onUrlChange={(url) => setFormData(prev => ({ ...prev, poster_image_url: url }))}
+                      label="Poster/Picture (Optional)"
+                      accept="image/*"
                     />
                   </div>
                   
@@ -319,12 +336,33 @@ const AnnouncementsManagement = ({ permissions }: { permissions: any }) => {
                       </div>
                     </div>
                     <p className="text-gray-700 mb-3">{announcement.content}</p>
+                    
+                    {/* Display poster image if available */}
+                    {announcement.poster_image_url && (
+                      <div className="mb-3">
+                        <img
+                          src={announcement.poster_image_url}
+                          alt={`${announcement.title} poster`}
+                          className="max-w-sm max-h-32 object-contain border rounded"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>Created: {new Date(announcement.created_at).toLocaleDateString('en-IN')}</span>
                       {announcement.expiry_date && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           Expires: {new Date(announcement.expiry_date).toLocaleDateString('en-IN')}
+                        </span>
+                      )}
+                      {announcement.poster_image_url && (
+                        <span className="flex items-center gap-1">
+                          <Image className="h-3 w-3" />
+                          Poster
                         </span>
                       )}
                     </div>

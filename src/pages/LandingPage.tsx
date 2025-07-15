@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin, Youtube } from 'lucide-react';
+
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
 
@@ -43,6 +45,7 @@ const LandingPage = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
   return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />
       
@@ -50,7 +53,7 @@ const LandingPage = () => {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-6 md:text-5xl">E-life Society 
+            <h1 className="text-4xl font-bold text-gray-900 mb-6 md:text-5xl">E-life Society 
 Self Employment Registration Portal</h1>
             <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto font-normal md:text-base">വിവിധ സ്വയം തൊഴിൽ അവസരങ്ങൾക്കായി രജിസ്റ്റർ ചെയ്യുകയും നിങ്ങളുടെ അപേക്ഷാ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക. ഭാവി കെട്ടിപ്പടുക്കുന്ന ആയിരക്കണക്കിന് സംരംഭകരോടൊപ്പം ചേരൂ.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -130,9 +133,22 @@ Self Employment Registration Portal</h1>
                 <Bell className="h-4 w-4 text-blue-600" />
                 <AlertDescription>
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="mb-1 text-xl font-bold text-amber-600">{announcement.title}</h3>
-                      <p className="text-blue-800">{announcement.content}</p>
+                      <p className="text-blue-800 mb-2">{announcement.content}</p>
+                      {/* Display poster image if available */}
+                      {announcement.poster_image_url && (
+                        <div className="mb-2">
+                          <img
+                            src={announcement.poster_image_url}
+                            alt={`${announcement.title} poster`}
+                            className="max-w-sm max-h-32 object-contain border rounded"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                     {announcement.expiry_date && <Badge variant="outline" className="text-xs">
                         Expires: {new Date(announcement.expiry_date).toLocaleDateString()}
@@ -249,7 +265,7 @@ Self Employment Registration Portal</h1>
             <div className="text-center">
               <Mail className="h-12 w-12 mx-auto mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Email Support</h3>
-              <p className="text-blue-100">teamelifesociety@gmail.com </p>
+              <p className="text-blue-100">teamelifesociety@gmail.com </p>
               <p className="text-blue-100">We'll respond within 24 hours</p>
             </div>
             
@@ -264,4 +280,5 @@ Self Employment Registration Portal</h1>
       </div>
     </div>;
 };
+
 export default LandingPage;

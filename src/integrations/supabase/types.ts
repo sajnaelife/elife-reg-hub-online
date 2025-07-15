@@ -51,6 +51,7 @@ export type Database = {
           expiry_date: string | null
           id: string
           is_active: boolean | null
+          poster_image_url: string | null
           title: string
           updated_at: string | null
           youtube_video_url: string | null
@@ -61,6 +62,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_active?: boolean | null
+          poster_image_url?: string | null
           title: string
           updated_at?: string | null
           youtube_video_url?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_active?: boolean | null
+          poster_image_url?: string | null
           title?: string
           updated_at?: string | null
           youtube_video_url?: string | null
