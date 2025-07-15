@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DateRangeFilter from './reports/DateRangeFilter';
+import ActivePanchayathReport from './reports/ActivePanchayathReport';
 
 const ReportsManagement = ({
   permissions
@@ -403,6 +404,9 @@ const ReportsManagement = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Active Panchayath Report */}
+      <ActivePanchayathReport />
 
       {/* Panchayath Performance Report */}
       <Card>
