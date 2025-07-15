@@ -8,13 +8,14 @@ import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreads
 import { useToast } from '@/hooks/use-toast';
 import DateRangeFilter from './reports/DateRangeFilter';
 import ActivePanchayathReport from './reports/ActivePanchayathReport';
-
 const ReportsManagement = ({
   permissions
 }: {
   permissions: any;
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isPanchayathReportOpen, setIsPanchayathReportOpen] = useState(false);
@@ -75,7 +76,6 @@ const ReportsManagement = ({
         count: 'exact',
         head: true
       });
-      
       if (startDate) {
         registrationsQuery = registrationsQuery.gte('created_at', startDate.toISOString());
       }
@@ -84,29 +84,19 @@ const ReportsManagement = ({
         endOfDay.setHours(23, 59, 59, 999);
         registrationsQuery = registrationsQuery.lte('created_at', endOfDay.toISOString());
       }
-
-      const [registrationsCount, categoriesCount, panchayathsCount, activeCategories] = await Promise.all([
-        registrationsQuery, 
-        supabase.from('categories').select('*', {
-          count: 'exact',
-          head: true
-        }), 
-        supabase.from('panchayaths').select('*', {
-          count: 'exact',
-          head: true
-        }), 
-        supabase.from('categories').select('*', {
-          count: 'exact',
-          head: true
-        }).eq('is_active', true)
-      ]);
+      const [registrationsCount, categoriesCount, panchayathsCount, activeCategories] = await Promise.all([registrationsQuery, supabase.from('categories').select('*', {
+        count: 'exact',
+        head: true
+      }), supabase.from('panchayaths').select('*', {
+        count: 'exact',
+        head: true
+      }), supabase.from('categories').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('is_active', true)]);
 
       // Calculate total fees collected with date filtering
-      let feesQuery = supabase
-        .from('registrations')
-        .select('fee_paid, approved_date')
-        .eq('status', 'approved');
-      
+      let feesQuery = supabase.from('registrations').select('fee_paid, approved_date').eq('status', 'approved');
       if (startDate) {
         feesQuery = feesQuery.gte('approved_date', startDate.toISOString());
       }
@@ -115,19 +105,13 @@ const ReportsManagement = ({
         endOfDay.setHours(23, 59, 59, 999);
         feesQuery = feesQuery.lte('approved_date', endOfDay.toISOString());
       }
-
       const approvedFeesData = await feesQuery;
-      
       const totalFeesCollected = approvedFeesData.data?.reduce((sum, reg) => {
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
 
       // Calculate pending amount from pending registrations with date filtering
-      let pendingQuery = supabase
-        .from('registrations')
-        .select('fee_paid')
-        .eq('status', 'pending');
-
+      let pendingQuery = supabase.from('registrations').select('fee_paid').eq('status', 'pending');
       if (startDate) {
         pendingQuery = pendingQuery.gte('created_at', startDate.toISOString());
       }
@@ -136,13 +120,10 @@ const ReportsManagement = ({
         endOfDay.setHours(23, 59, 59, 999);
         pendingQuery = pendingQuery.lte('created_at', endOfDay.toISOString());
       }
-
       const pendingRegistrationsData = await pendingQuery;
-
       const totalPendingAmount = pendingRegistrationsData.data?.reduce((sum, reg) => {
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
-
       return {
         totalRegistrations: registrationsCount.count || 0,
         totalCategories: categoriesCount.count || 0,
@@ -153,7 +134,6 @@ const ReportsManagement = ({
       };
     }
   });
-
   const handleExportExcel = async () => {
     if (!panchayathSummary) {
       toast({
@@ -163,11 +143,9 @@ const ReportsManagement = ({
       });
       return;
     }
-    
     try {
       // Dynamic import to avoid build issues
       const XLSX = await import('xlsx');
-      
       const exportData = panchayathSummary.map((item: any) => ({
         'Panchayath': item.panchayath,
         'District': item.district,
@@ -177,15 +155,13 @@ const ReportsManagement = ({
           return acc;
         }, {} as Record<string, any>)
       }));
-
       const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Panchayath Report');
       XLSX.writeFile(workbook, `panchayath_performance_${new Date().toISOString().split('T')[0]}.xlsx`);
-      
       toast({
         title: "Export Successful",
-        description: "Excel file has been downloaded.",
+        description: "Excel file has been downloaded."
       });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
@@ -196,7 +172,6 @@ const ReportsManagement = ({
       });
     }
   };
-
   const handleExportPDF = async () => {
     if (!panchayathSummary || panchayathSummary.length === 0) {
       toast({
@@ -206,19 +181,16 @@ const ReportsManagement = ({
       });
       return;
     }
-    
     try {
       console.log('Starting PDF export process...');
-      
+
       // Dynamic import with proper handling
       const jsPDFModule = await import('jspdf');
       const jsPDF = jsPDFModule.default;
-      
+
       // Import autoTable separately
       const autoTableModule = await import('jspdf-autotable');
-      
       console.log('jsPDF and autoTable loaded successfully');
-      
       const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -234,13 +206,7 @@ const ReportsManagement = ({
       doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 25);
 
       // Prepare table data
-      const tableData = panchayathSummary.map((item: any) => [
-        item.panchayath || '',
-        item.district || '',
-        item.totalRegistrations || 0,
-        Object.entries(item.categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')
-      ]);
-
+      const tableData = panchayathSummary.map((item: any) => [item.panchayath || '', item.district || '', item.totalRegistrations || 0, Object.entries(item.categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')]);
       console.log('Table data prepared:', tableData.length, 'rows');
 
       // Add table using autoTable with proper typing
@@ -258,10 +224,21 @@ const ReportsManagement = ({
           fontStyle: 'bold'
         },
         columnStyles: {
-          0: { cellWidth: 50 }, // Panchayath
-          1: { cellWidth: 40 }, // District
-          2: { cellWidth: 30 }, // Total
-          3: { cellWidth: 80 }  // Categories
+          0: {
+            cellWidth: 50
+          },
+          // Panchayath
+          1: {
+            cellWidth: 40
+          },
+          // District
+          2: {
+            cellWidth: 30
+          },
+          // Total
+          3: {
+            cellWidth: 80
+          } // Categories
         }
       });
 
@@ -269,10 +246,9 @@ const ReportsManagement = ({
       const fileName = `panchayath_performance_${new Date().toISOString().split('T')[0]}.pdf`;
       console.log('Saving PDF as:', fileName);
       doc.save(fileName);
-      
       toast({
         title: "Export Successful",
-        description: "PDF file has been downloaded.",
+        description: "PDF file has been downloaded."
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -283,12 +259,10 @@ const ReportsManagement = ({
       });
     }
   };
-
   const handleClearDateFilter = () => {
     setStartDate(null);
     setEndDate(null);
   };
-
   if (!permissions.canRead) {
     return <Card>
         <CardContent className="p-6">
@@ -298,7 +272,6 @@ const ReportsManagement = ({
         </CardContent>
       </Card>;
   }
-
   return <div className="space-y-6">
       {/* Date Filter */}
       <Card>
@@ -306,13 +279,7 @@ const ReportsManagement = ({
           <CardTitle>Date Range Filter</CardTitle>
         </CardHeader>
         <CardContent>
-          <DateRangeFilter
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            onClear={handleClearDateFilter}
-          />
+          <DateRangeFilter startDate={startDate} endDate={endDate} onStartDateChange={setStartDate} onEndDateChange={setEndDate} onClear={handleClearDateFilter} />
           <p className="text-sm text-muted-foreground mt-2">
             Filters Total Registrations, Fee Collection, and Pending Amount
           </p>
@@ -410,17 +377,13 @@ const ReportsManagement = ({
       {/* Active Panchayath Report - Collapsible */}
       <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
         <Card>
-          <CardHeader>
+          <CardHeader className="bg-green-200">
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0 h-auto">
                 <div className="flex items-center gap-2">
                   <CardTitle>Active Panchayath Report</CardTitle>
                 </div>
-                {isActiveReportOpen ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
+                {isActiveReportOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </Button>
             </CollapsibleTrigger>
             <p className="text-sm text-gray-600 text-left">
@@ -438,37 +401,21 @@ const ReportsManagement = ({
       {/* Panchayath Performance Report - Collapsible */}
       <Collapsible open={isPanchayathReportOpen} onOpenChange={setIsPanchayathReportOpen}>
         <Card>
-          <CardHeader>
+          <CardHeader className="bg-yellow-100">
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0 h-auto">
                 <div className="flex items-center gap-2">
                   <CardTitle>Panchayath Performance Report</CardTitle>
                 </div>
-                {isPanchayathReportOpen ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
+                {isPanchayathReportOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </Button>
             </CollapsibleTrigger>
             <div className="flex gap-2 mt-2">
-              <Button
-                onClick={handleExportExcel}
-                variant="outline"
-                size="sm"
-                disabled={loadingPanchayath || !panchayathSummary?.length}
-                className="flex items-center gap-2"
-              >
+              <Button onClick={handleExportExcel} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2">
                 <FileSpreadsheet className="h-4 w-4" />
                 Export Excel
               </Button>
-              <Button
-                onClick={handleExportPDF}
-                variant="outline"
-                size="sm"
-                disabled={loadingPanchayath || !panchayathSummary?.length}
-                className="flex items-center gap-2"
-              >
+              <Button onClick={handleExportPDF} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 Export PDF
               </Button>
@@ -528,5 +475,4 @@ const ReportsManagement = ({
       </Collapsible>
     </div>;
 };
-
 export default ReportsManagement;
