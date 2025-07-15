@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet, Clock } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { BarChart3, TrendingUp, Users, MapPin, DollarSign, Download, FileSpreadsheet, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DateRangeFilter from './reports/DateRangeFilter';
 import ActivePanchayathReport from './reports/ActivePanchayathReport';
@@ -17,6 +17,8 @@ const ReportsManagement = ({
   const { toast } = useToast();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [isPanchayathReportOpen, setIsPanchayathReportOpen] = useState(false);
+  const [isActiveReportOpen, setIsActiveReportOpen] = useState(false);
 
   // Fetch registration summary by panchayath
   const {
@@ -405,20 +407,51 @@ const ReportsManagement = ({
         </Card>
       </div>
 
-      {/* Active Panchayath Report */}
-      <ActivePanchayathReport />
+      {/* Active Panchayath Report - Collapsible */}
+      <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
+        <Card>
+          <CardHeader>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Active Panchayath Report</CardTitle>
+                </div>
+                {isActiveReportOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <p className="text-sm text-gray-600 text-left">
+              Performance grading based on registrations and revenue collection
+            </p>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <ActivePanchayathReport />
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
-      {/* Panchayath Performance Report */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Panchayath Performance Report</CardTitle>
-              <p className="text-sm text-gray-600">
-                Total registrations and category breakdown for each panchayath
-              </p>
-            </div>
-            <div className="flex gap-2">
+      {/* Panchayath Performance Report - Collapsible */}
+      <Collapsible open={isPanchayathReportOpen} onOpenChange={setIsPanchayathReportOpen}>
+        <Card>
+          <CardHeader>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Panchayath Performance Report</CardTitle>
+                </div>
+                {isPanchayathReportOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <div className="flex gap-2 mt-2">
               <Button
                 onClick={handleExportExcel}
                 variant="outline"
@@ -440,54 +473,59 @@ const ReportsManagement = ({
                 Export PDF
               </Button>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingPanchayath ? <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div> : <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border border-gray-200 px-4 py-2 text-left">Panchayath</th>
-                    <th className="border border-gray-200 px-4 py-2 text-left">District</th>
-                    <th className="border border-gray-200 px-4 py-2 text-left">Total Registrations</th>
-                    <th className="border border-gray-200 px-4 py-2 text-left">Category Breakdown</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {panchayathSummary?.map((item: any, index) => <tr key={index} className="hover:bg-gray-50">
-                      <td className="border border-gray-200 px-4 py-2 font-medium">
-                        {item.panchayath}
-                      </td>
-                      <td className="border border-gray-200 px-4 py-2">
-                        {item.district}
-                      </td>
-                      <td className="border border-gray-200 px-4 py-2">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
-                          {item.totalRegistrations}
-                        </span>
-                      </td>
-                      <td className="border border-gray-200 px-4 py-2">
-                        <div className="space-y-1">
-                          {Object.entries(item.categories).map(([category, count]: [string, any]) => <div key={category} className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">{category}:</span>
-                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                {count}
-                              </span>
-                            </div>)}
-                        </div>
-                      </td>
-                    </tr>)}
-                </tbody>
-              </table>
-            </div>}
+            <p className="text-sm text-gray-600 text-left mt-2">
+              Total registrations and category breakdown for each panchayath
+            </p>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              {loadingPanchayath ? <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div> : <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-200 px-4 py-2 text-left">Panchayath</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">District</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Total Registrations</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Category Breakdown</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {panchayathSummary?.map((item: any, index) => <tr key={index} className="hover:bg-gray-50">
+                          <td className="border border-gray-200 px-4 py-2 font-medium">
+                            {item.panchayath}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            {item.district}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                              {item.totalRegistrations}
+                            </span>
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <div className="space-y-1">
+                              {Object.entries(item.categories).map(([category, count]: [string, any]) => <div key={category} className="flex justify-between items-center">
+                                  <span className="text-sm text-gray-600">{category}:</span>
+                                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                    {count}
+                                  </span>
+                                </div>)}
+                            </div>
+                          </td>
+                        </tr>)}
+                    </tbody>
+                  </table>
+                </div>}
 
-          {!loadingPanchayath && (!panchayathSummary || panchayathSummary.length === 0) && <div className="text-center py-8 text-gray-500">
-              No registration data available for reports.
-            </div>}
-        </CardContent>
-      </Card>
+              {!loadingPanchayath && (!panchayathSummary || panchayathSummary.length === 0) && <div className="text-center py-8 text-gray-500">
+                  No registration data available for reports.
+                </div>}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
     </div>;
 };
 

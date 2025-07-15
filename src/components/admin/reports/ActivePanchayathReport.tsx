@@ -2,7 +2,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Medal, Award, Star } from 'lucide-react';
 
@@ -111,117 +110,102 @@ const ActivePanchayathReport = () => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Panchayath Report</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Active Panchayath Report</CardTitle>
-        <p className="text-sm text-gray-600">
-          Performance grading based on registrations and revenue collection
-        </p>
-      </CardHeader>
-      <CardContent>
-        {/* Grading Criteria */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold mb-2">Grading Criteria:</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-            <div className="flex items-center gap-1">
-              <Trophy className="h-3 w-3 text-green-500" />
-              <span>A+: 100+ reg, ₹50k+ revenue</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Medal className="h-3 w-3 text-green-400" />
-              <span>A: 75+ reg, ₹35k+ revenue</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Award className="h-3 w-3 text-blue-500" />
-              <span>B+: 50+ reg, ₹25k+ revenue</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 text-blue-400" />
-              <span>B: 30+ reg, ₹15k+ revenue</span>
-            </div>
+    <div>
+      {/* Grading Criteria */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h4 className="font-semibold mb-2">Grading Criteria:</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+          <div className="flex items-center gap-1">
+            <Trophy className="h-3 w-3 text-green-500" />
+            <span>A+: 100+ reg, ₹50k+ revenue</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Medal className="h-3 w-3 text-green-400" />
+            <span>A: 75+ reg, ₹35k+ revenue</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Award className="h-3 w-3 text-blue-500" />
+            <span>B+: 50+ reg, ₹25k+ revenue</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Star className="h-3 w-3 text-blue-400" />
+            <span>B: 30+ reg, ₹15k+ revenue</span>
           </div>
         </div>
+      </div>
 
-        {/* Report Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-200">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-200 px-4 py-2 text-left">Rank</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Grade</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Panchayath</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">District</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Total Reg.</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Free Reg.</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Paid Reg.</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Revenue</th>
+      {/* Report Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-200">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border border-gray-200 px-4 py-2 text-left">Rank</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Grade</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Panchayath</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">District</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Total Reg.</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Free Reg.</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Paid Reg.</th>
+              <th className="border border-gray-200 px-4 py-2 text-left">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {panchayathGrades?.map((panchayath, index) => (
+              <tr key={panchayath.id} className="hover:bg-gray-50">
+                <td className="border border-gray-200 px-4 py-2 text-center font-semibold">
+                  {index + 1}
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  <Badge className={`${panchayath.gradeColor} text-white flex items-center gap-1 w-fit`}>
+                    {panchayath.gradeIcon}
+                    {panchayath.grade}
+                  </Badge>
+                </td>
+                <td className="border border-gray-200 px-4 py-2 font-medium">
+                  {panchayath.name}
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  {panchayath.district}
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                    {panchayath.totalRegistrations}
+                  </span>
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm">
+                    {panchayath.freeRegistrations}
+                  </span>
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
+                    {panchayath.paidRegistrations}
+                  </span>
+                </td>
+                <td className="border border-gray-200 px-4 py-2">
+                  <span className="font-semibold text-green-600">
+                    ₹{panchayath.totalRevenue.toLocaleString('en-IN')}
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {panchayathGrades?.map((panchayath, index) => (
-                <tr key={panchayath.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-200 px-4 py-2 text-center font-semibold">
-                    {index + 1}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    <Badge className={`${panchayath.gradeColor} text-white flex items-center gap-1 w-fit`}>
-                      {panchayath.gradeIcon}
-                      {panchayath.grade}
-                    </Badge>
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2 font-medium">
-                    {panchayath.name}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    {panchayath.district}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
-                      {panchayath.totalRegistrations}
-                    </span>
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm">
-                      {panchayath.freeRegistrations}
-                    </span>
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      {panchayath.paidRegistrations}
-                    </span>
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    <span className="font-semibold text-green-600">
-                      ₹{panchayath.totalRevenue.toLocaleString('en-IN')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        {!panchayathGrades || panchayathGrades.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            No panchayath data available for grading.
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {!panchayathGrades || panchayathGrades.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          No panchayath data available for grading.
+        </div>
+      )}
+    </div>
   );
 };
 
