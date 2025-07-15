@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-
 interface DateRangeFilterProps {
   startDate: Date | null;
   endDate: Date | null;
@@ -13,7 +11,6 @@ interface DateRangeFilterProps {
   onEndDateChange: (date: Date | null) => void;
   onClear: () => void;
 }
-
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   startDate,
   endDate,
@@ -21,8 +18,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   onEndDateChange,
   onClear
 }) => {
-  return (
-    <div className="flex items-center gap-2 mb-4">
+  return <div className="flex items-center gap-2 mb-4 bg-gray-200">
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium">From:</label>
         <Popover>
@@ -33,12 +29,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={startDate || undefined}
-              onSelect={onStartDateChange}
-              initialFocus
-            />
+            <Calendar mode="single" selected={startDate || undefined} onSelect={onStartDateChange} initialFocus />
           </PopoverContent>
         </Popover>
       </div>
@@ -53,12 +44,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={endDate || undefined}
-              onSelect={onEndDateChange}
-              initialFocus
-            />
+            <Calendar mode="single" selected={endDate || undefined} onSelect={onEndDateChange} initialFocus />
           </PopoverContent>
         </Popover>
       </div>
@@ -66,8 +52,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
       <Button onClick={onClear} variant="outline" size="sm">
         Clear
       </Button>
-    </div>
-  );
+    </div>;
 };
-
 export default DateRangeFilter;
