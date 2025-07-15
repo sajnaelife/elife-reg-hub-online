@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,18 +60,30 @@ const ReportsManagement = ({
     }
   });
 
-  // Fetch overall statistics with date filtering for fees
+  // Fetch overall statistics with date filtering
   const {
     data: stats,
     isLoading: loadingStats
   } = useQuery({
     queryKey: ['admin-stats', startDate, endDate],
     queryFn: async () => {
+      // Get total registrations with date filtering
+      let registrationsQuery = supabase.from('registrations').select('*', {
+        count: 'exact',
+        head: true
+      });
+      
+      if (startDate) {
+        registrationsQuery = registrationsQuery.gte('created_at', startDate.toISOString());
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        registrationsQuery = registrationsQuery.lte('created_at', endOfDay.toISOString());
+      }
+
       const [registrationsCount, categoriesCount, panchayathsCount, activeCategories] = await Promise.all([
-        supabase.from('registrations').select('*', {
-          count: 'exact',
-          head: true
-        }), 
+        registrationsQuery, 
         supabase.from('categories').select('*', {
           count: 'exact',
           head: true
@@ -106,11 +119,22 @@ const ReportsManagement = ({
         return sum + (reg.fee_paid || 0);
       }, 0) || 0;
 
-      // Calculate pending amount from pending registrations
-      const pendingRegistrationsData = await supabase
+      // Calculate pending amount from pending registrations with date filtering
+      let pendingQuery = supabase
         .from('registrations')
         .select('fee_paid')
         .eq('status', 'pending');
+
+      if (startDate) {
+        pendingQuery = pendingQuery.gte('created_at', startDate.toISOString());
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        pendingQuery = pendingQuery.lte('created_at', endOfDay.toISOString());
+      }
+
+      const pendingRegistrationsData = await pendingQuery;
 
       const totalPendingAmount = pendingRegistrationsData.data?.reduce((sum, reg) => {
         return sum + (reg.fee_paid || 0);
@@ -171,7 +195,7 @@ const ReportsManagement = ({
   };
 
   const handleExportPDF = async () => {
-    if (!panchayathSummary) {
+    if (!panchayathSummary || panchayathSummary.length === 0) {
       toast({
         title: "Export Failed",
         description: "No data available to export.",
@@ -181,9 +205,16 @@ const ReportsManagement = ({
     }
     
     try {
-      // Dynamic imports to avoid build issues
-      const jsPDF = (await import('jspdf')).default;
-      await import('jspdf-autotable');
+      console.log('Starting PDF export process...');
+      
+      // Dynamic import with proper handling
+      const jsPDFModule = await import('jspdf');
+      const jsPDF = jsPDFModule.default;
+      
+      // Import autoTable separately
+      const autoTableModule = await import('jspdf-autotable');
+      
+      console.log('jsPDF and autoTable loaded successfully');
       
       const doc = new jsPDF({
         orientation: 'landscape',
@@ -207,7 +238,9 @@ const ReportsManagement = ({
         Object.entries(item.categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')
       ]);
 
-      // Add table using autoTable
+      console.log('Table data prepared:', tableData.length, 'rows');
+
+      // Add table using autoTable with proper typing
       (doc as any).autoTable({
         head: [['Panchayath', 'District', 'Total Registrations', 'Category Breakdown']],
         body: tableData,
@@ -231,6 +264,7 @@ const ReportsManagement = ({
 
       // Save the PDF
       const fileName = `panchayath_performance_${new Date().toISOString().split('T')[0]}.pdf`;
+      console.log('Saving PDF as:', fileName);
       doc.save(fileName);
       
       toast({
@@ -241,7 +275,7 @@ const ReportsManagement = ({
       console.error('Error generating PDF:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to export PDF file.",
+        description: "Failed to export PDF file. Please try again.",
         variant: "destructive"
       });
     }
@@ -263,10 +297,10 @@ const ReportsManagement = ({
   }
 
   return <div className="space-y-6">
-      {/* Date Filter for Fees */}
+      {/* Date Filter */}
       <Card>
         <CardHeader>
-          <CardTitle>Fee Collection Date Filter</CardTitle>
+          <CardTitle>Date Range Filter</CardTitle>
         </CardHeader>
         <CardContent>
           <DateRangeFilter
@@ -276,6 +310,9 @@ const ReportsManagement = ({
             onEndDateChange={setEndDate}
             onClear={handleClearDateFilter}
           />
+          <p className="text-sm text-muted-foreground mt-2">
+            Filters Total Registrations, Fee Collection, and Pending Amount
+          </p>
         </CardContent>
       </Card>
 
@@ -290,6 +327,9 @@ const ReportsManagement = ({
             <div className="text-2xl font-bold">
               {loadingStats ? '...' : stats?.totalRegistrations || 0}
             </div>
+            <p className="text-xs text-muted-foreground">
+              {startDate || endDate ? 'Filtered by date range' : 'All time'}
+            </p>
           </CardContent>
         </Card>
         
@@ -345,7 +385,7 @@ const ReportsManagement = ({
               ₹{loadingStats ? '...' : (stats?.totalPendingAmount || 0).toLocaleString('en-IN')}
             </div>
             <p className="text-xs text-muted-foreground">
-              From pending registrations
+              {startDate || endDate ? 'Filtered by date range' : 'From pending registrations'}
             </p>
           </CardContent>
         </Card>
