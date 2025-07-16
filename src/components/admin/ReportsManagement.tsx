@@ -374,29 +374,31 @@ const ReportsManagement = ({
         </Card>
       </div>
 
-      {/* Active Panchayath Report - Collapsible */}
-      <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
-        <Card>
-          <CardHeader className="bg-green-200">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
-                <div className="flex items-center gap-2">
-                  <CardTitle>Active Panchayath Report</CardTitle>
-                </div>
-                {isActiveReportOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <p className="text-sm text-gray-600 text-left">
-              Performance grading based on registrations and revenue collection
-            </p>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent>
-              <ActivePanchayathReport />
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+      {/* Active Panchayath Report - Collapsible (Super Admin Only) */}
+      {permissions.canManageAdmins && (
+        <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
+          <Card>
+            <CardHeader className="bg-green-200">
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Active Panchayath Report</CardTitle>
+                  </div>
+                  {isActiveReportOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <p className="text-sm text-gray-600 text-left">
+                Performance grading based on registrations and revenue collection
+              </p>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent>
+                <ActivePanchayathReport />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
 
       {/* Panchayath Performance Report - Collapsible */}
       <Collapsible open={isPanchayathReportOpen} onOpenChange={setIsPanchayathReportOpen}>

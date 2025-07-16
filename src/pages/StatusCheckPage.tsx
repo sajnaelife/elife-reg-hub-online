@@ -169,10 +169,14 @@ const StatusCheckPage = () => {
                   {/* Confirmation button for Pennyekart Free Registration - placed prominently at the top */}
                   {showConfirmationButton && <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
                       <h4 className="font-bold text-blue-900 mb-3 text-xl">Free Registration Confirmation</h4>
-                      <p className="text-blue-700 mb-4 text-lg">'ഒരു വീട്ടിൽ ഒരു സംരംഭക എന്ന ശീർഷകത്തിൽ' സ്ത്രീകളുടെ കൂട്ടായ്മയായ  ഇ - ലൈഫ് സൊസൈറ്റി നടപ്പാക്കുന്ന ' സംരംഭക.കോം ' എന്ന പദ്ധതിയുടെ ഭാഗമാകാൻ ഇപ്പൊൾ ആഗ്രഹമില്ല, ഭാവിയിൽ പദ്ധതിയുടെ ഭാഗമാകണം എന്നുണ്ടെങ്കിൽ അടുത്തുള്ള ഇ - ലൈഫ് ഏജൻ്റിനെ അറിയിക്കാം</p>
+                      <textarea 
+                        className="w-full p-3 border border-gray-300 rounded-lg text-blue-700 bg-blue-50 resize-none"
+                        rows={4}
+                        defaultValue="'ഒരു വീട്ടിൽ ഒരു സംരംഭക എന്ന ശീർഷകത്തിൽ' സ്ത്രീകളുടെ കൂട്ടായ്മയായ  ഇ - ലൈഫ് സൊസൈറ്റി നടപ്പാക്കുന്ന ' സംരംഭക.കോം ' എന്ന പദ്ധതിയുടെ ഭാഗമാകാൻ ഇപ്പൊൾ ആഗ്രഹമില്ല, ഭാവിയിൽ പദ്ധതിയുടെ ഭാഗമാകണം എന്നുണ്ടെങ്കിൽ അടുത്തുള്ള ഇ - ലൈഫ് ഏജൻ്റിനെ അറിയിക്കാം"
+                      />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold">
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold mt-4">
                             Confirm Free Registration
                           </Button>
                         </AlertDialogTrigger>
@@ -220,7 +224,6 @@ const StatusCheckPage = () => {
                       <h3 className="text-lg font-semibold text-gray-900">Registration Details</h3>
                       <div className="space-y-2">
                         <div>
-                          <span className="text-sm text-gray-500 bg-amber-200 mx-[55px] px-[99px] my-[6px] py-[2px]">Button Text:  സമ്മതം, മുന്നോട്ട് പോകാം</span>
                           <p className="text-zinc-950 text-xl font-bold text-center">{registration.categories?.name}</p>
                         </div>
                         <div>
