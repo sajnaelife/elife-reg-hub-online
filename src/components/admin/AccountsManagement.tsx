@@ -20,6 +20,7 @@ interface AccountsManagementProps {
     canRead: boolean;
     canWrite: boolean;
     canDelete: boolean;
+    canManageAdmins: boolean;
   };
 }
 
@@ -188,11 +189,11 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({ permissions }) 
         </TabsList>
 
         <TabsContent value="transactions">
-          <TransactionsTable permissions={permissions} onDataChange={loadCashSummary} />
+          <TransactionsTable permissions={{...permissions, canManageAdmins: permissions.canManageAdmins}} onDataChange={loadCashSummary} />
         </TabsContent>
 
         <TabsContent value="expenses">
-          <ExpensesTable permissions={permissions} onDataChange={loadCashSummary} />
+          <ExpensesTable permissions={{...permissions, canManageAdmins: permissions.canManageAdmins}} onDataChange={loadCashSummary} />
         </TabsContent>
       </Tabs>
 

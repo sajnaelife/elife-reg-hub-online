@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Expense {
@@ -19,6 +21,7 @@ interface ExpensesTableProps {
     canRead: boolean;
     canWrite: boolean;
     canDelete: boolean;
+    canManageAdmins: boolean;
   };
   onDataChange: () => void;
 }
@@ -54,6 +57,45 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({ permissions, onDataChange
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!permissions.canManageAdmins) {
+      toast({
+        title: "Access Denied",
+        description: "Only super admins can delete expenses",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this expense?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      });
+
+      loadExpenses();
+      onDataChange();
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -80,12 +122,13 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({ permissions, onDataChange
                 <TableHead>Amount</TableHead>
                 <TableHead>Payment Method</TableHead>
                 <TableHead>Description</TableHead>
+                {permissions.canManageAdmins && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {expenses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
+                  <TableCell colSpan={permissions.canManageAdmins ? 5 : 4} className="text-center py-4">
                     No expenses found
                   </TableCell>
                 </TableRow>
@@ -112,6 +155,19 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({ permissions, onDataChange
                         {expense.description}
                       </div>
                     </TableCell>
+                    {permissions.canManageAdmins && (
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(expense.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}

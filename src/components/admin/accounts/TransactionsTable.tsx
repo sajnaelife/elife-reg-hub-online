@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Transaction {
@@ -21,6 +23,7 @@ interface TransactionsTableProps {
     canRead: boolean;
     canWrite: boolean;
     canDelete: boolean;
+    canManageAdmins: boolean;
   };
   onDataChange: () => void;
 }
@@ -57,6 +60,45 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ permissions, onDa
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!permissions.canManageAdmins) {
+      toast({
+        title: "Access Denied",
+        description: "Only super admins can delete transactions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this transaction?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('cash_transactions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Transaction deleted successfully",
+      });
+
+      loadTransactions();
+      onDataChange();
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete transaction",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -84,12 +126,13 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ permissions, onDa
                 <TableHead>Period</TableHead>
                 <TableHead>Remarks</TableHead>
                 <TableHead>Created By</TableHead>
+                {permissions.canManageAdmins && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={permissions.canManageAdmins ? 6 : 5} className="text-center py-4">
                     No cash transfers found
                   </TableCell>
                 </TableRow>
@@ -122,6 +165,19 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ permissions, onDa
                     <TableCell>
                       {transaction.created_by || 'System'}
                     </TableCell>
+                    {permissions.canManageAdmins && (
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(transaction.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
