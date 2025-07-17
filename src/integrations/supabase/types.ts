@@ -80,6 +80,33 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          created_at: string | null
+          id: number
+          operation: string | null
+          query: string | null
+          table_name: string | null
+          user_email: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          operation?: string | null
+          query?: string | null
+          table_name?: string | null
+          user_email?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          operation?: string | null
+          query?: string | null
+          table_name?: string | null
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       cash_summary: {
         Row: {
           cash_at_bank: number
@@ -356,6 +383,7 @@ export type Database = {
     Enums: {
       admin_role: "super_admin" | "local_admin" | "user_admin"
       application_status: "pending" | "approved" | "rejected"
+      user_role: "admin" | "manager" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -485,6 +513,7 @@ export const Constants = {
     Enums: {
       admin_role: ["super_admin", "local_admin", "user_admin"],
       application_status: ["pending", "approved", "rejected"],
+      user_role: ["admin", "manager", "viewer"],
     },
   },
 } as const
