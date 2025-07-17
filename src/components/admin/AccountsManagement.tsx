@@ -159,8 +159,8 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
       {/* Tabs for different views */}
       <Tabs defaultValue="transactions" className="w-full">
         <TabsList>
-          <TabsTrigger value="transactions">Cash Transfers</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-slate-50 bg-slate-900 hover:bg-slate-800 text-base">Cash Transfers</TabsTrigger>
+          <TabsTrigger value="expenses" className="text-slate-50 bg-rose-600 hover:bg-rose-500">Expenses</TabsTrigger>
         </TabsList>
 
         <TabsContent value="transactions">
