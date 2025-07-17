@@ -415,7 +415,7 @@ const ReportsManagement = ({
                 <FileSpreadsheet className="h-4 w-4" />
                 Export Excel
               </Button>
-              <Button onClick={handleExportPDF} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2">
+              <Button onClick={handleExportPDF} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2 text-gray-50 bg-[#ef0233]">
                 <Download className="h-4 w-4" />
                 Export PDF
               </Button>
