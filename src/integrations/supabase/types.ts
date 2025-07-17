@@ -80,6 +80,63 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_summary: {
+        Row: {
+          cash_at_bank: number
+          cash_in_hand: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cash_at_bank?: number
+          cash_in_hand?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cash_at_bank?: number
+          cash_in_hand?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cash_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          from_date: string | null
+          id: string
+          remarks: string | null
+          to_date: string | null
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          from_date?: string | null
+          id?: string
+          remarks?: string | null
+          to_date?: string | null
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          from_date?: string | null
+          id?: string
+          remarks?: string | null
+          to_date?: string | null
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           actual_fee: number
@@ -125,6 +182,33 @@ export type Database = {
           qr_image_url?: string | null
           updated_at?: string | null
           warning_message?: string | null
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string
+          id: string
+          payment_method: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description: string
+          id?: string
+          payment_method: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string
+          id?: string
+          payment_method?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
