@@ -36,10 +36,8 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({ permissions }) 
       const adminSession = localStorage.getItem('adminSession');
       if (adminSession) {
         const sessionData = JSON.parse(adminSession);
-        await supabase.rpc('set_config', {
-          setting: 'app.current_admin_role',
-          value: sessionData.role,
-          is_local: false
+        await supabase.rpc('set_admin_context', {
+          admin_role: sessionData.role
         });
       }
     };

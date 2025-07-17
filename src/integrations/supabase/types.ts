@@ -379,6 +379,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      set_admin_context: {
+        Args: { admin_role: string }
+        Returns: undefined
+      }
     }
     Enums: {
       admin_role: "super_admin" | "local_admin" | "user_admin"
