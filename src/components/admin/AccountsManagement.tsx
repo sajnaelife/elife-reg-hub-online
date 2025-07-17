@@ -150,7 +150,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
             <ArrowLeftRight className="h-4 w-4" />
             Cash Transfer
           </Button>
-          <Button onClick={() => setIsExpenseDialogOpen(true)} variant="outline" className="flex items-center gap-2">
+          <Button onClick={() => setIsExpenseDialogOpen(true)} variant="outline" className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-gray-50">
             <Receipt className="h-4 w-4" />
             Add Expense
           </Button>
