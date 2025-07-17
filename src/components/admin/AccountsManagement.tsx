@@ -119,7 +119,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-emerald-600">
-            <CardTitle className="text-sm font-medium">Cash in Hand</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-50">Cash in Hand</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="bg-teal-100">
@@ -132,7 +132,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-sky-600">
-            <CardTitle className="text-sm font-medium">Cash at Bank</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-50">Cash at Bank</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="bg-sky-200">
