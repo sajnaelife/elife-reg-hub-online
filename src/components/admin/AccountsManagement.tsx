@@ -31,7 +31,22 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({ permissions }) 
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCashSummary();
+    // Set admin context for database queries
+    const setAdminContext = async () => {
+      const adminSession = localStorage.getItem('adminSession');
+      if (adminSession) {
+        const sessionData = JSON.parse(adminSession);
+        await supabase.rpc('set_config', {
+          setting: 'app.current_admin_role',
+          value: sessionData.role,
+          is_local: false
+        });
+      }
+    };
+
+    setAdminContext().then(() => {
+      loadCashSummary();
+    });
   }, []);
 
   const loadCashSummary = async () => {
