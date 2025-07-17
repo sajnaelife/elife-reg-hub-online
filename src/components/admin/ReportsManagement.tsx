@@ -411,7 +411,7 @@ const ReportsManagement = ({
               </Button>
             </CollapsibleTrigger>
             <div className="flex gap-2 mt-2">
-              <Button onClick={handleExportExcel} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2">
+              <Button onClick={handleExportExcel} variant="outline" size="sm" disabled={loadingPanchayath || !panchayathSummary?.length} className="flex items-center gap-2 text-gray-50 bg-[#049104]">
                 <FileSpreadsheet className="h-4 w-4" />
                 Export Excel
               </Button>
