@@ -375,12 +375,11 @@ const ReportsManagement = ({
       </div>
 
       {/* Active Panchayath Report - Collapsible (Super Admin Only) */}
-      {permissions.canManageAdmins && (
-        <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
+      {permissions.canManageAdmins && <Collapsible open={isActiveReportOpen} onOpenChange={setIsActiveReportOpen}>
           <Card>
             <CardHeader className="bg-green-200">
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                <Button variant="ghost" className="w-full justify-between p-0 h-auto rounded-sm">
                   <div className="flex items-center gap-2">
                     <CardTitle>Active Panchayath Report</CardTitle>
                   </div>
@@ -397,8 +396,7 @@ const ReportsManagement = ({
               </CardContent>
             </CollapsibleContent>
           </Card>
-        </Collapsible>
-      )}
+        </Collapsible>}
 
       {/* Panchayath Performance Report - Collapsible */}
       <Collapsible open={isPanchayathReportOpen} onOpenChange={setIsPanchayathReportOpen}>

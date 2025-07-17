@@ -49,7 +49,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </Popover>
       </div>
 
-      <Button onClick={onClear} variant="outline" size="sm">
+      <Button onClick={onClear} variant="outline" size="sm" className="text-zinc-50 bg-rose-600 hover:bg-rose-500">
         Clear
       </Button>
     </div>;
