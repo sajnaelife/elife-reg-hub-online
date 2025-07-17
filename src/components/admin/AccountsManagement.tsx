@@ -119,8 +119,8 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-emerald-600">
-            <CardTitle className="text-sm font-medium text-slate-50">Cash in Hand</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="font-medium text-slate-50 text-xl">Cash in Hand</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground bg-zinc-50" />
           </CardHeader>
           <CardContent className="bg-teal-100">
             <div className="text-2xl font-bold">₹{cashSummary.cash_in_hand.toFixed(2)}</div>
@@ -132,8 +132,8 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-sky-600">
-            <CardTitle className="text-sm font-medium text-slate-50">Cash at Bank</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="font-medium text-slate-50 text-xl">Cash at Bank</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground bg-zinc-50" />
           </CardHeader>
           <CardContent className="bg-sky-200">
             <div className="text-2xl font-bold">₹{cashSummary.cash_at_bank.toFixed(2)}</div>
@@ -159,7 +159,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
       {/* Tabs for different views */}
       <Tabs defaultValue="transactions" className="w-full">
         <TabsList>
-          <TabsTrigger value="transactions" className="text-slate-50 bg-slate-900 hover:bg-slate-800 text-base">Cash Transfers</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-slate-50 bg-slate-900 hover:bg-slate-800 text-sm">Cash Transfers</TabsTrigger>
           <TabsTrigger value="expenses" className="text-slate-50 bg-rose-600 hover:bg-rose-500">Expenses</TabsTrigger>
         </TabsList>
 
