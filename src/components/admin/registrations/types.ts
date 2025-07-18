@@ -14,6 +14,7 @@ export interface Registration {
   created_at: string;
   updated_at: string;
   approved_date: string | null;
+  approved_by: string | null;
   category_id: string;
   panchayath_id: string | null;
   preference: string | null;

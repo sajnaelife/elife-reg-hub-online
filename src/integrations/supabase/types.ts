@@ -267,6 +267,7 @@ export type Database = {
         Row: {
           address: string
           agent_pro: string | null
+          approved_by: string | null
           approved_date: string | null
           category_id: string
           created_at: string | null
@@ -284,6 +285,7 @@ export type Database = {
         Insert: {
           address: string
           agent_pro?: string | null
+          approved_by?: string | null
           approved_date?: string | null
           category_id: string
           created_at?: string | null
@@ -301,6 +303,7 @@ export type Database = {
         Update: {
           address?: string
           agent_pro?: string | null
+          approved_by?: string | null
           approved_date?: string | null
           category_id?: string
           created_at?: string | null

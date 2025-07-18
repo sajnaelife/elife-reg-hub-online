@@ -131,9 +131,17 @@ const RegistrationsManagement = ({
         updated_at: new Date().toISOString()
       };
       
-      // Set approved_date when status is approved
+      // Set approved_date and approved_by when status is approved
       if (status === 'approved') {
         updateData.approved_date = new Date().toISOString();
+        // Get current admin session
+        const adminSession = localStorage.getItem('adminSession');
+        if (adminSession) {
+          const sessionData = JSON.parse(adminSession);
+          updateData.approved_by = sessionData.username;
+        } else {
+          updateData.approved_by = 'self'; // For self-approval (free registrations)
+        }
       }
       
       const { error } = await supabase.from('registrations').update(updateData).eq('id', id);
@@ -366,6 +374,7 @@ const RegistrationsManagement = ({
                 <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Reg. Date</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Approved Date</th>
+                <th className="border border-gray-200 px-4 py-2 text-left">Approved By</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Expiry</th>
                 <th className="border border-gray-200 px-4 py-2 text-left">Actions</th>
               </tr>
@@ -406,6 +415,9 @@ const RegistrationsManagement = ({
                       ? new Date(registration.approved_date).toLocaleDateString('en-IN')
                       : '-'
                     }
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2">
+                    {registration.approved_by || '-'}
                   </td>
                   <td className="border border-gray-200 px-4 py-2">
                     {registration.status === 'pending' ? (
