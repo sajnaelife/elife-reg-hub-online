@@ -144,6 +144,12 @@ const RegistrationsManagement = ({
         }
       }
       
+      // Clear approved_by and approved_date when status is changed to pending
+      if (status === 'pending') {
+        updateData.approved_by = null;
+        updateData.approved_date = null;
+      }
+      
       const { error } = await supabase.from('registrations').update(updateData).eq('id', id);
       if (error) {
         console.error('Error updating status:', error);

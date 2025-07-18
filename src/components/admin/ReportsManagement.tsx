@@ -21,6 +21,34 @@ const ReportsManagement = ({
   const [isPanchayathReportOpen, setIsPanchayathReportOpen] = useState(false);
   const [isActiveReportOpen, setIsActiveReportOpen] = useState(false);
 
+  // Fetch approved registrations when date range is selected
+  const { data: approvedRegistrations, isLoading: loadingApprovedRegistrations } = useQuery({
+    queryKey: ['approved-registrations', startDate, endDate],
+    queryFn: async () => {
+      if (!startDate && !endDate) return [];
+      
+      let query = supabase.from('registrations').select(`
+        *,
+        categories(name),
+        panchayaths(name, district)
+      `).eq('status', 'approved').order('approved_date', { ascending: false });
+      
+      if (startDate) {
+        query = query.gte('approved_date', startDate.toISOString());
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.lte('approved_date', endOfDay.toISOString());
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!(startDate || endDate)
+  });
+
   // Fetch registration summary by panchayath
   const {
     data: panchayathSummary,
@@ -283,6 +311,54 @@ const ReportsManagement = ({
           <p className="text-sm text-muted-foreground mt-2">
             Filters Total Registrations, Fee Collection, and Pending Amount
           </p>
+          
+          {/* Approved Registrations Table when date range is selected */}
+          {(startDate || endDate) && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4">Approved Registrations in Date Range</h3>
+              {loadingApprovedRegistrations ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : approvedRegistrations && approvedRegistrations.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200 text-sm">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-200 px-3 py-2 text-left">Customer ID</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Name</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Category</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Panchayath</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Fee Paid</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Approved By</th>
+                        <th className="border border-gray-200 px-3 py-2 text-left">Approved Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedRegistrations.map((registration: any) => (
+                        <tr key={registration.id} className="hover:bg-gray-50">
+                          <td className="border border-gray-200 px-3 py-2 font-medium">{registration.customer_id}</td>
+                          <td className="border border-gray-200 px-3 py-2">{registration.name}</td>
+                          <td className="border border-gray-200 px-3 py-2">{registration.categories?.name}</td>
+                          <td className="border border-gray-200 px-3 py-2">{registration.panchayaths?.name}, {registration.panchayaths?.district}</td>
+                          <td className="border border-gray-200 px-3 py-2">₹{registration.fee_paid?.toLocaleString('en-IN') || 0}</td>
+                          <td className="border border-gray-200 px-3 py-2">{registration.approved_by || '-'}</td>
+                          <td className="border border-gray-200 px-3 py-2">
+                            {registration.approved_date ? new Date(registration.approved_date).toLocaleDateString('en-IN') : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Total: {approvedRegistrations.length} approved registrations
+                  </p>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No approved registrations found in the selected date range.</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
