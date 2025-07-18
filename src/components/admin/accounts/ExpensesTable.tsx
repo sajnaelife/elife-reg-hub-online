@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, FileSpreadsheet, FileText } from 'lucide-react';
+import { exportExpensesToExcel, exportExpensesToPDF } from './ExportUtils';
 import { format } from 'date-fns';
 
 interface Expense {
@@ -111,7 +112,29 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({ permissions, onDataChange
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Expenses History</CardTitle>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <CardTitle>Expenses History</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => exportExpensesToExcel(expenses)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+            <Button
+              onClick={() => exportExpensesToPDF(expenses)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              PDF
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">

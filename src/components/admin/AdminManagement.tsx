@@ -76,7 +76,8 @@ const AdminManagement = ({ permissions }: { permissions: any }) => {
         
         // Only update password if provided
         if (adminData.password) {
-          updateData.password_hash = adminData.password; // This would need proper hashing in real app
+          const bcrypt = await import('bcryptjs');
+          updateData.password_hash = await bcrypt.hash(adminData.password, 6);
         }
 
         const { error } = await supabase
@@ -91,11 +92,14 @@ const AdminManagement = ({ permissions }: { permissions: any }) => {
         console.log('Admin updated successfully');
       } else {
         // Create new admin
+        const bcrypt = await import('bcryptjs');
+        const hashedPassword = await bcrypt.hash(adminData.password, 6);
+        
         const { error } = await supabase
           .from('admin_users')
           .insert([{
             username: adminData.username,
-            password_hash: adminData.password, // This would need proper hashing in real app
+            password_hash: hashedPassword,
             role: adminData.role,
             is_active: adminData.is_active
           }]);

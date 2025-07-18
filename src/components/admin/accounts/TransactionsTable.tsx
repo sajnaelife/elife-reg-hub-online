@@ -5,11 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, FileSpreadsheet, FileText } from 'lucide-react';
+import { exportTransactionsToExcel, exportTransactionsToPDF } from './ExportUtils';
 import { format } from 'date-fns';
 
 interface Transaction {
   id: string;
+  transaction_type: string;
   amount: number;
   from_date: string | null;
   to_date: string | null;
@@ -114,7 +116,29 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ permissions, onDa
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cash Transfer History</CardTitle>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <CardTitle>Cash Transfer History</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => exportTransactionsToExcel(transactions)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+            <Button
+              onClick={() => exportTransactionsToPDF(transactions)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              PDF
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
