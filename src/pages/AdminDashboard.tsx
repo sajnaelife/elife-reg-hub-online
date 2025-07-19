@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, Grid3X3, MapPin, Bell, Shield, BarChart3, Settings, Wallet } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import RegistrationsManagement from '@/components/admin/RegistrationsManagement';
 import CategoriesManagement from '@/components/admin/CategoriesManagement';
@@ -51,6 +53,27 @@ const AdminDashboard = () => {
     checkAdminSession();
   }, [navigate]);
 
+  // Fetch admin permissions from database
+  const { data: adminPermissions } = useQuery({
+    queryKey: ['admin-permissions', adminSession?.id],
+    queryFn: async () => {
+      if (!adminSession?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('admin_permissions')
+        .select('module, permission_type')
+        .eq('admin_user_id', adminSession.id);
+      
+      if (error) {
+        console.error('Error fetching admin permissions:', error);
+        return [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!adminSession?.id
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('adminSession');
     toast({
@@ -60,16 +83,53 @@ const AdminDashboard = () => {
     navigate('/admin/login');
   };
 
-  const getRolePermissions = (role: string) => {
-    console.log('Getting permissions for role:', role);
+  const getPermissionsForModule = (module: string) => {
+    if (!adminPermissions) return { canRead: false, canWrite: false, canDelete: false };
+    
+    const modulePermissions = adminPermissions.filter(p => p.module === module);
+    return {
+      canRead: modulePermissions.some(p => p.permission_type === 'read'),
+      canWrite: modulePermissions.some(p => p.permission_type === 'write'),
+      canDelete: modulePermissions.some(p => p.permission_type === 'delete')
+    };
+  };
+
+  const getRolePermissions = (role: string, adminId: string) => {
+    console.log('Getting permissions for role:', role, 'adminId:', adminId);
+    console.log('Admin permissions from DB:', adminPermissions);
+    
+    // Super admins always have all permissions
+    if (role === 'super_admin') {
+      const superAdminPerms = {
+        canRead: true,
+        canWrite: true,
+        canDelete: true,
+        canManageAdmins: true
+      };
+      console.log('Super admin permissions:', superAdminPerms);
+      return superAdminPerms;
+    }
+    
+    // For other roles, check database permissions first
+    if (adminPermissions && adminPermissions.length > 0) {
+      const hasReadPermission = adminPermissions.some(p => p.permission_type === 'read');
+      const hasWritePermission = adminPermissions.some(p => p.permission_type === 'write');
+      const hasDeletePermission = adminPermissions.some(p => p.permission_type === 'delete');
+      const hasAdminManagePermission = adminPermissions.some(p => p.module === 'admin_users' && (p.permission_type === 'write' || p.permission_type === 'read'));
+      
+      const dbPerms = {
+        canRead: hasReadPermission,
+        canWrite: hasWritePermission,
+        canDelete: hasDeletePermission,
+        canManageAdmins: hasAdminManagePermission
+      };
+      console.log('Database permissions:', dbPerms);
+      return dbPerms;
+    }
+    
+    // Fallback to default role-based permissions if no database permissions found
+    console.log('No database permissions found, using fallback for role:', role);
     switch (role) {
-      case 'super_admin':
-        return {
-          canRead: true,
-          canWrite: true,
-          canDelete: true,
-          canManageAdmins: true
-        };
       case 'local_admin':
         return {
           canRead: true,
@@ -94,7 +154,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !adminSession) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -106,7 +166,12 @@ const AdminDashboard = () => {
     return null;
   }
 
-  const permissions = getRolePermissions(adminSession.role);
+  const permissions = adminSession ? getRolePermissions(adminSession.role, adminSession.id) : {
+    canRead: false,
+    canWrite: false,
+    canDelete: false,
+    canManageAdmins: false
+  };
   console.log('Admin permissions:', permissions);
 
   return (
