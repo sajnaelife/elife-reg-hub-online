@@ -10,6 +10,7 @@ import CategoriesManagement from '@/components/admin/CategoriesManagement';
 import PanchayathsManagement from '@/components/admin/PanchayathsManagement';
 import AnnouncementsManagement from '@/components/admin/AnnouncementsManagement';
 import AdminManagement from '@/components/admin/AdminManagement';
+import AdminPermissionsManagement from '@/components/admin/AdminPermissionsManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
 import UtilitiesManagement from '@/components/admin/UtilitiesManagement';
 import AccountsManagement from '@/components/admin/AccountsManagement';
@@ -234,7 +235,10 @@ const AdminDashboard = () => {
 
               {permissions.canManageAdmins && (
                 <TabsContent value="admins">
-                  <AdminManagement permissions={permissions} />
+                  <div className="space-y-6">
+                    <AdminManagement permissions={permissions} />
+                    <AdminPermissionsManagement permissions={permissions} />
+                  </div>
                 </TabsContent>
               )}
             </>

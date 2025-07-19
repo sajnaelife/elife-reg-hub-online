@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          id: string
+          module: string
+          permission_type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          module: string
+          permission_type: string
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          module?: string
+          permission_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_permissions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_users: {
         Row: {
           created_at: string | null
@@ -373,6 +408,13 @@ export type Database = {
       can_manage_admins: {
         Args: { user_role: string }
         Returns: boolean
+      }
+      get_admin_permissions: {
+        Args: { admin_id: string }
+        Returns: {
+          module: string
+          permissions: string[]
+        }[]
       }
       get_current_admin_role: {
         Args: Record<PropertyKey, never>
