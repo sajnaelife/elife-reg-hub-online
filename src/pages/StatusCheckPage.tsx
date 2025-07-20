@@ -176,8 +176,8 @@ const StatusCheckPage = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-rose-600">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>ശ്രദ്ധിക്കുക !!</AlertDialogTitle>
-                            <AlertDialogDescription>രജിസ്ട്രേഷൻ ഞാൻ സ്വയം പൂര്‍ത്തിയാക്കുന്നു.    ഫ്രീ രജിസ്ട്രേഷൻ വഴി സ്വയം തൊഴില്‍ പദ്ധതികളുടെ ഭാഗമാകാന്‍ കഴിയില്ലെന്ന് ഞാന്‍ മനസ്സിലാക്കുന്നു.</AlertDialogDescription>
+                            <AlertDialogTitle className="text-zinc-50 text-3xl text-center">ശ്രദ്ധിക്കുക !!</AlertDialogTitle>
+                            <AlertDialogDescription className="text-slate-50 text-xl text-center">രജിസ്ട്രേഷൻ ഞാൻ സ്വയം പൂര്‍ത്തിയാക്കുന്നു.    ഫ്രീ രജിസ്ട്രേഷൻ വഴി സ്വയം തൊഴില്‍ പദ്ധതികളുടെ ഭാഗമാകാന്‍ കഴിയില്ലെന്ന് ഞാന്‍ മനസ്സിലാക്കുന്നു.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
