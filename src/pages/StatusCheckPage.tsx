@@ -169,16 +169,10 @@ const StatusCheckPage = () => {
                   {/* Confirmation button for Pennyekart Free Registration - placed prominently at the top */}
                   {showConfirmationButton && <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
                       <h4 className="font-bold text-blue-900 mb-3 text-xl">Free Registration Confirmation</h4>
-                      <textarea 
-                        className="w-full p-3 border border-gray-300 rounded-lg text-blue-700 bg-blue-50 resize-none"
-                        rows={4}
-                        defaultValue="'ഒരു വീട്ടിൽ ഒരു സംരംഭക എന്ന ശീർഷകത്തിൽ' സ്ത്രീകളുടെ കൂട്ടായ്മയായ  ഇ - ലൈഫ് സൊസൈറ്റി നടപ്പാക്കുന്ന ' സംരംഭക.കോം ' എന്ന പദ്ധതിയുടെ ഭാഗമാകാൻ ഇപ്പൊൾ ആഗ്രഹമില്ല, ഭാവിയിൽ പദ്ധതിയുടെ ഭാഗമാകണം എന്നുണ്ടെങ്കിൽ അടുത്തുള്ള ഇ - ലൈഫ് ഏജൻ്റിനെ അറിയിക്കാം"
-                      />
+                      <textarea className="w-full p-3 border border-gray-300 rounded-lg text-blue-700 bg-blue-50 resize-none" rows={4} defaultValue="'ഒരു വീട്ടിൽ ഒരു സംരംഭക എന്ന ശീർഷകത്തിൽ' സ്ത്രീകളുടെ കൂട്ടായ്മയായ  ഇ - ലൈഫ് സൊസൈറ്റി നടപ്പാക്കുന്ന ' സംരംഭക.കോം ' എന്ന പദ്ധതിയുടെ ഭാഗമാകാൻ ഇപ്പൊൾ ആഗ്രഹമില്ല, ഭാവിയിൽ പദ്ധതിയുടെ ഭാഗമാകണം എന്നുണ്ടെങ്കിൽ അടുത്തുള്ള ഇ - ലൈഫ് ഏജൻ്റിനെ അറിയിക്കാം" />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold mt-4">
-                            Confirm Free Registration
-                          </Button>
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold mt-4">രജിസ്ട്രേഷൻ പൂര്‍ത്തിയാക്കുക</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
