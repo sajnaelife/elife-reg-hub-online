@@ -177,9 +177,7 @@ const StatusCheckPage = () => {
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirm Free Registration</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              I confirmed as free registration. By clicking confirm, your registration will be automatically approved.
-                            </AlertDialogDescription>
+                            <AlertDialogDescription>രജിസ്ട്രേഷൻ ഞാൻ സ്വയം പൂര്‍ത്തിയാക്കുന്നു.    ഫ്രീ രജിസ്ട്രേഷൻ വഴി സ്വയം തൊഴില്‍ പദ്ധതികളുടെ ഭാഗമാകാന്‍ കഴിയില്ലെന്ന് ഞാന്‍ മനസ്സിലാക്കുന്നു.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
