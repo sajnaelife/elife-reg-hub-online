@@ -219,42 +219,56 @@ const AdminDashboard = () => {
               </div>
             </div>
           ) : (
-            <TabsList className={`grid w-full mb-6 ${permissions.canManageAdmins ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-8' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-7'}`}>
-              <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
-                <Users className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Registrations</span>
-                <span className="sm:hidden">Reg</span>
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
-                <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Categories</span>
-                <span className="sm:hidden">Cat</span>
-              </TabsTrigger>
-              <TabsTrigger value="panchayaths" className="flex items-center gap-1 text-xs md:text-sm">
-                <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Panchayaths</span>
-                <span className="sm:hidden">Pan</span>
-              </TabsTrigger>
-              <TabsTrigger value="announcements" className="flex items-center gap-1 text-xs md:text-sm">
-                <Bell className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Announcements</span>
-                <span className="sm:hidden">Ann</span>
-              </TabsTrigger>
-              <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
-                <Settings className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Utilities</span>
-                <span className="sm:hidden">Util</span>
-              </TabsTrigger>
-              <TabsTrigger value="accounts" className="flex items-center gap-1 text-xs md:text-sm">
-                <Wallet className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Accounts</span>
-                <span className="sm:hidden">Acc</span>
-              </TabsTrigger>
-              <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
-                <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">Reports</span>
-                <span className="sm:hidden">Rep</span>
-              </TabsTrigger>
+            <TabsList className={`grid w-full mb-6`}>
+              {getPermissionsForModule('registrations').canRead && (
+                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Users className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Registrations</span>
+                  <span className="sm:hidden">Reg</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('categories').canRead && (
+                <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Categories</span>
+                  <span className="sm:hidden">Cat</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('panchayaths').canRead && (
+                <TabsTrigger value="panchayaths" className="flex items-center gap-1 text-xs md:text-sm">
+                  <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Panchayaths</span>
+                  <span className="sm:hidden">Pan</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('announcements').canRead && (
+                <TabsTrigger value="announcements" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Bell className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Announcements</span>
+                  <span className="sm:hidden">Ann</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('utilities').canRead && (
+                <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Settings className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Utilities</span>
+                  <span className="sm:hidden">Util</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('accounts').canRead && (
+                <TabsTrigger value="accounts" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Wallet className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Accounts</span>
+                  <span className="sm:hidden">Acc</span>
+                </TabsTrigger>
+              )}
+              {getPermissionsForModule('reports').canRead && (
+                <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
+                  <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Reports</span>
+                  <span className="sm:hidden">Rep</span>
+                </TabsTrigger>
+              )}
               {permissions.canManageAdmins && (
                 <TabsTrigger value="admins" className="flex items-center gap-1 text-xs md:text-sm">
                   <Shield className="h-3 w-3 md:h-4 md:w-4" />
@@ -270,33 +284,47 @@ const AdminDashboard = () => {
             <RegistrationsManagement permissions={permissions} />
           ) : (
             <>
-              <TabsContent value="registrations">
-                <RegistrationsManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('registrations').canRead && (
+                <TabsContent value="registrations">
+                  <RegistrationsManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
-              <TabsContent value="categories">
-                <CategoriesManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('categories').canRead && (
+                <TabsContent value="categories">
+                  <CategoriesManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
-              <TabsContent value="panchayaths">
-                <PanchayathsManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('panchayaths').canRead && (
+                <TabsContent value="panchayaths">
+                  <PanchayathsManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
-              <TabsContent value="announcements">
-                <AnnouncementsManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('announcements').canRead && (
+                <TabsContent value="announcements">
+                  <AnnouncementsManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
-              <TabsContent value="utilities">
-                <UtilitiesManagement />
-              </TabsContent>
+              {getPermissionsForModule('utilities').canRead && (
+                <TabsContent value="utilities">
+                  <UtilitiesManagement />
+                </TabsContent>
+              )}
 
-              <TabsContent value="accounts">
-                <AccountsManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('accounts').canRead && (
+                <TabsContent value="accounts">
+                  <AccountsManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
-              <TabsContent value="reports">
-                <ReportsManagement permissions={permissions} />
-              </TabsContent>
+              {getPermissionsForModule('reports').canRead && (
+                <TabsContent value="reports">
+                  <ReportsManagement permissions={permissions} />
+                </TabsContent>
+              )}
 
               {permissions.canManageAdmins && (
                 <TabsContent value="admins">

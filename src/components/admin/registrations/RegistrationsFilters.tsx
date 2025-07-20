@@ -153,6 +153,22 @@ const RegistrationsFilters: React.FC<RegistrationsFiltersProps> = ({
           </Popover>
         </div>
       </div>
+
+      {/* Clear date filters button */}
+      {(fromDate || toDate) && (
+        <div className="flex justify-center">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setFromDate(undefined);
+              setToDate(undefined);
+            }}
+          >
+            Clear Date Filters
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
