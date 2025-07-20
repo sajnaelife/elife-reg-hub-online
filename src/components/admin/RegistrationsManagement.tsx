@@ -32,6 +32,8 @@ const RegistrationsManagement = ({
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
 
   console.log('RegistrationsManagement permissions:', permissions);
 
@@ -50,7 +52,7 @@ const RegistrationsManagement = ({
     isLoading,
     error
   } = useQuery({
-    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter],
+    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter, fromDate, toDate],
     queryFn: async () => {
       console.log('Fetching registrations...');
       let query = supabase.from('registrations').select(`
@@ -72,6 +74,14 @@ const RegistrationsManagement = ({
       }
       if (panchayathFilter !== 'all') {
         query = query.eq('panchayath_id', panchayathFilter);
+      }
+      if (fromDate) {
+        query = query.gte('created_at', fromDate.toISOString().split('T')[0]);
+      }
+      if (toDate) {
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        query = query.lte('created_at', endDate.toISOString());
       }
 
       const { data, error } = await query;
@@ -355,6 +365,10 @@ const RegistrationsManagement = ({
           setPanchayathFilter={setPanchayathFilter}
           categories={categories}
           panchayaths={panchayaths}
+          fromDate={fromDate}
+          setFromDate={setFromDate}
+          toDate={toDate}
+          setToDate={setToDate}
         />
 
         {/* Registrations Table */}

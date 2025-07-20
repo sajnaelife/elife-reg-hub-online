@@ -31,6 +31,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [totalCollected, setTotalCollected] = useState(0);
   const {
     toast
   } = useToast();
@@ -58,6 +59,7 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
       } = await supabase.from('registrations').select('fee_paid').eq('status', 'approved').not('fee_paid', 'is', null);
       if (regError) throw regError;
       const totalCollected = registrations?.reduce((sum, reg) => sum + (reg.fee_paid || 0), 0) || 0;
+      setTotalCollected(totalCollected);
 
       // Get cash transfers
       const {
@@ -125,8 +127,13 @@ const AccountsManagement: React.FC<AccountsManagementProps> = ({
           <CardContent className="bg-teal-100">
             <div className="text-2xl font-bold">₹{cashSummary.cash_in_hand.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
-              Total collected fees
+              Available cash from collections
             </p>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold text-emerald-700">
+                Total Fee Collected: ₹{totalCollected.toFixed(2)}
+              </span>
+            </div>
           </CardContent>
         </Card>
 
