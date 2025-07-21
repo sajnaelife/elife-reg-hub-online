@@ -84,13 +84,9 @@ const LandingPage = () => {
                   മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക
                 </Button>
               </Link>
-              {utilitiesData && utilitiesData[0] && (
-                <a href={utilitiesData[0].url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 text-sm sm:text-base font-bold bg-green-600 text-white hover:bg-green-700">
-                    For Agents
-                  </Button>
-                </a>
-              )}
+              {utilitiesData && utilitiesData[0] && <a href={utilitiesData[0].url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 text-sm sm:text-base font-bold bg-green-600 text-white hover:bg-green-700">ഏജന്റ്  മാര്‍ക്ക് മാത്രം</Button>
+                </a>}
             </div>
           </div>
         </div>
