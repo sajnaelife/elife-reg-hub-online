@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -10,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Users, FileText, TrendingUp, Bell, Phone, Mail, MapPin, Youtube } from 'lucide-react';
-
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
 
@@ -45,7 +43,6 @@ const LandingPage = () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />
       
@@ -58,14 +55,10 @@ Self Employment Registration Portal</h1>
             <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto font-normal md:text-base">വിവിധ സ്വയം തൊഴിൽ അവസരങ്ങൾക്കായി രജിസ്റ്റർ ചെയ്യുകയും നിങ്ങളുടെ അപേക്ഷാ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക. ഭാവി കെട്ടിപ്പടുക്കുന്ന ആയിരക്കണക്കിന് സംരംഭകരോടൊപ്പം ചേരൂ.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/categories">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
-                  Start Registration
-                </Button>
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">പുതുതായി രജിസ്ട്രേഷൻ ചെയ്യുക</Button>
               </Link>
               <Link to="/status">
-                <Button variant="outline" size="lg" className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-base font-bold">
-                  Check Status
-                </Button>
+                <Button variant="outline" size="lg" className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-base font-bold">മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക</Button>
               </Link>
             </div>
           </div>
@@ -76,51 +69,28 @@ Self Employment Registration Portal</h1>
       <JobCardHighlight />
 
       {/* YouTube Videos Section */}
-      {announcementsData && announcementsData.some(a => a.youtube_video_url) && (
-        <div className="max-w-7xl mx-auto px-4 py-12 bg-gradient-to-r from-red-50 to-pink-50">
+      {announcementsData && announcementsData.some(a => a.youtube_video_url) && <div className="max-w-7xl mx-auto px-4 py-12 bg-gradient-to-r from-red-50 to-pink-50">
           <div className="flex items-center gap-2 mb-8">
             <Youtube className="h-8 w-8 text-red-600" />
             <h2 className="text-3xl font-bold text-gray-900">Program Videos</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {announcementsData
-              .filter(announcement => announcement.youtube_video_url)
-              .map(announcement => {
-                const videoId = announcement.youtube_video_url?.includes('youtube.com/watch?v=') 
-                  ? announcement.youtube_video_url.split('watch?v=')[1]?.split('&')[0]
-                  : announcement.youtube_video_url?.includes('youtu.be/') 
-                    ? announcement.youtube_video_url.split('youtu.be/')[1]?.split('?')[0]
-                    : null;
-                
-                return (
-                  <Card key={announcement.id} className="overflow-hidden">
+            {announcementsData.filter(announcement => announcement.youtube_video_url).map(announcement => {
+          const videoId = announcement.youtube_video_url?.includes('youtube.com/watch?v=') ? announcement.youtube_video_url.split('watch?v=')[1]?.split('&')[0] : announcement.youtube_video_url?.includes('youtu.be/') ? announcement.youtube_video_url.split('youtu.be/')[1]?.split('?')[0] : null;
+          return <Card key={announcement.id} className="overflow-hidden">
                     <div className="aspect-video">
-                      {videoId ? (
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          src={`https://www.youtube.com/embed/${videoId}`}
-                          title={announcement.title}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gray-100">
+                      {videoId ? <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${videoId}`} title={announcement.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <div className="flex items-center justify-center h-full bg-gray-100">
                           <Youtube className="h-12 w-12 text-gray-400" />
-                        </div>
-                      )}
+                        </div>}
                     </div>
                     <CardContent className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{announcement.title}</h3>
                       <p className="text-gray-600 text-sm">{announcement.content}</p>
                     </CardContent>
-                  </Card>
-                );
-              })}
+                  </Card>;
+        })}
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Announcements Section */}
       {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 py-8 bg-yellow-200">
@@ -137,18 +107,11 @@ Self Employment Registration Portal</h1>
                       <h3 className="mb-1 text-xl font-bold text-amber-600">{announcement.title}</h3>
                       <p className="text-blue-800 mb-2">{announcement.content}</p>
                       {/* Display poster image if available */}
-                      {announcement.poster_image_url && (
-                        <div className="mb-2">
-                          <img
-                            src={announcement.poster_image_url}
-                            alt={`${announcement.title} poster`}
-                            className="max-w-sm max-h-32 object-contain border rounded"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
+                      {announcement.poster_image_url && <div className="mb-2">
+                          <img src={announcement.poster_image_url} alt={`${announcement.title} poster`} className="max-w-sm max-h-32 object-contain border rounded" onError={e => {
+                    e.currentTarget.style.display = 'none';
+                  }} />
+                        </div>}
                     </div>
                     {announcement.expiry_date && <Badge variant="outline" className="text-xs">
                         Expires: {new Date(announcement.expiry_date).toLocaleDateString()}
@@ -280,5 +243,4 @@ Self Employment Registration Portal</h1>
       </div>
     </div>;
 };
-
 export default LandingPage;
