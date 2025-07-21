@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -17,14 +16,14 @@ import AdminPermissionsManagement from '@/components/admin/AdminPermissionsManag
 import ReportsManagement from '@/components/admin/ReportsManagement';
 import UtilitiesManagement from '@/components/admin/UtilitiesManagement';
 import AccountsManagement from '@/components/admin/AccountsManagement';
-
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [adminSession, setAdminSession] = useState(null);
   const [activeTab, setActiveTab] = useState('registrations');
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const checkAdminSession = () => {
       const session = localStorage.getItem('adminSession');
@@ -32,7 +31,6 @@ const AdminDashboard = () => {
         navigate('/admin/login');
         return;
       }
-
       try {
         const sessionData = JSON.parse(session);
         // Check if session exists and has required fields
@@ -50,43 +48,42 @@ const AdminDashboard = () => {
         setIsLoading(false);
       }
     };
-
     checkAdminSession();
   }, [navigate]);
 
   // Fetch admin permissions from database
-  const { data: adminPermissions } = useQuery({
+  const {
+    data: adminPermissions
+  } = useQuery({
     queryKey: ['admin-permissions', adminSession?.id],
     queryFn: async () => {
       if (!adminSession?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('admin_permissions')
-        .select('module, permission_type')
-        .eq('admin_user_id', adminSession.id);
-      
+      const {
+        data,
+        error
+      } = await supabase.from('admin_permissions').select('module, permission_type').eq('admin_user_id', adminSession.id);
       if (error) {
         console.error('Error fetching admin permissions:', error);
         return [];
       }
-      
       return data || [];
     },
     enabled: !!adminSession?.id
   });
-
   const handleLogout = () => {
     localStorage.removeItem('adminSession');
     toast({
       title: "Logged Out",
-      description: "You have been successfully logged out.",
+      description: "You have been successfully logged out."
     });
     navigate('/admin/login');
   };
-
   const getPermissionsForModule = (module: string) => {
-    if (!adminPermissions) return { canRead: false, canWrite: false, canDelete: false };
-    
+    if (!adminPermissions) return {
+      canRead: false,
+      canWrite: false,
+      canDelete: false
+    };
     const modulePermissions = adminPermissions.filter(p => p.module === module);
     return {
       canRead: modulePermissions.some(p => p.permission_type === 'read'),
@@ -94,11 +91,10 @@ const AdminDashboard = () => {
       canDelete: modulePermissions.some(p => p.permission_type === 'delete')
     };
   };
-
   const getRolePermissions = (role: string, adminId: string) => {
     console.log('Getting permissions for role:', role, 'adminId:', adminId);
     console.log('Admin permissions from DB:', adminPermissions);
-    
+
     // Super admins always have all permissions
     if (role === 'super_admin') {
       const superAdminPerms = {
@@ -110,14 +106,13 @@ const AdminDashboard = () => {
       console.log('Super admin permissions:', superAdminPerms);
       return superAdminPerms;
     }
-    
+
     // For other roles, check database permissions first
     if (adminPermissions && adminPermissions.length > 0) {
       const hasReadPermission = adminPermissions.some(p => p.permission_type === 'read');
       const hasWritePermission = adminPermissions.some(p => p.permission_type === 'write');
       const hasDeletePermission = adminPermissions.some(p => p.permission_type === 'delete');
       const hasAdminManagePermission = adminPermissions.some(p => p.module === 'admin_users' && (p.permission_type === 'write' || p.permission_type === 'read'));
-      
       const dbPerms = {
         canRead: hasReadPermission,
         canWrite: hasWritePermission,
@@ -127,7 +122,7 @@ const AdminDashboard = () => {
       console.log('Database permissions:', dbPerms);
       return dbPerms;
     }
-    
+
     // Fallback to default role-based permissions if no database permissions found
     console.log('No database permissions found, using fallback for role:', role);
     switch (role) {
@@ -154,24 +149,14 @@ const AdminDashboard = () => {
         };
     }
   };
-
-  const hasAccessToModule = (module: string) => {
-    if (adminSession?.role === 'super_admin') return true;
-    return getPermissionsForModule(module).canRead;
-  };
-
   if (isLoading || !adminSession) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+      </div>;
   }
-
   if (!adminSession) {
     return null;
   }
-
   const permissions = adminSession ? getRolePermissions(adminSession.role, adminSession.id) : {
     canRead: false,
     canWrite: false,
@@ -179,9 +164,7 @@ const AdminDashboard = () => {
     canManageAdmins: false
   };
   console.log('Admin permissions:', permissions);
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       {/* Admin Header */}
@@ -189,21 +172,17 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-sm md:text-base text-gray-600">
+              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-gray-600">
                 Welcome back, <span className="font-semibold">{adminSession.username}</span>
                 <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                   {adminSession.role.replace('_', ' ').toUpperCase()}
                 </span>
               </p>
             </div>
-            <Button 
-              onClick={handleLogout}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
+            <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2">
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              Logout
             </Button>
           </div>
         </div>
@@ -212,9 +191,9 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {adminSession.role === 'user_admin' ? (
-            // User admin only sees registrations
-            <div className="mb-6">
+          {adminSession.role === 'user_admin' ?
+        // User admin only sees registrations
+        <div className="mb-6">
               <div className="border-b border-gray-200">
                 <nav className="-mb-px flex">
                   <button className="bg-white border-b-2 border-blue-500 text-blue-600 py-4 px-6 text-sm font-medium flex items-center gap-2">
@@ -223,173 +202,89 @@ const AdminDashboard = () => {
                   </button>
                 </nav>
               </div>
-            </div>
-          ) : (
-            <div className="mb-6">
-              <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl overflow-x-auto shadow-lg">
-                <nav className="flex min-w-max p-2">
-                  {hasAccessToModule('registrations') && (
-                    <button
-                      onClick={() => setActiveTab('registrations')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'registrations' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Users className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Registrations</span>
-                      <span className="sm:hidden">Reg</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('categories') && (
-                    <button
-                      onClick={() => setActiveTab('categories')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'categories' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Categories</span>
-                      <span className="sm:hidden">Cat</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('panchayaths') && (
-                    <button
-                      onClick={() => setActiveTab('panchayaths')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'panchayaths' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Panchayaths</span>
-                      <span className="sm:hidden">Pan</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('announcements') && (
-                    <button
-                      onClick={() => setActiveTab('announcements')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'announcements' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Bell className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Announcements</span>
-                      <span className="sm:hidden">Ann</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('utilities') && (
-                    <button
-                      onClick={() => setActiveTab('utilities')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'utilities' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Settings className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Utilities</span>
-                      <span className="sm:hidden">Util</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('accounts') && (
-                    <button
-                      onClick={() => setActiveTab('accounts')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'accounts' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Wallet className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Accounts</span>
-                      <span className="sm:hidden">Acc</span>
-                    </button>
-                  )}
-                  {hasAccessToModule('reports') && (
-                    <button
-                      onClick={() => setActiveTab('reports')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'reports' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Reports</span>
-                      <span className="sm:hidden">Rep</span>
-                    </button>
-                  )}
-                  {permissions.canManageAdmins && (
-                    <button
-                      onClick={() => setActiveTab('admins')}
-                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
-                        activeTab === 'admins' 
-                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
-                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
-                      }`}
-                    >
-                      <Shield className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="hidden sm:inline">Admin Control</span>
-                      <span className="sm:hidden">Adm</span>
-                    </button>
-                  )}
-                </nav>
-              </div>
-            </div>
-          )}
+            </div> : <TabsList className={`grid w-full mb-6`}>
+              {getPermissionsForModule('registrations').canRead && <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Users className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Registrations</span>
+                  <span className="sm:hidden">Reg</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('categories').canRead && <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Grid3X3 className="h-3 w-3 md:h-4 md:w-4 bg-lime-200 hover:bg-lime-100" />
+                  <span className="hidden sm:inline">Categories</span>
+                  <span className="sm:hidden">Cat</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('panchayaths').canRead && <TabsTrigger value="panchayaths" className="flex items-center gap-1 text-xs md:text-sm">
+                  <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Panchayaths</span>
+                  <span className="sm:hidden">Pan</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('announcements').canRead && <TabsTrigger value="announcements" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Bell className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Announcements</span>
+                  <span className="sm:hidden">Ann</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('utilities').canRead && <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Settings className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Utilities</span>
+                  <span className="sm:hidden">Util</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('accounts').canRead && <TabsTrigger value="accounts" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Wallet className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Accounts</span>
+                  <span className="sm:hidden">Acc</span>
+                </TabsTrigger>}
+              {getPermissionsForModule('reports').canRead && <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
+                  <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Reports</span>
+                  <span className="sm:hidden">Rep</span>
+                </TabsTrigger>}
+              {permissions.canManageAdmins && <TabsTrigger value="admins" className="flex items-center gap-1 text-xs md:text-sm">
+                  <Shield className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Admin Control</span>
+                  <span className="sm:hidden">Adm</span>
+                </TabsTrigger>}
+            </TabsList>}
 
-          {adminSession.role === 'user_admin' ? (
-            // User admin only sees registrations
-            <RegistrationsManagement permissions={permissions} />
-          ) : (
-            <>
-              {hasAccessToModule('registrations') && activeTab === 'registrations' && (
-                <RegistrationsManagement permissions={permissions} />
-              )}
+          {adminSession.role === 'user_admin' ?
+        // User admin only sees registrations
+        <RegistrationsManagement permissions={permissions} /> : <>
+              {getPermissionsForModule('registrations').canRead && <TabsContent value="registrations">
+                  <RegistrationsManagement permissions={permissions} />
+                </TabsContent>}
 
-              {hasAccessToModule('categories') && activeTab === 'categories' && (
-                <CategoriesManagement permissions={permissions} />
-              )}
+              {getPermissionsForModule('categories').canRead && <TabsContent value="categories">
+                  <CategoriesManagement permissions={permissions} />
+                </TabsContent>}
 
-              {hasAccessToModule('panchayaths') && activeTab === 'panchayaths' && (
-                <PanchayathsManagement permissions={permissions} />
-              )}
+              {getPermissionsForModule('panchayaths').canRead && <TabsContent value="panchayaths">
+                  <PanchayathsManagement permissions={permissions} />
+                </TabsContent>}
 
-              {hasAccessToModule('announcements') && activeTab === 'announcements' && (
-                <AnnouncementsManagement permissions={permissions} />
-              )}
+              {getPermissionsForModule('announcements').canRead && <TabsContent value="announcements">
+                  <AnnouncementsManagement permissions={permissions} />
+                </TabsContent>}
 
-              {hasAccessToModule('utilities') && activeTab === 'utilities' && (
-                <UtilitiesManagement />
-              )}
+              {getPermissionsForModule('utilities').canRead && <TabsContent value="utilities">
+                  <UtilitiesManagement />
+                </TabsContent>}
 
-              {hasAccessToModule('accounts') && activeTab === 'accounts' && (
-                <AccountsManagement permissions={permissions} />
-              )}
+              {getPermissionsForModule('accounts').canRead && <TabsContent value="accounts">
+                  <AccountsManagement permissions={permissions} />
+                </TabsContent>}
 
-              {hasAccessToModule('reports') && activeTab === 'reports' && (
-                <ReportsManagement permissions={permissions} />
-              )}
+              {getPermissionsForModule('reports').canRead && <TabsContent value="reports">
+                  <ReportsManagement permissions={permissions} />
+                </TabsContent>}
 
-              {permissions.canManageAdmins && activeTab === 'admins' && (
-                <div className="space-y-6">
-                  <AdminManagement permissions={permissions} />
-                  <AdminPermissionsManagement permissions={permissions} />
-                </div>
-              )}
-            </>
-          )}
+              {permissions.canManageAdmins && <TabsContent value="admins">
+                  <div className="space-y-6">
+                    <AdminManagement permissions={permissions} />
+                    <AdminPermissionsManagement permissions={permissions} />
+                  </div>
+                </TabsContent>}
+            </>}
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdminDashboard;
