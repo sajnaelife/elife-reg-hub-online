@@ -48,17 +48,24 @@ const LandingPage = () => {
       
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-6 md:text-5xl">E-life Society 
-Self Employment Registration Portal</h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto font-normal md:text-base">വിവിധ സ്വയം തൊഴിൽ അവസരങ്ങൾക്കായി രജിസ്റ്റർ ചെയ്യുകയും നിങ്ങളുടെ അപേക്ഷാ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക. ഭാവി കെട്ടിപ്പടുക്കുന്ന ആയിരക്കണക്കിന് സംരംഭകരോടൊപ്പം ചേരൂ.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/categories">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">പുതുതായി രജിസ്ട്രേഷൻ ചെയ്യുക</Button>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+              E-life Society Self Employment Registration Portal
+            </h1>
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto font-normal px-4">
+              വിവിധ സ്വയം തൊഴിൽ അവസരങ്ങൾക്കായി രജിസ്റ്റർ ചെയ്യുകയും നിങ്ങളുടെ അപേക്ഷാ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക. ഭാവി കെട്ടിപ്പടുക്കുന്ന ആയിരക്കണക്കിന് സംരംഭകരോടൊപ്പം ചേരൂ.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+              <Link to="/categories" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 text-sm sm:text-base">
+                  പുതുതായി രജിസ്ട്രേഷൻ ചെയ്യുക
+                </Button>
               </Link>
-              <Link to="/status">
-                <Button variant="outline" size="lg" className="px-8 py-3 text-base font-bold bg-[#f77205] text-slate-50">മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക</Button>
+              <Link to="/status" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 text-sm sm:text-base font-bold bg-[#f77205] text-slate-50 hover:bg-[#e66204]">
+                  മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക
+                </Button>
               </Link>
             </div>
           </div>
@@ -69,12 +76,12 @@ Self Employment Registration Portal</h1>
       <JobCardHighlight />
 
       {/* YouTube Videos Section */}
-      {announcementsData && announcementsData.some(a => a.youtube_video_url) && <div className="max-w-7xl mx-auto px-4 py-12 bg-gradient-to-r from-red-50 to-pink-50">
-          <div className="flex items-center gap-2 mb-8">
-            <Youtube className="h-8 w-8 text-red-600" />
-            <h2 className="text-3xl font-bold text-gray-900">Program Videos</h2>
+      {announcementsData && announcementsData.some(a => a.youtube_video_url) && <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-gradient-to-r from-red-50 to-pink-50">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8">
+            <Youtube className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Program Videos</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {announcementsData.filter(announcement => announcement.youtube_video_url).map(announcement => {
           const videoId = announcement.youtube_video_url?.includes('youtube.com/watch?v=') ? announcement.youtube_video_url.split('watch?v=')[1]?.split('&')[0] : announcement.youtube_video_url?.includes('youtu.be/') ? announcement.youtube_video_url.split('youtu.be/')[1]?.split('?')[0] : null;
           return <Card key={announcement.id} className="overflow-hidden">
@@ -93,27 +100,27 @@ Self Employment Registration Portal</h1>
         </div>}
 
       {/* Announcements Section */}
-      {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 py-8 bg-yellow-200">
-          <div className="flex items-center gap-2 mb-6">
-            <Bell className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Live Announcements</h2>
+      {announcementsData && announcementsData.length > 0 && <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-yellow-200">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6">
+            <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Live Announcements</h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {announcementsData.map(announcement => <Alert key={announcement.id} className="border-blue-200 bg-lime-100">
                 <Bell className="h-4 w-4 text-blue-600" />
                 <AlertDescription>
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="flex-1">
-                      <h3 className="mb-1 text-xl font-bold text-amber-600">{announcement.title}</h3>
-                      <p className="text-blue-800 mb-2">{announcement.content}</p>
+                      <h3 className="mb-1 text-lg sm:text-xl font-bold text-amber-600">{announcement.title}</h3>
+                      <p className="text-blue-800 mb-2 text-sm sm:text-base">{announcement.content}</p>
                       {/* Display poster image if available */}
                       {announcement.poster_image_url && <div className="mb-2">
-                          <img src={announcement.poster_image_url} alt={`${announcement.title} poster`} className="max-w-sm max-h-32 object-contain border rounded" onError={e => {
+                          <img src={announcement.poster_image_url} alt={`${announcement.title} poster`} className="w-full max-w-xs sm:max-w-sm max-h-32 object-contain border rounded" onError={e => {
                     e.currentTarget.style.display = 'none';
                   }} />
                         </div>}
                     </div>
-                    {announcement.expiry_date && <Badge variant="outline" className="text-xs">
+                    {announcement.expiry_date && <Badge variant="outline" className="text-xs self-start">
                         Expires: {new Date(announcement.expiry_date).toLocaleDateString()}
                       </Badge>}
                   </div>
@@ -123,8 +130,8 @@ Self Employment Registration Portal</h1>
         </div>}
 
       {/* Stats Section */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           <Card className="text-center">
             <CardHeader>
               <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
@@ -158,17 +165,17 @@ Self Employment Registration Portal</h1>
       </div>
 
       {/* Women Self-Employment Section */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
             Empowering Women Entrepreneurs
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600 px-4">
             Join our community of successful women who have built their own businesses
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           <Card className="bg-gradient-to-br from-pink-50 to-rose-100 border-pink-200">
             <CardHeader>
               <CardTitle className="text-xl text-pink-800">Tailoring & Fashion</CardTitle>
@@ -208,35 +215,35 @@ Self Employment Registration Portal</h1>
       </div>
 
       {/* Contact Us Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
-            <p className="text-lg text-blue-100">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Contact Us</h2>
+            <p className="text-base sm:text-lg text-blue-100 px-4">
               Get in touch with us for any queries or support
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center">
-              <Phone className="h-12 w-12 mx-auto mb-4 text-blue-200" />
-              <h3 className="text-xl font-semibold mb-2">Phone Support</h3>
-              <p className="text-blue-100">+91 9497589094</p>
-              <p className="text-blue-100">Mon-Fri, 9AM-6PM</p>
+              <Phone className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-200" />
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Phone Support</h3>
+              <p className="text-blue-100 text-sm sm:text-base">+91 9497589094</p>
+              <p className="text-blue-100 text-sm sm:text-base">Mon-Fri, 9AM-6PM</p>
             </div>
             
             <div className="text-center">
-              <Mail className="h-12 w-12 mx-auto mb-4 text-blue-200" />
-              <h3 className="text-xl font-semibold mb-2">Email Support</h3>
-              <p className="text-blue-100">teamelifesociety@gmail.com </p>
-              <p className="text-blue-100">We'll respond within 24 hours</p>
+              <Mail className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-200" />
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Email Support</h3>
+              <p className="text-blue-100 text-sm sm:text-base break-all">teamelifesociety@gmail.com</p>
+              <p className="text-blue-100 text-sm sm:text-base">We'll respond within 24 hours</p>
             </div>
             
             <div className="text-center">
-              <MapPin className="h-12 w-12 mx-auto mb-4 text-blue-200" />
-              <h3 className="text-xl font-semibold mb-2">Office Address</h3>
-              <p className="text-blue-100">Forza Mall Complex -Tirur</p>
-              <p className="text-blue-100">Kerala, India - 676101</p>
+              <MapPin className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-200" />
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Office Address</h3>
+              <p className="text-blue-100 text-sm sm:text-base">Forza Mall Complex -Tirur</p>
+              <p className="text-blue-100 text-sm sm:text-base">Kerala, India - 676101</p>
             </div>
           </div>
         </div>
