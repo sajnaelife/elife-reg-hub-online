@@ -29,6 +29,23 @@ const LandingPage = () => {
     }
   });
 
+  // Fetch active utilities (for agents button)
+  const {
+    data: utilitiesData
+  } = useQuery({
+    queryKey: ['utilities'],
+    queryFn: async () => {
+      const {
+        data,
+        error
+      } = await supabase.from('utilities').select('*').eq('is_active', true).order('created_at', {
+        ascending: false
+      }).limit(1);
+      if (error) throw error;
+      return data;
+    }
+  });
+
   // Real-time updates for announcements
   useEffect(() => {
     const channel = supabase.channel('announcements-changes').on('postgres_changes', {
@@ -67,6 +84,13 @@ const LandingPage = () => {
                   മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക
                 </Button>
               </Link>
+              {utilitiesData && utilitiesData[0] && (
+                <a href={utilitiesData[0].url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 text-sm sm:text-base font-bold bg-green-600 text-white hover:bg-green-700">
+                    For Agents
+                  </Button>
+                </a>
+              )}
             </div>
           </div>
         </div>
