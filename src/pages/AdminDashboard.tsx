@@ -202,46 +202,38 @@ const AdminDashboard = () => {
                   </button>
                 </nav>
               </div>
-            </div> : <TabsList className={`grid w-full mb-6`}>
-              {getPermissionsForModule('registrations').canRead && <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Users className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Registrations</span>
-                  <span className="sm:hidden">Reg</span>
+            </div> : <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1 w-full mb-6 p-1 bg-muted rounded-lg">
+              {getPermissionsForModule('registrations').canRead && <TabsTrigger value="registrations" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Users className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Registrations</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('categories').canRead && <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Grid3X3 className="h-3 w-3 md:h-4 md:w-4 bg-lime-200 hover:bg-lime-100" />
-                  <span className="hidden sm:inline">Categories</span>
-                  <span className="sm:hidden">Cat</span>
+              {getPermissionsForModule('categories').canRead && <TabsTrigger value="categories" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Grid3X3 className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Categories</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('panchayaths').canRead && <TabsTrigger value="panchayaths" className="flex items-center gap-1 text-xs md:text-sm">
-                  <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Panchayaths</span>
-                  <span className="sm:hidden">Pan</span>
+              {getPermissionsForModule('panchayaths').canRead && <TabsTrigger value="panchayaths" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Panchayaths</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('announcements').canRead && <TabsTrigger value="announcements" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Bell className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Announcements</span>
-                  <span className="sm:hidden">Ann</span>
+              {getPermissionsForModule('announcements').canRead && <TabsTrigger value="announcements" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Bell className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Announcements</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('utilities').canRead && <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Settings className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Utilities</span>
-                  <span className="sm:hidden">Util</span>
+              {getPermissionsForModule('utilities').canRead && <TabsTrigger value="utilities" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Settings className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Utilities</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('accounts').canRead && <TabsTrigger value="accounts" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Wallet className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Accounts</span>
-                  <span className="sm:hidden">Acc</span>
+              {getPermissionsForModule('accounts').canRead && <TabsTrigger value="accounts" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Wallet className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Accounts</span>
                 </TabsTrigger>}
-              {getPermissionsForModule('reports').canRead && <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
-                  <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Reports</span>
-                  <span className="sm:hidden">Rep</span>
+              {getPermissionsForModule('reports').canRead && <TabsTrigger value="reports" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Reports</span>
                 </TabsTrigger>}
-              {permissions.canManageAdmins && <TabsTrigger value="admins" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Shield className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Admin Control</span>
-                  <span className="sm:hidden">Adm</span>
+              {permissions.canManageAdmins && <TabsTrigger value="admins" className="flex flex-col items-center gap-1 p-3 h-auto text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-medium">Admin Control</span>
                 </TabsTrigger>}
             </TabsList>}
 
