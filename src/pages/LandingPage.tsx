@@ -58,7 +58,7 @@ Self Employment Registration Portal</h1>
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">പുതുതായി രജിസ്ട്രേഷൻ ചെയ്യുക</Button>
               </Link>
               <Link to="/status">
-                <Button variant="outline" size="lg" className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-base font-bold">മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക</Button>
+                <Button variant="outline" size="lg" className="px-8 py-3 text-base font-bold bg-[#f77205] text-slate-50">മൊബൈൽ നമ്പർ ചെക്ക് ചെയ്യുക</Button>
               </Link>
             </div>
           </div>
