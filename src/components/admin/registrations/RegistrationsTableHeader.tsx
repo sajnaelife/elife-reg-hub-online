@@ -1,43 +1,68 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Download, FileText } from 'lucide-react';
+import { CheckCircle, FileDown, FileSpreadsheet } from 'lucide-react';
+import ExpiryFilterDialog from './ExpiryFilterDialog';
 
 interface RegistrationsTableHeaderProps {
   selectedRows: string[];
   onBulkApprove: () => void;
   onExportPDF: () => void;
   onExportExcel: () => void;
+  onExpiryFilter: (days: number) => void;
+  onExpiryExportExcel: (days: number) => void;
+  onExpiryExportPDF: (days: number) => void;
 }
 
 const RegistrationsTableHeader: React.FC<RegistrationsTableHeaderProps> = ({
   selectedRows,
   onBulkApprove,
   onExportPDF,
-  onExportExcel
+  onExportExcel,
+  onExpiryFilter,
+  onExpiryExportExcel,
+  onExpiryExportPDF
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {selectedRows.length > 0 && (
         <Button
           onClick={onBulkApprove}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
+          size="sm"
         >
           <CheckCircle className="h-4 w-4" />
           Bulk Approve ({selectedRows.length})
         </Button>
       )}
-      <Button
-        onClick={onExportPDF}
-        className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
-      >
-        <FileText className="h-4 w-4" />
-        Export PDF
-      </Button>
-      <Button onClick={onExportExcel} className="flex items-center gap-2">
-        <Download className="h-4 w-4" />
-        Export Excel
-      </Button>
+      
+      <div className="flex items-center gap-2">
+        <ExpiryFilterDialog
+          onFilter={onExpiryFilter}
+          onExportExcel={onExpiryExportExcel}
+          onExportPDF={onExpiryExportPDF}
+        />
+        
+        <Button
+          onClick={onExportExcel}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          <span className="hidden sm:inline">Excel</span>
+        </Button>
+        
+        <Button
+          onClick={onExportPDF}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+        >
+          <FileDown className="h-4 w-4" />
+          <span className="hidden sm:inline">PDF</span>
+        </Button>
+      </div>
     </div>
   );
 };

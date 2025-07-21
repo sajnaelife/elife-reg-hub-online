@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -154,6 +155,11 @@ const AdminDashboard = () => {
     }
   };
 
+  const hasAccessToModule = (module: string) => {
+    if (adminSession?.role === 'super_admin') return true;
+    return getPermissionsForModule(module).canRead;
+  };
+
   if (isLoading || !adminSession) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -183,8 +189,8 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-sm md:text-base text-gray-600">
                 Welcome back, <span className="font-semibold">{adminSession.username}</span>
                 <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                   {adminSession.role.replace('_', ' ').toUpperCase()}
@@ -197,7 +203,7 @@ const AdminDashboard = () => {
               className="flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
@@ -219,64 +225,124 @@ const AdminDashboard = () => {
               </div>
             </div>
           ) : (
-            <TabsList className={`grid w-full mb-6`}>
-              {getPermissionsForModule('registrations').canRead && (
-                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Users className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Registrations</span>
-                  <span className="sm:hidden">Reg</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('categories').canRead && (
-                <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Categories</span>
-                  <span className="sm:hidden">Cat</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('panchayaths').canRead && (
-                <TabsTrigger value="panchayaths" className="flex items-center gap-1 text-xs md:text-sm">
-                  <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Panchayaths</span>
-                  <span className="sm:hidden">Pan</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('announcements').canRead && (
-                <TabsTrigger value="announcements" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Bell className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Announcements</span>
-                  <span className="sm:hidden">Ann</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('utilities').canRead && (
-                <TabsTrigger value="utilities" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Settings className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Utilities</span>
-                  <span className="sm:hidden">Util</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('accounts').canRead && (
-                <TabsTrigger value="accounts" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Wallet className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Accounts</span>
-                  <span className="sm:hidden">Acc</span>
-                </TabsTrigger>
-              )}
-              {getPermissionsForModule('reports').canRead && (
-                <TabsTrigger value="reports" className="flex items-center gap-1 text-xs md:text-sm">
-                  <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Reports</span>
-                  <span className="sm:hidden">Rep</span>
-                </TabsTrigger>
-              )}
-              {permissions.canManageAdmins && (
-                <TabsTrigger value="admins" className="flex items-center gap-1 text-xs md:text-sm">
-                  <Shield className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Admin Control</span>
-                  <span className="sm:hidden">Adm</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
+            <div className="mb-6">
+              <div className="border-b border-gray-200 overflow-x-auto">
+                <nav className="-mb-px flex min-w-max">
+                  {hasAccessToModule('registrations') && (
+                    <button
+                      onClick={() => setActiveTab('registrations')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'registrations' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Users className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Registrations</span>
+                      <span className="sm:hidden">Reg</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('categories') && (
+                    <button
+                      onClick={() => setActiveTab('categories')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'categories' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Categories</span>
+                      <span className="sm:hidden">Cat</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('panchayaths') && (
+                    <button
+                      onClick={() => setActiveTab('panchayaths')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'panchayaths' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Panchayaths</span>
+                      <span className="sm:hidden">Pan</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('announcements') && (
+                    <button
+                      onClick={() => setActiveTab('announcements')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'announcements' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Bell className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Announcements</span>
+                      <span className="sm:hidden">Ann</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('utilities') && (
+                    <button
+                      onClick={() => setActiveTab('utilities')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'utilities' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Settings className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Utilities</span>
+                      <span className="sm:hidden">Util</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('accounts') && (
+                    <button
+                      onClick={() => setActiveTab('accounts')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'accounts' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Wallet className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Accounts</span>
+                      <span className="sm:hidden">Acc</span>
+                    </button>
+                  )}
+                  {hasAccessToModule('reports') && (
+                    <button
+                      onClick={() => setActiveTab('reports')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'reports' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Reports</span>
+                      <span className="sm:hidden">Rep</span>
+                    </button>
+                  )}
+                  {permissions.canManageAdmins && (
+                    <button
+                      onClick={() => setActiveTab('admins')}
+                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                        activeTab === 'admins' 
+                          ? 'border-blue-500 text-blue-600' 
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Shield className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Admin Control</span>
+                      <span className="sm:hidden">Adm</span>
+                    </button>
+                  )}
+                </nav>
+              </div>
+            </div>
           )}
 
           {adminSession.role === 'user_admin' ? (
@@ -284,55 +350,39 @@ const AdminDashboard = () => {
             <RegistrationsManagement permissions={permissions} />
           ) : (
             <>
-              {getPermissionsForModule('registrations').canRead && (
-                <TabsContent value="registrations">
-                  <RegistrationsManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('registrations') && activeTab === 'registrations' && (
+                <RegistrationsManagement permissions={permissions} />
               )}
 
-              {getPermissionsForModule('categories').canRead && (
-                <TabsContent value="categories">
-                  <CategoriesManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('categories') && activeTab === 'categories' && (
+                <CategoriesManagement permissions={permissions} />
               )}
 
-              {getPermissionsForModule('panchayaths').canRead && (
-                <TabsContent value="panchayaths">
-                  <PanchayathsManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('panchayaths') && activeTab === 'panchayaths' && (
+                <PanchayathsManagement permissions={permissions} />
               )}
 
-              {getPermissionsForModule('announcements').canRead && (
-                <TabsContent value="announcements">
-                  <AnnouncementsManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('announcements') && activeTab === 'announcements' && (
+                <AnnouncementsManagement permissions={permissions} />
               )}
 
-              {getPermissionsForModule('utilities').canRead && (
-                <TabsContent value="utilities">
-                  <UtilitiesManagement />
-                </TabsContent>
+              {hasAccessToModule('utilities') && activeTab === 'utilities' && (
+                <UtilitiesManagement />
               )}
 
-              {getPermissionsForModule('accounts').canRead && (
-                <TabsContent value="accounts">
-                  <AccountsManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('accounts') && activeTab === 'accounts' && (
+                <AccountsManagement permissions={permissions} />
               )}
 
-              {getPermissionsForModule('reports').canRead && (
-                <TabsContent value="reports">
-                  <ReportsManagement permissions={permissions} />
-                </TabsContent>
+              {hasAccessToModule('reports') && activeTab === 'reports' && (
+                <ReportsManagement permissions={permissions} />
               )}
 
-              {permissions.canManageAdmins && (
-                <TabsContent value="admins">
-                  <div className="space-y-6">
-                    <AdminManagement permissions={permissions} />
-                    <AdminPermissionsManagement permissions={permissions} />
-                  </div>
-                </TabsContent>
+              {permissions.canManageAdmins && activeTab === 'admins' && (
+                <div className="space-y-6">
+                  <AdminManagement permissions={permissions} />
+                  <AdminPermissionsManagement permissions={permissions} />
+                </div>
               )}
             </>
           )}

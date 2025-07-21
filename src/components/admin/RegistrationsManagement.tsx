@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,6 +33,7 @@ const RegistrationsManagement = ({
   const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
+  const [expiryDaysFilter, setExpiryDaysFilter] = useState<number | null>(null);
 
   console.log('RegistrationsManagement permissions:', permissions);
 
@@ -52,7 +52,7 @@ const RegistrationsManagement = ({
     isLoading,
     error
   } = useQuery({
-    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter, fromDate, toDate],
+    queryKey: ['admin-registrations', searchTerm, statusFilter, categoryFilter, panchayathFilter, fromDate, toDate, expiryDaysFilter],
     queryFn: async () => {
       console.log('Fetching registrations...');
       let query = supabase.from('registrations').select(`
@@ -90,7 +90,21 @@ const RegistrationsManagement = ({
         throw error;
       }
       console.log('Fetched registrations:', data);
-      return data as Registration[];
+      
+      let filteredData = data as Registration[];
+      
+      // Apply expiry filter if set
+      if (expiryDaysFilter !== null) {
+        filteredData = filteredData.filter(reg => {
+          if (reg.status === 'pending') {
+            const daysRemaining = calculateDaysRemaining(reg.created_at);
+            return daysRemaining <= expiryDaysFilter;
+          }
+          return false;
+        });
+      }
+      
+      return filteredData;
     }
   });
 
@@ -328,6 +342,95 @@ const RegistrationsManagement = ({
     }
   };
 
+  const handleExpiryFilter = (days: number) => {
+    setExpiryDaysFilter(days);
+    setStatusFilter('pending'); // Only pending registrations can expire
+    toast({
+      title: "Filter Applied",
+      description: `Showing registrations expiring within ${days} days.`
+    });
+  };
+
+  const handleExpiryExportExcel = (days: number) => {
+    if (!registrations) return;
+    
+    const expiringRegistrations = registrations.filter(reg => {
+      if (reg.status === 'pending') {
+        const daysRemaining = calculateDaysRemaining(reg.created_at);
+        return daysRemaining <= days;
+      }
+      return false;
+    });
+    
+    if (expiringRegistrations.length === 0) {
+      toast({
+        title: "No Data",
+        description: `No registrations found expiring within ${days} days.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      exportToExcel(expiringRegistrations);
+      toast({
+        title: "Export Successful",
+        description: `Exported ${expiringRegistrations.length} registrations expiring within ${days} days.`
+      });
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export registrations to Excel.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExpiryExportPDF = (days: number) => {
+    if (!registrations) return;
+    
+    const expiringRegistrations = registrations.filter(reg => {
+      if (reg.status === 'pending') {
+        const daysRemaining = calculateDaysRemaining(reg.created_at);
+        return daysRemaining <= days;
+      }
+      return false;
+    });
+    
+    if (expiringRegistrations.length === 0) {
+      toast({
+        title: "No Data",
+        description: `No registrations found expiring within ${days} days.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      exportToPDF(expiringRegistrations);
+      toast({
+        title: "Export Successful",
+        description: `Exported ${expiringRegistrations.length} registrations expiring within ${days} days.`
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export registrations to PDF.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const clearExpiryFilter = () => {
+    setExpiryDaysFilter(null);
+    toast({
+      title: "Filter Cleared",
+      description: "Expiry filter has been cleared."
+    });
+  };
+
   if (error) {
     return (
       <Card>
@@ -343,14 +446,30 @@ const RegistrationsManagement = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Registrations Management</CardTitle>
-          <RegistrationsTableHeader
-            selectedRows={selectedRows}
-            onBulkApprove={handleBulkApprove}
-            onExportPDF={handleExportPDF}
-            onExportExcel={handleExportExcel}
-          />
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <CardTitle className="text-lg md:text-xl">Registrations Management</CardTitle>
+          <div className="flex flex-wrap gap-2">
+            <RegistrationsTableHeader
+              selectedRows={selectedRows}
+              onBulkApprove={handleBulkApprove}
+              onExportPDF={handleExportPDF}
+              onExportExcel={handleExportExcel}
+              onExpiryFilter={handleExpiryFilter}
+              onExpiryExportExcel={handleExpiryExportExcel}
+              onExpiryExportPDF={handleExpiryExportPDF}
+            />
+            {expiryDaysFilter !== null && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                <span>Expiring within {expiryDaysFilter} days</span>
+                <button
+                  onClick={clearExpiryFilter}
+                  className="ml-1 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -373,10 +492,10 @@ const RegistrationsManagement = ({
 
         {/* Registrations Table */}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-200">
+          <table className="w-full border-collapse border border-gray-200 min-w-[800px]">
             <thead>
               <tr className="bg-gray-50">
-                <th className="border border-gray-200 px-4 py-2 text-left">
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">
                   <input
                     type="checkbox"
                     checked={selectedRows.length === registrations?.length && registrations?.length > 0}
@@ -385,18 +504,18 @@ const RegistrationsManagement = ({
                   />
                   Select
                 </th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Customer ID</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Name</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Mobile</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Category</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Preference</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Fee</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Reg. Date</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Approved Date</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Approved By</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Expiry</th>
-                <th className="border border-gray-200 px-4 py-2 text-left">Actions</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Customer ID</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Name</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Mobile</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Category</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Preference</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Status</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Fee</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Reg. Date</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Approved Date</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Approved By</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Expiry</th>
+                <th className="border border-gray-200 px-2 md:px-4 py-2 text-left text-xs md:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -405,41 +524,41 @@ const RegistrationsManagement = ({
                   key={registration.id} 
                   className={`${getCategoryColor(registration.categories?.name, registration.category_id)} transition-colors`}
                 >
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2">
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(registration.id)}
                       onChange={() => toggleRowSelection(registration.id)}
                     />
                   </td>
-                  <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 font-mono text-xs md:text-sm">
                     {registration.customer_id}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">{registration.name}</td>
-                  <td className="border border-gray-200 px-4 py-2">{registration.mobile_number}</td>
-                  <td className="border border-gray-200 px-4 py-2 font-bold text-gray-900">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">{registration.name}</td>
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">{registration.mobile_number}</td>
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 font-bold text-gray-900 text-xs md:text-sm">
                     {registration.categories?.name}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">
                     {registration.preference || '-'}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2">
                     {getStatusBadge(registration.status)}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">₹{registration.fee_paid}</td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">₹{registration.fee_paid}</td>
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">
                     {new Date(registration.created_at).toLocaleDateString('en-IN')}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">
                     {registration.approved_date 
                       ? new Date(registration.approved_date).toLocaleDateString('en-IN')
                       : '-'
                     }
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2 text-xs md:text-sm">
                     {registration.approved_by || '-'}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2">
                     {registration.status === 'pending' ? (
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         calculateDaysRemaining(registration.created_at) <= 3 
@@ -452,7 +571,7 @@ const RegistrationsManagement = ({
                       </span>
                     ) : '-'}
                   </td>
-                  <td className="border border-gray-200 px-4 py-2">
+                  <td className="border border-gray-200 px-2 md:px-4 py-2">
                     <RegistrationsTableActions
                       registration={registration}
                       permissions={permissions}
