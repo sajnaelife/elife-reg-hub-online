@@ -226,15 +226,15 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <div className="mb-6">
-              <div className="border-b border-gray-200 overflow-x-auto">
-                <nav className="-mb-px flex min-w-max">
+              <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl overflow-x-auto shadow-lg">
+                <nav className="flex min-w-max p-2">
                   {hasAccessToModule('registrations') && (
                     <button
                       onClick={() => setActiveTab('registrations')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'registrations' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Users className="h-3 w-3 md:h-4 md:w-4" />
@@ -245,10 +245,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('categories') && (
                     <button
                       onClick={() => setActiveTab('categories')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'categories' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
@@ -259,10 +259,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('panchayaths') && (
                     <button
                       onClick={() => setActiveTab('panchayaths')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'panchayaths' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <MapPin className="h-3 w-3 md:h-4 md:w-4" />
@@ -273,10 +273,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('announcements') && (
                     <button
                       onClick={() => setActiveTab('announcements')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'announcements' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Bell className="h-3 w-3 md:h-4 md:w-4" />
@@ -287,10 +287,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('utilities') && (
                     <button
                       onClick={() => setActiveTab('utilities')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'utilities' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Settings className="h-3 w-3 md:h-4 md:w-4" />
@@ -301,10 +301,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('accounts') && (
                     <button
                       onClick={() => setActiveTab('accounts')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'accounts' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Wallet className="h-3 w-3 md:h-4 md:w-4" />
@@ -315,10 +315,10 @@ const AdminDashboard = () => {
                   {hasAccessToModule('reports') && (
                     <button
                       onClick={() => setActiveTab('reports')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'reports' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
@@ -329,10 +329,10 @@ const AdminDashboard = () => {
                   {permissions.canManageAdmins && (
                     <button
                       onClick={() => setActiveTab('admins')}
-                      className={`py-4 px-3 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 border-b-2 whitespace-nowrap ${
+                      className={`mx-1 py-3 px-4 md:px-6 text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2 rounded-lg whitespace-nowrap backdrop-blur-md transition-all duration-300 ${
                         activeTab === 'admins' 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                          ? 'bg-blue-500/20 text-blue-600 border border-blue-300/30 shadow-md' 
+                          : 'bg-white/5 text-gray-600 hover:bg-white/10 hover:text-gray-800 border border-white/10'
                       }`}
                     >
                       <Shield className="h-3 w-3 md:h-4 md:w-4" />
