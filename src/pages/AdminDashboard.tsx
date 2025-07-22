@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [adminSession, setAdminSession] = useState(null);
   const [activeTab, setActiveTab] = useState('registrations');
   const [isLoading, setIsLoading] = useState(true);
+  const [isPendingPopupOpen, setIsPendingPopupOpen] = useState(false);
   useEffect(() => {
     const checkAdminSession = () => {
       const session = localStorage.getItem('adminSession');
@@ -169,7 +170,11 @@ const AdminDashboard = () => {
       <Navbar />
       
       {/* Pending Registrations Popup */}
-      <PendingRegistrationsPopup adminSession={adminSession} />
+      <PendingRegistrationsPopup 
+        adminSession={adminSession}
+        isOpen={isPendingPopupOpen}
+        onOpenChange={setIsPendingPopupOpen}
+      />
       
       {/* Admin Header */}
       <div className="bg-white shadow-sm border-b">
@@ -184,10 +189,24 @@ const AdminDashboard = () => {
                 </span>
               </p>
             </div>
-            <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2 bg-red-400 hover:bg-red-300">
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* Pending Registrations Notification Bell */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsPendingPopupOpen(true)}
+                className="relative p-2 h-10 w-10 hover:bg-red-50 border-red-200"
+              >
+                <Bell className="h-4 w-4 text-red-600" />
+                <div className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">
+                  !
+                </div>
+              </Button>
+              <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2 bg-red-400 hover:bg-red-300">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>

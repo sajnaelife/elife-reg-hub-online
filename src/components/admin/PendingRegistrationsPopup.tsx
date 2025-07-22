@@ -11,10 +11,22 @@ import { toast } from 'sonner';
 
 interface PendingRegistrationsPopupProps {
   adminSession: any;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  expiringRegistrations?: Registration[];
 }
 
-const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const PendingRegistrationsPopup = ({ 
+  adminSession, 
+  isOpen: controlledIsOpen, 
+  onOpenChange: controlledOnOpenChange,
+  expiringRegistrations: propExpiringRegistrations 
+}: PendingRegistrationsPopupProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  // Use controlled or internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = controlledOnOpenChange || setInternalIsOpen;
 
   // Helper function to calculate days remaining for pending registrations
   const calculateDaysRemaining = (createdAt: string): number => {
@@ -25,8 +37,8 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
     return Math.max(0, 15 - diffDays);
   };
 
-  // Fetch pending registrations expiring in less than 5 days
-  const { data: expiringRegistrations } = useQuery({
+  // Fetch pending registrations expiring in less than 5 days (only if not provided as prop)
+  const { data: fetchedExpiringRegistrations } = useQuery({
     queryKey: ['expiring-registrations'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -67,18 +79,20 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
 
       return expiring;
     },
-    enabled: !!adminSession
+    enabled: !!adminSession && !propExpiringRegistrations
   });
 
-  // Check if popup should be shown
-  useEffect(() => {
-    if (!adminSession || !expiringRegistrations) return;
+  const expiringRegistrations = propExpiringRegistrations || fetchedExpiringRegistrations;
 
-    // Show popup if there are expiring registrations
+  // Auto-show popup only if not controlled and there are expiring registrations
+  useEffect(() => {
+    if (!adminSession || !expiringRegistrations || controlledIsOpen !== undefined) return;
+
+    // Show popup if there are expiring registrations and it's not controlled
     if (expiringRegistrations.length > 0) {
       setIsOpen(true);
     }
-  }, [expiringRegistrations, adminSession]);
+  }, [expiringRegistrations, adminSession, controlledIsOpen]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -143,10 +157,27 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
         </DialogHeader>
         
         <div className="flex-1 overflow-auto">
-          <div className="mb-4">
+          <div className="mb-4 space-y-3">
             <p className="text-sm text-muted-foreground">
               The following {expiringRegistrations.length} registration(s) are expiring within 5 days and require immediate attention:
             </p>
+            
+            {/* Admin Permissions Information */}
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <h4 className="text-sm font-medium text-blue-800 mb-2">Admin Permissions Management</h4>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Assign Admin Permissions:</strong> Control access to different modules</p>
+                <p><strong>Module Permissions:</strong></p>
+                <ul className="ml-4 space-y-1">
+                  <li>• <strong>Registrations:</strong> Read, Write, Delete permissions</li>
+                  <li>• <strong>Categories:</strong> Read, Write, Delete permissions</li>
+                  <li>• <strong>Accounts:</strong> Read, Write, Delete permissions</li>
+                  <li>• <strong>Reports:</strong> Read, Write permissions</li>
+                  <li>• <strong>Admin Users:</strong> Read, Write permissions</li>
+                </ul>
+                <p className="mt-2 text-blue-600"><strong>Note:</strong> Super admins have all permissions by default</p>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-3">
