@@ -7,6 +7,19 @@ import { Registration } from './types';
 export const exportToExcel = (registrations: Registration[]) => {
   if (!registrations) return;
   
+  // Helper function to calculate days remaining
+  const calculateDaysRemaining = (createdAt: string): string => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffTime = now.getTime() - created.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const remaining = Math.max(0, 15 - diffDays);
+    
+    if (remaining === 0) return 'Expired';
+    if (remaining === 1) return '1 day left';
+    return `${remaining} days left`;
+  };
+  
   const exportData = registrations.map(reg => ({
     'Customer ID': reg.customer_id,
     'Name': reg.name,
@@ -21,7 +34,8 @@ export const exportToExcel = (registrations: Registration[]) => {
     'Status': reg.status,
     'Fee Paid': reg.fee_paid,
     'Applied Date': new Date(reg.created_at).toLocaleDateString('en-IN'),
-    'Updated Date': new Date(reg.updated_at).toLocaleDateString('en-IN')
+    'Updated Date': new Date(reg.updated_at).toLocaleDateString('en-IN'),
+    'Expiry Status': calculateDaysRemaining(reg.created_at)
   }));
   
   const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -34,6 +48,19 @@ export const exportToPDF = (registrations: Registration[]) => {
   if (!registrations || registrations.length === 0) {
     throw new Error('No registrations available to export');
   }
+  
+  // Helper function to calculate days remaining
+  const calculateDaysRemaining = (createdAt: string): string => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffTime = now.getTime() - created.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const remaining = Math.max(0, 15 - diffDays);
+    
+    if (remaining === 0) return 'Expired';
+    if (remaining === 1) return '1 day';
+    return `${remaining} days`;
+  };
   
   console.log('Starting PDF export...');
   const doc = new jsPDF({
@@ -59,19 +86,20 @@ export const exportToPDF = (registrations: Registration[]) => {
     reg.preference || '-',
     reg.status || '',
     `₹${reg.fee_paid || 0}`,
-    new Date(reg.created_at).toLocaleDateString('en-IN')
+    new Date(reg.created_at).toLocaleDateString('en-IN'),
+    calculateDaysRemaining(reg.created_at)
   ]);
   
   console.log('Table data prepared:', tableData.length, 'rows');
 
   // Add table using autoTable
   autoTable(doc, {
-    head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date']],
+    head: [['Customer ID', 'Name', 'Mobile', 'Category', 'Preference', 'Status', 'Fee', 'Date', 'Expiry']],
     body: tableData,
     startY: 35,
     styles: {
-      fontSize: 8,
-      cellPadding: 2
+      fontSize: 7,
+      cellPadding: 1.5
     },
     headStyles: {
       fillColor: [66, 139, 202],
@@ -79,14 +107,15 @@ export const exportToPDF = (registrations: Registration[]) => {
       fontStyle: 'bold'
     },
     columnStyles: {
-      0: { cellWidth: 25 }, // Customer ID
-      1: { cellWidth: 35 }, // Name
-      2: { cellWidth: 25 }, // Mobile
-      3: { cellWidth: 30 }, // Category
-      4: { cellWidth: 20 }, // Preference
-      5: { cellWidth: 20 }, // Status
-      6: { cellWidth: 20 }, // Fee
-      7: { cellWidth: 25 }  // Date
+      0: { cellWidth: 22 }, // Customer ID
+      1: { cellWidth: 30 }, // Name
+      2: { cellWidth: 22 }, // Mobile
+      3: { cellWidth: 25 }, // Category
+      4: { cellWidth: 18 }, // Preference
+      5: { cellWidth: 18 }, // Status
+      6: { cellWidth: 18 }, // Fee
+      7: { cellWidth: 22 }, // Date
+      8: { cellWidth: 20 }  // Expiry
     }
   });
 
