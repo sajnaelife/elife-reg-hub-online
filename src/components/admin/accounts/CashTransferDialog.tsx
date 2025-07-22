@@ -188,7 +188,7 @@ const CashTransferDialog: React.FC<CashTransferDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
         {!showReceipt ? (
           <>
             <DialogHeader>
@@ -300,19 +300,21 @@ const CashTransferDialog: React.FC<CashTransferDialogProps> = ({
               <DialogTitle>Transfer Receipt</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div ref={receiptRef}>
-                <CashReceipt
-                  amount={lastTransaction.amount}
-                  fromDate={lastTransaction.fromDate}
-                  toDate={lastTransaction.toDate}
-                  remarks={lastTransaction.remarks}
-                  transactionId={lastTransaction.id}
-                  timestamp={lastTransaction.timestamp}
-                />
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-y-auto max-h-[60vh] p-4">
+                <div ref={receiptRef}>
+                  <CashReceipt
+                    amount={lastTransaction.amount}
+                    fromDate={lastTransaction.fromDate}
+                    toDate={lastTransaction.toDate}
+                    remarks={lastTransaction.remarks}
+                    transactionId={lastTransaction.id}
+                    timestamp={lastTransaction.timestamp}
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-center space-x-3 pt-6 border-t">
+              <div className="flex-shrink-0 flex justify-center space-x-3 pt-6 pb-2 border-t bg-background/95 backdrop-blur-sm sticky bottom-0">
                 <Button
                   variant="outline"
                   onClick={handleDownloadReceipt}
