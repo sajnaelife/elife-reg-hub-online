@@ -180,7 +180,7 @@ const AdminDashboard = () => {
                 </span>
               </p>
             </div>
-            <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2">
+            <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2 bg-red-400 hover:bg-red-300">
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
@@ -202,116 +202,42 @@ const AdminDashboard = () => {
                   </button>
                 </nav>
               </div>
-            </div> : 
-            <div className="mb-6">
+            </div> : <div className="mb-6">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-6">
-                {getPermissionsForModule('registrations').canRead && 
-                  <button
-                    onClick={() => setActiveTab('registrations')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'registrations' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                {getPermissionsForModule('registrations').canRead && <button onClick={() => setActiveTab('registrations')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'registrations' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Users className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Registrations</span>
-                  </button>
-                }
-                {getPermissionsForModule('categories').canRead && 
-                  <button
-                    onClick={() => setActiveTab('categories')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'categories' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('categories').canRead && <button onClick={() => setActiveTab('categories')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'categories' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Grid3X3 className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Categories</span>
-                  </button>
-                }
-                {getPermissionsForModule('panchayaths').canRead && 
-                  <button
-                    onClick={() => setActiveTab('panchayaths')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'panchayaths' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('panchayaths').canRead && <button onClick={() => setActiveTab('panchayaths')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'panchayaths' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <MapPin className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Panchayaths</span>
-                  </button>
-                }
-                {getPermissionsForModule('announcements').canRead && 
-                  <button
-                    onClick={() => setActiveTab('announcements')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'announcements' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('announcements').canRead && <button onClick={() => setActiveTab('announcements')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'announcements' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Bell className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Announcements</span>
-                  </button>
-                }
-                {getPermissionsForModule('utilities').canRead && 
-                  <button
-                    onClick={() => setActiveTab('utilities')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'utilities' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('utilities').canRead && <button onClick={() => setActiveTab('utilities')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'utilities' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Settings className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Utilities</span>
-                  </button>
-                }
-                {getPermissionsForModule('accounts').canRead && 
-                  <button
-                    onClick={() => setActiveTab('accounts')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'accounts' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('accounts').canRead && <button onClick={() => setActiveTab('accounts')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'accounts' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Wallet className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Accounts</span>
-                  </button>
-                }
-                {getPermissionsForModule('reports').canRead && 
-                  <button
-                    onClick={() => setActiveTab('reports')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'reports' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {getPermissionsForModule('reports').canRead && <button onClick={() => setActiveTab('reports')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'reports' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <BarChart3 className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Reports</span>
-                  </button>
-                }
-                {permissions.canManageAdmins && 
-                  <button
-                    onClick={() => setActiveTab('admins')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      activeTab === 'admins' 
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                        : 'bg-card hover:bg-accent border-border hover:shadow-md'
-                    }`}
-                  >
+                  </button>}
+                {permissions.canManageAdmins && <button onClick={() => setActiveTab('admins')} className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${activeTab === 'admins' ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card hover:bg-accent border-border hover:shadow-md'}`}>
                     <Shield className="h-5 w-5" />
                     <span className="text-xs font-medium text-center">Admin Control</span>
-                  </button>
-                }
+                  </button>}
               </div>
-            </div>
-          }
+            </div>}
 
           {adminSession.role === 'user_admin' ?
         // User admin only sees registrations
