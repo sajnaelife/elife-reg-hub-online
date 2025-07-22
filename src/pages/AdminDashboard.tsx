@@ -16,6 +16,7 @@ import AdminPermissionsManagement from '@/components/admin/AdminPermissionsManag
 import ReportsManagement from '@/components/admin/ReportsManagement';
 import UtilitiesManagement from '@/components/admin/UtilitiesManagement';
 import AccountsManagement from '@/components/admin/AccountsManagement';
+import PendingRegistrationsPopup from '@/components/admin/PendingRegistrationsPopup';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -166,6 +167,9 @@ const AdminDashboard = () => {
   console.log('Admin permissions:', permissions);
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
+      
+      {/* Pending Registrations Popup */}
+      <PendingRegistrationsPopup adminSession={adminSession} />
       
       {/* Admin Header */}
       <div className="bg-white shadow-sm border-b">
