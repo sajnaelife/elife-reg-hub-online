@@ -15,7 +15,6 @@ interface PendingRegistrationsPopupProps {
 
 const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [hasShownToday, setHasShownToday] = useState(false);
 
   // Helper function to calculate days remaining for pending registrations
   const calculateDaysRemaining = (createdAt: string): number => {
@@ -75,22 +74,11 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
   useEffect(() => {
     if (!adminSession || !expiringRegistrations) return;
 
-    // Check if popup was already shown today
-    const today = new Date().toDateString();
-    const lastShown = localStorage.getItem('pendingRegistrationsPopupShown');
-    
-    if (lastShown === today) {
-      setHasShownToday(true);
-      return;
-    }
-
-    // Show popup if there are expiring registrations and it hasn't been shown today
-    if (expiringRegistrations.length > 0 && !hasShownToday) {
+    // Show popup if there are expiring registrations
+    if (expiringRegistrations.length > 0) {
       setIsOpen(true);
-      localStorage.setItem('pendingRegistrationsPopupShown', today);
-      setHasShownToday(true);
     }
-  }, [expiringRegistrations, adminSession, hasShownToday]);
+  }, [expiringRegistrations, adminSession]);
 
   const handleClose = () => {
     setIsOpen(false);
