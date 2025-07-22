@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, Clock, User, Phone } from 'lucide-react';
+import { X, Clock, User, Phone, FileDown, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface Registration {
-  id: string;
-  name: string;
-  mobile_number: string;
-  customer_id: string;
-  created_at: string;
-  status: string;
-  categories: { name: string };
-  panchayaths?: { name: string; district: string };
-}
+import { exportToExcel, exportToPDF } from '@/components/admin/registrations/exportUtils';
+import { Registration } from '@/components/admin/registrations/types';
+import { toast } from 'sonner';
 
 interface PendingRegistrationsPopupProps {
   adminSession: any;
@@ -41,7 +33,22 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
       const { data, error } = await supabase
         .from('registrations')
         .select(`
-          *,
+          id,
+          customer_id,
+          name,
+          mobile_number,
+          address,
+          ward,
+          agent_pro,
+          status,
+          fee_paid,
+          created_at,
+          updated_at,
+          approved_date,
+          approved_by,
+          category_id,
+          panchayath_id,
+          preference,
           categories (name),
           panchayaths (name, district)
         `)
@@ -87,6 +94,36 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
 
   const handleClose = () => {
     setIsOpen(false);
+  };
+
+  const handleExportExcel = () => {
+    if (!expiringRegistrations || expiringRegistrations.length === 0) {
+      toast.error('No pending registrations to export');
+      return;
+    }
+    
+    try {
+      exportToExcel(expiringRegistrations);
+      toast.success('Pending registrations exported to Excel successfully');
+    } catch (error) {
+      console.error('Export to Excel failed:', error);
+      toast.error('Failed to export to Excel');
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!expiringRegistrations || expiringRegistrations.length === 0) {
+      toast.error('No pending registrations to export');
+      return;
+    }
+    
+    try {
+      exportToPDF(expiringRegistrations);
+      toast.success('Pending registrations exported to PDF successfully');
+    } catch (error) {
+      console.error('Export to PDF failed:', error);
+      toast.error('Failed to export to PDF');
+    }
   };
 
   const getDaysRemainingColor = (days: number) => {
@@ -159,7 +196,7 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
                     </div>
                     <div>
                       <span className="font-medium">Category:</span>
-                      <p className="text-muted-foreground">{registration.categories.name}</p>
+                      <p className="text-muted-foreground">{registration.categories?.name || 'N/A'}</p>
                     </div>
                     {registration.panchayaths && (
                       <div className="col-span-2">
@@ -180,13 +217,35 @@ const PendingRegistrationsPopup = ({ adminSession }: PendingRegistrationsPopupPr
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={handleClose}>
-            Remind Me Tomorrow
-          </Button>
-          <Button onClick={handleClose}>
-            Got It
-          </Button>
+        <div className="flex justify-between items-center pt-4 border-t">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Export Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              className="flex items-center gap-1"
+            >
+              <FileDown className="h-4 w-4" />
+              Export PDF
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleClose}>
+              Remind Me Tomorrow
+            </Button>
+            <Button onClick={handleClose}>
+              Got It
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
