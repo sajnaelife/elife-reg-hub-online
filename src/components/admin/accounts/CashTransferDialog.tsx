@@ -312,11 +312,11 @@ const CashTransferDialog: React.FC<CashTransferDialogProps> = ({
                 />
               </div>
 
-              <div className="flex justify-center space-x-2 pt-4">
+              <div className="flex justify-center space-x-3 pt-6 border-t">
                 <Button
                   variant="outline"
                   onClick={handleDownloadReceipt}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 bg-secondary/10 hover:bg-secondary/20"
                 >
                   <Download className="h-4 w-4" />
                   <span>Download</span>
@@ -324,12 +324,12 @@ const CashTransferDialog: React.FC<CashTransferDialogProps> = ({
                 <Button
                   variant="outline"
                   onClick={handleShareWhatsApp}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
                 >
                   <Share className="h-4 w-4" />
                   <span>WhatsApp</span>
                 </Button>
-                <Button onClick={handleCloseReceipt}>
+                <Button onClick={handleCloseReceipt} className="bg-primary">
                   Done
                 </Button>
               </div>
