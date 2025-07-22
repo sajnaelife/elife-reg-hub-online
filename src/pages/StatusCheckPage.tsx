@@ -143,7 +143,7 @@ const StatusCheckPage = () => {
                 <Input id="mobile" type="tel" value={searchData.mobile_number} onChange={e => setSearchData(prev => ({
                 ...prev,
                 mobile_number: e.target.value
-              }))} placeholder="Enter your mobile number" required />
+              }))} placeholder="Enter your mobile number" required className="bg-sky-100" />
               </div>
               <Button type="submit" className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
                 Check Status
