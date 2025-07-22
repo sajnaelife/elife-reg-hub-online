@@ -20,6 +20,7 @@ const ReportsManagement = ({
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isPanchayathReportOpen, setIsPanchayathReportOpen] = useState(false);
   const [isActiveReportOpen, setIsActiveReportOpen] = useState(false);
+  const [isCategoryReportOpen, setIsCategoryReportOpen] = useState(false);
 
   // Fetch approved registrations when date range is selected
   const { data: approvedRegistrations, isLoading: loadingApprovedRegistrations } = useQuery({
@@ -162,6 +163,54 @@ const ReportsManagement = ({
       };
     }
   });
+
+  // Fetch category-wise statistics
+  const {
+    data: categorySummary,
+    isLoading: loadingCategorySummary
+  } = useQuery({
+    queryKey: ['category-summary'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('registrations')
+        .select(`
+          fee_paid,
+          status,
+          categories!inner(name)
+        `);
+      
+      if (error) throw error;
+
+      // Process data to create category summary
+      const summary = data.reduce((acc, reg) => {
+        const categoryName = reg.categories?.name || 'Unknown';
+        
+        if (!acc[categoryName]) {
+          acc[categoryName] = {
+            name: categoryName,
+            totalRegistrations: 0,
+            totalFeeCollected: 0,
+            approvedRegistrations: 0,
+            pendingRegistrations: 0
+          };
+        }
+        
+        acc[categoryName].totalRegistrations++;
+        
+        if (reg.status === 'approved') {
+          acc[categoryName].approvedRegistrations++;
+          acc[categoryName].totalFeeCollected += reg.fee_paid || 0;
+        } else if (reg.status === 'pending') {
+          acc[categoryName].pendingRegistrations++;
+        }
+        
+        return acc;
+      }, {});
+      
+      return Object.values(summary);
+    }
+  });
+
   const handleExportExcel = async () => {
     if (!panchayathSummary) {
       toast({
@@ -473,6 +522,81 @@ const ReportsManagement = ({
             </CollapsibleContent>
           </Card>
         </Collapsible>}
+
+      {/* Category Performance Report - Collapsible */}
+      <Collapsible open={isCategoryReportOpen} onOpenChange={setIsCategoryReportOpen}>
+        <Card>
+          <CardHeader className="bg-blue-100">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Category Performance Report</CardTitle>
+                </div>
+                {isCategoryReportOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <p className="text-sm text-gray-600 text-left mt-2">
+              Total fee collected and registration count for each category
+            </p>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              {loadingCategorySummary ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-200 px-4 py-2 text-left">Category Name</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Total Registrations</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Approved</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Pending</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Total Fee Collected</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categorySummary?.map((category: any, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="border border-gray-200 px-4 py-2 font-medium">
+                            {category.name}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                              {category.totalRegistrations}
+                            </span>
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                              {category.approvedRegistrations}
+                            </span>
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
+                              {category.pendingRegistrations}
+                            </span>
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2 font-medium text-green-600">
+                            ₹{category.totalFeeCollected.toLocaleString('en-IN')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {!loadingCategorySummary && (!categorySummary || categorySummary.length === 0) && (
+                <div className="text-center py-8 text-gray-500">
+                  No category data available for reports.
+                </div>
+              )}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Panchayath Performance Report - Collapsible */}
       <Collapsible open={isPanchayathReportOpen} onOpenChange={setIsPanchayathReportOpen}>
